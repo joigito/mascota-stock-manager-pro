@@ -2,14 +2,7 @@
 import { ShoppingBag } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-interface ProductData {
-  name: string;
-  quantity: number;
-  revenue: number;
-  profit: number;
-  margin: number;
-}
+import { ProductData } from "@/types/sales";
 
 interface TopProductsCardProps {
   topProducts: Array<[string, ProductData]>;

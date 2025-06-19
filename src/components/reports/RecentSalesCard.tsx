@@ -1,25 +1,7 @@
 
 import { ShoppingBag } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface Sale {
-  id: string;
-  date: string;
-  customer: string;
-  items: Array<{
-    productId: string;
-    productName: string;
-    quantity: number;
-    price: number;
-    costPrice?: number;
-    subtotal: number;
-    profit?: number;
-    margin?: number;
-  }>;
-  total: number;
-  totalProfit?: number;
-  averageMargin?: number;
-}
+import { Sale } from "@/types/sales";
 
 interface RecentSalesCardProps {
   filteredSales: Sale[];

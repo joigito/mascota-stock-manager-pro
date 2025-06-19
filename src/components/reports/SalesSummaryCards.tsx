@@ -1,14 +1,7 @@
 
 import { DollarSign, TrendingUp, ShoppingBag, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface SalesSummary {
-  totalSales: number;
-  totalProfit: number;
-  totalTransactions: number;
-  averageSale: number;
-  averageMargin: number;
-}
+import { SalesSummary } from "@/types/sales";
 
 interface SalesSummaryCardsProps {
   salesSummary: SalesSummary;
