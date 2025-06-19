@@ -1,24 +1,18 @@
 
 import { useState } from "react";
-import { Plus, Package, PawPrint, LogOut, User } from "lucide-react";
+import { Plus, Package, PawPrint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductList from "@/components/ProductList";
 import AddProductDialog from "@/components/AddProductDialog";
 import StockAlert from "@/components/StockAlert";
 import Dashboard from "@/components/Dashboard";
 import { useProducts } from "@/hooks/useProducts";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
-  const { user, signOut } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   if (loading) {
     return (
@@ -47,24 +41,12 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="h-4 w-4" />
-                <span>{user?.email}</span>
-              </div>
               <Button 
                 onClick={() => setIsAddDialogOpen(true)}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Agregar Producto
-              </Button>
-              <Button 
-                onClick={handleSignOut}
-                variant="outline"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Salir
               </Button>
             </div>
           </div>
