@@ -1,7 +1,6 @@
-
 import { Package, AlertTriangle, TrendingUp, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Product } from "@/pages/Index";
+import { Product } from "@/hooks/useProducts";
 
 interface DashboardProps {
   products: Product[];

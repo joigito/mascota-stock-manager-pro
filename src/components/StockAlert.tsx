@@ -1,8 +1,7 @@
-
 import { AlertTriangle, Package } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Product } from "@/pages/Index";
+import { Product } from "@/hooks/useProducts";
 
 interface StockAlertProps {
   products: Product[];

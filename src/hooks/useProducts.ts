@@ -51,7 +51,7 @@ export const useProducts = () => {
         category: product.category as "mascotas" | "forrajeria",
         stock: product.stock,
         minStock: product.min_stock,
-        price: parseFloat(product.price),
+        price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
         description: product.description || undefined,
         created_at: product.created_at,
         updated_at: product.updated_at,
@@ -104,7 +104,7 @@ export const useProducts = () => {
         category: data.category,
         stock: data.stock,
         minStock: data.min_stock,
-        price: parseFloat(data.price),
+        price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
         description: data.description || undefined,
       };
 
@@ -157,7 +157,7 @@ export const useProducts = () => {
         category: data.category,
         stock: data.stock,
         minStock: data.min_stock,
-        price: parseFloat(data.price),
+        price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
         description: data.description || undefined,
       };
 

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Edit, Trash2, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Product } from "@/pages/Index";
+import { Product } from "@/hooks/useProducts";
 import EditProductDialog from "./EditProductDialog";
 
 interface ProductListProps {
