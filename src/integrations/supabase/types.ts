@@ -205,7 +205,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      clean_duplicate_products: {
+        Args: { user_uuid: string }
+        Returns: {
+          deleted_count: number
+        }[]
+      }
+      detect_duplicate_products: {
+        Args: { user_uuid: string }
+        Returns: {
+          product_name: string
+          category: string
+          duplicate_count: number
+        }[]
+      }
     }
     Enums: {
       product_category: "mascotas" | "forrajeria"
