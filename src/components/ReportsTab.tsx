@@ -1,13 +1,18 @@
+
 import { useState, useMemo } from "react";
-import { BarChart3, Calendar, DollarSign, ShoppingBag, TrendingUp, Package, Target, Printer } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart3, Calendar } from "lucide-react";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Product } from "@/hooks/useProducts";
 import PrintableStockReport from "@/components/reports/PrintableStockReport";
 import PrintableSalesReport from "@/components/reports/PrintableSalesReport";
-import DateRangeSelector from "@/components/reports/DateRangeSelector";
+import PrintSection from "@/components/reports/PrintSection";
+import SalesSummaryCards from "@/components/reports/SalesSummaryCards";
+import TopProductsCard from "@/components/reports/TopProductsCard";
+import MostProfitableProductsCard from "@/components/reports/MostProfitableProductsCard";
+import InventoryOverviewCard from "@/components/reports/InventoryOverviewCard";
+import AlertsCard from "@/components/reports/AlertsCard";
+import RecentSalesCard from "@/components/reports/RecentSalesCard";
 
 interface Sale {
   id: string;
@@ -176,47 +181,14 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Print Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Printer className="h-5 w-5" />
-            <span>Reportes para Imprimir</span>
-          </CardTitle>
-          <CardDescription>
-            Genera reportes imprimibles de stock y ventas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button 
-              onClick={handlePrintStock}
-              variant="outline"
-              className="h-auto p-4 flex flex-col items-center space-y-2"
-            >
-              <Package className="h-8 w-8" />
-              <div className="text-center">
-                <div className="font-semibold">Reporte de Stock</div>
-                <div className="text-sm text-gray-600">Inventario completo con valores</div>
-              </div>
-            </Button>
-
-            <div className="border rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-3">
-                <ShoppingBag className="h-5 w-5" />
-                <span className="font-semibold">Reporte de Ventas</span>
-              </div>
-              <DateRangeSelector
-                startDate={salesReportStartDate}
-                endDate={salesReportEndDate}
-                onStartDateChange={setSalesReportStartDate}
-                onEndDateChange={setSalesReportEndDate}
-                onGenerateReport={handlePrintSales}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <PrintSection
+        handlePrintStock={handlePrintStock}
+        salesReportStartDate={salesReportStartDate}
+        salesReportEndDate={salesReportEndDate}
+        setSalesReportStartDate={setSalesReportStartDate}
+        setSalesReportEndDate={setSalesReportEndDate}
+        handlePrintSales={handlePrintSales}
+      />
 
       {/* Header with period selector */}
       <Card>
@@ -249,282 +221,32 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
         </CardHeader>
       </Card>
 
-      {/* Sales Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${salesSummary.totalSales.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              {getPeriodLabel(selectedPeriod)}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ganancia Total</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">${salesSummary.totalProfit.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              Margen: {salesSummary.averageMargin.toFixed(1)}%
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transacciones</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{salesSummary.totalTransactions}</div>
-            <p className="text-xs text-muted-foreground">
-              Número de ventas realizadas
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Venta Promedio</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${salesSummary.averageSale.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              Valor promedio por transacción
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <SalesSummaryCards 
+        salesSummary={salesSummary} 
+        getPeriodLabel={getPeriodLabel} 
+        selectedPeriod={selectedPeriod} 
+      />
 
       {/* Top Products and Most Profitable */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Productos Más Vendidos</CardTitle>
-            <CardDescription>
-              Top 5 productos por cantidad vendida
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {salesSummary.topProducts.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No hay ventas registradas en este período</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {salesSummary.topProducts.map(([productId, data], index) => (
-                  <div key={productId} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center">
-                        {index + 1}
-                      </Badge>
-                      <div>
-                        <h4 className="font-medium">{data.name}</h4>
-                        <p className="text-sm text-gray-600">
-                          {data.quantity} unidades vendidas
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold">${data.revenue.toLocaleString()}</div>
-                      <div className="text-sm text-green-600">+${data.profit.toLocaleString()}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Productos Más Rentables</CardTitle>
-            <CardDescription>
-              Top 5 productos por ganancia generada
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {salesSummary.mostProfitableProducts.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No hay ventas registradas en este período</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {salesSummary.mostProfitableProducts.map(([productId, data], index) => (
-                  <div key={productId} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <Badge variant="default" className="w-8 h-8 rounded-full flex items-center justify-center bg-green-600">
-                        {index + 1}
-                      </Badge>
-                      <div>
-                        <h4 className="font-medium">{data.name}</h4>
-                        <p className="text-sm text-gray-600">
-                          {data.margin.toFixed(1)}% margen
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-green-600">${data.profit.toLocaleString()}</div>
-                      <div className="text-sm text-gray-600">${data.revenue.toLocaleString()} ventas</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <TopProductsCard topProducts={salesSummary.topProducts} />
+        <MostProfitableProductsCard mostProfitableProducts={salesSummary.mostProfitableProducts} />
       </div>
 
       {/* Inventory Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Package className="h-5 w-5" />
-              <span>Resumen de Inventario</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Total de productos:</span>
-              <span className="font-semibold">{products.length}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Valor total del inventario:</span>
-              <span className="font-semibold">${totalInventoryValue.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Costo total del inventario:</span>
-              <span className="font-semibold">${totalInventoryCost.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between items-center border-t pt-2">
-              <span className="text-sm text-green-600 font-medium">Ganancia potencial:</span>
-              <span className="font-semibold text-green-600">${potentialProfit.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Productos con stock bajo:</span>
-              <Badge variant={lowStockProducts.length > 0 ? "destructive" : "secondary"}>
-                {lowStockProducts.length}
-              </Badge>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Productos con margen bajo:</span>
-              <Badge variant={lowMarginProducts.length > 0 ? "destructive" : "secondary"}>
-                {lowMarginProducts.length}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Alertas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {lowStockProducts.length === 0 && lowMarginProducts.length === 0 ? (
-              <div className="text-center py-4 text-green-600">
-                <p className="font-medium">✓ Todo está en orden</p>
-                <p className="text-xs text-gray-500">Stock y márgenes adecuados</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {lowStockProducts.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-red-600 mb-2">Stock Bajo:</h4>
-                    <div className="space-y-1">
-                      {lowStockProducts.slice(0, 3).map((product) => (
-                        <div key={product.id} className="flex justify-between items-center text-sm">
-                          <span className="truncate">{product.name}</span>
-                          <Badge variant="destructive" className="ml-2 text-xs">
-                            {product.stock} restantes
-                          </Badge>
-                        </div>
-                      ))}
-                      {lowStockProducts.length > 3 && (
-                        <p className="text-xs text-gray-500">
-                          ... y {lowStockProducts.length - 3} más
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {lowMarginProducts.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-yellow-600 mb-2">Margen Bajo (&lt;20%):</h4>
-                    <div className="space-y-1">
-                      {lowMarginProducts.slice(0, 3).map((product) => {
-                        const margin = ((product.price - (product.costPrice || 0)) / product.price * 100);
-                        return (
-                          <div key={product.id} className="flex justify-between items-center text-sm">
-                            <span className="truncate">{product.name}</span>
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              {margin.toFixed(1)}%
-                            </Badge>
-                          </div>
-                        );
-                      })}
-                      {lowMarginProducts.length > 3 && (
-                        <p className="text-xs text-gray-500">
-                          ... y {lowMarginProducts.length - 3} más
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <InventoryOverviewCard
+          products={products}
+          totalInventoryValue={totalInventoryValue}
+          totalInventoryCost={totalInventoryCost}
+          potentialProfit={potentialProfit}
+          lowStockProducts={lowStockProducts}
+          lowMarginProducts={lowMarginProducts}
+        />
+        <AlertsCard lowStockProducts={lowStockProducts} lowMarginProducts={lowMarginProducts} />
       </div>
 
-      {/* Recent Sales */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ventas Recientes</CardTitle>
-          <CardDescription>
-            Últimas transacciones con información de rentabilidad
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredSales.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No hay ventas registradas en este período</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredSales.slice(0, 10).map((sale: Sale) => (
-                <div key={sale.id} className="flex justify-between items-center p-4 border rounded-lg">
-                  <div>
-                    <div className="font-medium">{sale.customer}</div>
-                    <div className="text-sm text-gray-600">
-                      {new Date(sale.date).toLocaleDateString()} - {sale.items.length} productos
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold">${sale.total.toLocaleString()}</div>
-                    <div className="text-sm text-green-600">
-                      +${(sale.totalProfit || 0).toLocaleString()} 
-                      ({(sale.averageMargin || 0).toFixed(1)}%)
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <RecentSalesCard filteredSales={filteredSales} />
     </div>
   );
 };
