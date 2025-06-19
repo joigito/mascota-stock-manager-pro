@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Product } from "@/hooks/useProducts";
+import { useSales } from "@/hooks/useSales";
 import ProductSelector from "./sales/ProductSelector";
 import SalesList from "./sales/SalesList";
 
@@ -28,6 +28,7 @@ interface SalesTabProps {
 
 const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { toast } = useToast();
+  const { addSale } = useSales();
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
@@ -174,10 +175,8 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         }
       }
 
-      // Guardar venta en localStorage
-      const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+      // Crear nueva venta usando el hook
       const newSale = {
-        id: Date.now().toString(),
         date: new Date().toISOString(),
         customer: customerName || 'Cliente General',
         items: saleItems,
@@ -186,8 +185,11 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         averageMargin: getAverageMargin()
       };
       
-      sales.push(newSale);
-      localStorage.setItem('sales', JSON.stringify(sales));
+      const { error } = await addSale(newSale);
+      
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Venta completada",

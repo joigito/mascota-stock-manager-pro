@@ -2,24 +2,11 @@
 import { useState, useMemo } from "react";
 import { Sale } from "@/types/sales";
 import { calculateSalesSummary, filterSalesForReport } from "@/utils/salesCalculations";
+import { useSales } from "./useSales";
 
 export const useSalesData = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("7");
-
-  const sales = useMemo(() => {
-    const saved = localStorage.getItem('sales');
-    console.log('Loaded sales from localStorage:', saved);
-    const parsedSales = saved ? JSON.parse(saved) : [];
-    console.log('Parsed sales:', parsedSales);
-    
-    // Log each sale's date format
-    parsedSales.forEach((sale: Sale, index: number) => {
-      console.log(`Sale ${index} - ID: ${sale.id}, Date: ${sale.date}, Date type: ${typeof sale.date}`);
-      console.log(`Sale ${index} - Parsed date: ${new Date(sale.date).toISOString()}`);
-    });
-    
-    return parsedSales;
-  }, []);
+  const { sales, loading, syncing, syncSales } = useSales();
 
   const filteredSales = useMemo(() => {
     const days = parseInt(selectedPeriod);
@@ -43,6 +30,9 @@ export const useSalesData = () => {
     salesSummary,
     selectedPeriod,
     setSelectedPeriod,
-    getSalesForReport
+    getSalesForReport,
+    loading,
+    syncing,
+    syncSales
   };
 };

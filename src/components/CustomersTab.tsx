@@ -1,28 +1,25 @@
 
 import { useState } from "react";
-import { Users, Plus, Edit, Trash2, Phone, Mail } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Phone, Mail, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Customer {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  created_at: string;
-}
+import { useCustomers, Customer } from "@/hooks/useCustomers";
 
 const CustomersTab = () => {
   const { toast } = useToast();
-  const [customers, setCustomers] = useState<Customer[]>(() => {
-    const saved = localStorage.getItem('customers');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const { 
+    customers, 
+    loading, 
+    syncing, 
+    addCustomer, 
+    updateCustomer, 
+    deleteCustomer, 
+    syncCustomers 
+  } = useCustomers();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
@@ -33,12 +30,7 @@ const CustomersTab = () => {
     address: ""
   });
 
-  const saveCustomers = (newCustomers: Customer[]) => {
-    setCustomers(newCustomers);
-    localStorage.setItem('customers', JSON.stringify(newCustomers));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name.trim()) {
@@ -50,38 +42,40 @@ const CustomersTab = () => {
       return;
     }
 
-    if (editingCustomer) {
-      // Editar cliente existente
-      const updatedCustomers = customers.map(customer =>
-        customer.id === editingCustomer.id
-          ? { ...customer, ...formData }
-          : customer
-      );
-      saveCustomers(updatedCustomers);
-      
+    try {
+      if (editingCustomer) {
+        // Editar cliente existente
+        const { error } = await updateCustomer(editingCustomer.id, formData);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Cliente actualizado",
+          description: "La información del cliente se ha actualizado correctamente",
+        });
+      } else {
+        // Crear nuevo cliente
+        const { error } = await addCustomer(formData);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Cliente agregado",
+          description: "El cliente se ha registrado correctamente",
+        });
+      }
+
+      // Limpiar formulario y cerrar dialog
+      setFormData({ name: "", email: "", phone: "", address: "" });
+      setEditingCustomer(null);
+      setIsDialogOpen(false);
+    } catch (error) {
       toast({
-        title: "Cliente actualizado",
-        description: "La información del cliente se ha actualizado correctamente",
-      });
-    } else {
-      // Crear nuevo cliente
-      const newCustomer: Customer = {
-        id: Date.now().toString(),
-        ...formData,
-        created_at: new Date().toISOString()
-      };
-      saveCustomers([...customers, newCustomer]);
-      
-      toast({
-        title: "Cliente agregado",
-        description: "El cliente se ha registrado correctamente",
+        title: "Error",
+        description: "No se pudo guardar el cliente",
+        variant: "destructive",
       });
     }
-
-    // Limpiar formulario y cerrar dialog
-    setFormData({ name: "", email: "", phone: "", address: "" });
-    setEditingCustomer(null);
-    setIsDialogOpen(false);
   };
 
   const handleEdit = (customer: Customer) => {
@@ -95,14 +89,23 @@ const CustomersTab = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (customerId: string) => {
-    const updatedCustomers = customers.filter(customer => customer.id !== customerId);
-    saveCustomers(updatedCustomers);
-    
-    toast({
-      title: "Cliente eliminado",
-      description: "El cliente ha sido eliminado correctamente",
-    });
+  const handleDelete = async (customerId: string) => {
+    try {
+      const { error } = await deleteCustomer(customerId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Cliente eliminado",
+        description: "El cliente ha sido eliminado correctamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el cliente",
+        variant: "destructive",
+      });
+    }
   };
 
   const openNewCustomerDialog = () => {
@@ -110,6 +113,14 @@ const CustomersTab = () => {
     setEditingCustomer(null);
     setIsDialogOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -122,13 +133,23 @@ const CustomersTab = () => {
                 <span>Gestión de Clientes</span>
               </CardTitle>
               <CardDescription>
-                Administra la información de tus clientes (opcional para las ventas)
+                Administra la información de tus clientes (sincronizado en la nube)
               </CardDescription>
             </div>
-            <Button onClick={openNewCustomerDialog}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Cliente
-            </Button>
+            <div className="flex space-x-2">
+              <Button 
+                onClick={syncCustomers} 
+                disabled={syncing}
+                variant="outline"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+                Sincronizar
+              </Button>
+              <Button onClick={openNewCustomerDialog}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Cliente
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>

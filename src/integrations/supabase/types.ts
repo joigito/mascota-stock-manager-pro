@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_audit: {
         Row: {
           action: string
@@ -42,6 +75,7 @@ export type Database = {
       products: {
         Row: {
           category: Database["public"]["Enums"]["product_category"]
+          cost_price: number | null
           created_at: string
           description: string | null
           id: string
@@ -54,6 +88,7 @@ export type Database = {
         }
         Insert: {
           category: Database["public"]["Enums"]["product_category"]
+          cost_price?: number | null
           created_at?: string
           description?: string | null
           id?: string
@@ -66,6 +101,7 @@ export type Database = {
         }
         Update: {
           category?: Database["public"]["Enums"]["product_category"]
+          cost_price?: number | null
           created_at?: string
           description?: string | null
           id?: string
@@ -73,6 +109,92 @@ export type Database = {
           name?: string
           price?: number
           stock?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sale_items: {
+        Row: {
+          cost_price: number | null
+          created_at: string
+          id: string
+          margin: number | null
+          price: number
+          product_id: string
+          product_name: string
+          profit: number | null
+          quantity: number
+          sale_id: string
+          subtotal: number
+        }
+        Insert: {
+          cost_price?: number | null
+          created_at?: string
+          id?: string
+          margin?: number | null
+          price: number
+          product_id: string
+          product_name: string
+          profit?: number | null
+          quantity: number
+          sale_id: string
+          subtotal: number
+        }
+        Update: {
+          cost_price?: number | null
+          created_at?: string
+          id?: string
+          margin?: number | null
+          price?: number
+          product_id?: string
+          product_name?: string
+          profit?: number | null
+          quantity?: number
+          sale_id?: string
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          average_margin: number | null
+          created_at: string
+          customer: string
+          date: string
+          id: string
+          total: number
+          total_profit: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_margin?: number | null
+          created_at?: string
+          customer?: string
+          date?: string
+          id?: string
+          total: number
+          total_profit?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_margin?: number | null
+          created_at?: string
+          customer?: string
+          date?: string
+          id?: string
+          total?: number
+          total_profit?: number | null
           updated_at?: string
           user_id?: string
         }

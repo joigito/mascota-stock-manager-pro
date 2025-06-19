@@ -1,7 +1,7 @@
 
 import { useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { Product } from "@/hooks/useProducts";
-import { Sale } from "@/types/sales";
 import { getPeriodLabel } from "@/utils/salesCalculations";
 import { useSalesData } from "@/hooks/useSalesData";
 import PrintableStockReport from "@/components/reports/PrintableStockReport";
@@ -25,7 +25,10 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
     salesSummary,
     selectedPeriod,
     setSelectedPeriod,
-    getSalesForReport
+    getSalesForReport,
+    loading,
+    syncing,
+    syncSales
   } = useSalesData();
 
   const [showStockPrint, setShowStockPrint] = useState(false);
@@ -81,8 +84,31 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
     />;
   }
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Cargando datos...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Reportes</h2>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={syncSales}
+            disabled={syncing}
+            className="flex items-center space-x-2 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            <span>{syncing ? 'Sincronizando...' : 'Actualizar Datos'}</span>
+          </button>
+        </div>
+      </div>
+
       <PrintSection
         handlePrintStock={handlePrintStock}
         salesReportStartDate={salesReportStartDate}
