@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,7 @@ import { Product } from "@/hooks/useProducts";
 interface AddProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddProduct: (product: Omit<Product, "id">) => Promise<void>;
+  onAddProduct: (product: Omit<Product, "id" | "created_at" | "updated_at">) => Promise<{ error: any }>;
 }
 
 const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialogProps) => {
@@ -61,7 +60,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
     setLoading(true);
 
     try {
-      await onAddProduct({
+      const result = await onAddProduct({
         name: formData.name.trim(),
         category: formData.category,
         stock,
@@ -70,17 +69,19 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
         description: formData.description.trim() || undefined
       });
 
-      // Reset form
-      setFormData({
-        name: "",
-        category: "mascotas",
-        stock: "",
-        minStock: "",
-        price: "",
-        description: ""
-      });
-      
-      onOpenChange(false);
+      if (!result.error) {
+        // Reset form
+        setFormData({
+          name: "",
+          category: "mascotas",
+          stock: "",
+          minStock: "",
+          price: "",
+          description: ""
+        });
+        
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error('Error adding product:', error);
     } finally {
