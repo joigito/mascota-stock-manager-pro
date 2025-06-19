@@ -2,10 +2,14 @@
 import { useState } from "react";
 import { Plus, Package, PawPrint } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
 import AddProductDialog from "@/components/AddProductDialog";
 import StockAlert from "@/components/StockAlert";
 import Dashboard from "@/components/Dashboard";
+import SalesTab from "@/components/SalesTab";
+import ReportsTab from "@/components/ReportsTab";
+import CustomersTab from "@/components/CustomersTab";
 import { useProducts } from "@/hooks/useProducts";
 
 const Index = () => {
@@ -62,25 +66,53 @@ const Index = () => {
           </div>
         )}
 
-        {/* Dashboard */}
-        <div className="mb-8">
-          <Dashboard products={products} />
-        </div>
+        {/* Tabs Navigation */}
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="inventory">Inventario</TabsTrigger>
+            <TabsTrigger value="sales">Ventas</TabsTrigger>
+            <TabsTrigger value="customers">Clientes</TabsTrigger>
+            <TabsTrigger value="reports">Reportes</TabsTrigger>
+          </TabsList>
 
-        {/* Product List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-2">
-              <Package className="h-5 w-5 text-green-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Inventario de Productos</h2>
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-8">
+            <Dashboard products={products} />
+          </TabsContent>
+
+          {/* Inventory Tab */}
+          <TabsContent value="inventory">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center space-x-2">
+                  <Package className="h-5 w-5 text-green-600" />
+                  <h2 className="text-xl font-semibold text-gray-900">Inventario de Productos</h2>
+                </div>
+              </div>
+              <ProductList 
+                products={products}
+                onUpdateProduct={updateProduct}
+                onDeleteProduct={deleteProduct}
+              />
             </div>
-          </div>
-          <ProductList 
-            products={products}
-            onUpdateProduct={updateProduct}
-            onDeleteProduct={deleteProduct}
-          />
-        </div>
+          </TabsContent>
+
+          {/* Sales Tab */}
+          <TabsContent value="sales">
+            <SalesTab products={products} onUpdateProduct={updateProduct} />
+          </TabsContent>
+
+          {/* Customers Tab */}
+          <TabsContent value="customers">
+            <CustomersTab />
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports">
+            <ReportsTab products={products} />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Add Product Dialog */}
