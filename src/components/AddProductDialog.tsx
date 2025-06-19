@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Product } from "@/hooks/useProducts";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AddProductDialogProps {
   open: boolean;
@@ -27,12 +29,14 @@ interface AddProductDialogProps {
 }
 
 const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialogProps) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     category: "mascotas" as "mascotas" | "forrajeria",
     stock: "",
     minStock: "",
     price: "",
+    costPrice: "",
     description: ""
   });
   const [loading, setLoading] = useState(false);
@@ -40,7 +44,12 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.stock || !formData.minStock || !formData.price) {
+    if (!formData.name.trim() || !formData.stock || !formData.minStock || !formData.price || !formData.costPrice) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos obligatorios",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -48,12 +57,32 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
     const stock = parseInt(formData.stock);
     const minStock = parseInt(formData.minStock);
     const price = parseFloat(formData.price);
+    const costPrice = parseFloat(formData.costPrice);
 
-    if (stock < 0 || minStock < 0 || price < 0) {
+    if (stock < 0 || minStock < 0 || price < 0 || costPrice < 0) {
+      toast({
+        title: "Error",
+        description: "Los valores no pueden ser negativos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (costPrice >= price) {
+      toast({
+        title: "Error",
+        description: "El precio de costo debe ser menor al precio de venta",
+        variant: "destructive",
+      });
       return;
     }
 
     if (formData.name.length > 200 || (formData.description && formData.description.length > 1000)) {
+      toast({
+        title: "Error",
+        description: "El nombre es muy largo o la descripción excede los 1000 caracteres",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -66,10 +95,17 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
         stock,
         minStock,
         price,
+        costPrice,
         description: formData.description.trim() || undefined
       });
 
       if (!result.error) {
+        const margin = ((price - costPrice) / price * 100).toFixed(1);
+        toast({
+          title: "Producto agregado",
+          description: `Producto agregado con margen de ganancia del ${margin}%`,
+        });
+        
         // Reset form
         setFormData({
           name: "",
@@ -77,6 +113,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
           stock: "",
           minStock: "",
           price: "",
+          costPrice: "",
           description: ""
         });
         
@@ -84,6 +121,11 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
       }
     } catch (error) {
       console.error('Error adding product:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo agregar el producto",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -94,6 +136,15 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
       ...prev,
       [field]: value
     }));
+  };
+
+  const calculateMargin = () => {
+    const price = parseFloat(formData.price);
+    const costPrice = parseFloat(formData.costPrice);
+    if (price > 0 && costPrice > 0 && costPrice < price) {
+      return ((price - costPrice) / price * 100).toFixed(1);
+    }
+    return "0";
   };
 
   return (
@@ -160,20 +211,47 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="price">Precio (COP)</Label>
-            <Input
-              id="price"
-              type="number"
-              value={formData.price}
-              onChange={(e) => handleInputChange("price", e.target.value)}
-              placeholder="0"
-              min="0"
-              max="1000000"
-              step="0.01"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="costPrice">Precio de Costo (COP)</Label>
+              <Input
+                id="costPrice"
+                type="number"
+                value={formData.costPrice}
+                onChange={(e) => handleInputChange("costPrice", e.target.value)}
+                placeholder="0"
+                min="0"
+                max="1000000"
+                step="0.01"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Precio de Venta (COP)</Label>
+              <Input
+                id="price"
+                type="number"
+                value={formData.price}
+                onChange={(e) => handleInputChange("price", e.target.value)}
+                placeholder="0"
+                min="0"
+                max="1000000"
+                step="0.01"
+                required
+              />
+            </div>
           </div>
+
+          {formData.price && formData.costPrice && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="text-sm text-green-800">
+                <strong>Margen de ganancia: {calculateMargin()}%</strong>
+              </div>
+              <div className="text-xs text-green-600 mt-1">
+                Ganancia por unidad: ${(parseFloat(formData.price) - parseFloat(formData.costPrice)).toLocaleString()}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Descripción (Opcional)</Label>

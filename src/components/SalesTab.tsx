@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { ShoppingCart, Plus, Minus, DollarSign } from "lucide-react";
+import { ShoppingCart, Plus, Minus, DollarSign, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,10 @@ interface SaleItem {
   productName: string;
   quantity: number;
   price: number;
+  costPrice: number;
   subtotal: number;
+  profit: number;
+  margin: number;
 }
 
 interface SalesTabProps {
@@ -66,16 +70,29 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         return;
       }
       
+      const subtotal = newQuantity * product.price;
+      const profit = newQuantity * (product.price - (product.costPrice || 0));
+      const margin = product.price > 0 ? ((product.price - (product.costPrice || 0)) / product.price * 100) : 0;
+      
       newItems[existingItemIndex].quantity = newQuantity;
-      newItems[existingItemIndex].subtotal = newQuantity * product.price;
+      newItems[existingItemIndex].subtotal = subtotal;
+      newItems[existingItemIndex].profit = profit;
+      newItems[existingItemIndex].margin = margin;
       setSaleItems(newItems);
     } else {
+      const subtotal = quantity * product.price;
+      const profit = quantity * (product.price - (product.costPrice || 0));
+      const margin = product.price > 0 ? ((product.price - (product.costPrice || 0)) / product.price * 100) : 0;
+      
       const newItem: SaleItem = {
         productId: selectedProductId,
         productName: product.name,
         quantity,
         price: product.price,
-        subtotal: quantity * product.price
+        costPrice: product.costPrice || 0,
+        subtotal,
+        profit,
+        margin
       };
       setSaleItems([...saleItems, newItem]);
     }
@@ -106,15 +123,34 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       return;
     }
 
-    setSaleItems(saleItems.map(item => 
-      item.productId === productId 
-        ? { ...item, quantity: newQuantity, subtotal: newQuantity * item.price }
-        : item
-    ));
+    setSaleItems(saleItems.map(item => {
+      if (item.productId === productId) {
+        const subtotal = newQuantity * item.price;
+        const profit = newQuantity * (item.price - item.costPrice);
+        return { 
+          ...item, 
+          quantity: newQuantity, 
+          subtotal,
+          profit
+        };
+      }
+      return item;
+    }));
   };
 
   const getTotalAmount = () => {
     return saleItems.reduce((total, item) => total + item.subtotal, 0);
+  };
+
+  const getTotalProfit = () => {
+    return saleItems.reduce((total, item) => total + item.profit, 0);
+  };
+
+  const getAverageMargin = () => {
+    if (saleItems.length === 0) return 0;
+    const totalRevenue = getTotalAmount();
+    const totalProfit = getTotalProfit();
+    return totalRevenue > 0 ? (totalProfit / totalRevenue * 100) : 0;
   };
 
   const completeSale = async () => {
@@ -145,7 +181,9 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         date: new Date().toISOString(),
         customer: customerName || 'Cliente General',
         items: saleItems,
-        total: getTotalAmount()
+        total: getTotalAmount(),
+        totalProfit: getTotalProfit(),
+        averageMargin: getAverageMargin()
       };
       
       sales.push(newSale);
@@ -153,7 +191,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
       toast({
         title: "Venta completada",
-        description: `Venta por $${getTotalAmount().toLocaleString()} registrada exitosamente`,
+        description: `Venta por $${getTotalAmount().toLocaleString()} con ganancia de $${getTotalProfit().toLocaleString()} (${getAverageMargin().toFixed(1)}% margen)`,
       });
 
       // Limpiar formulario
@@ -237,48 +275,70 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
                 <h3 className="font-semibold mb-4">Productos en la venta:</h3>
                 <div className="space-y-3">
                   {saleItems.map((item) => (
-                    <div key={item.productId} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                      <div className="flex-1">
-                        <span className="font-medium">{item.productName}</span>
-                        <div className="text-sm text-gray-600">
-                          ${item.price} x {item.quantity} = ${item.subtotal.toLocaleString()}
+                    <div key={item.productId} className="bg-gray-50 p-4 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex-1">
+                          <span className="font-medium">{item.productName}</span>
+                          <div className="text-sm text-gray-600">
+                            ${item.price} x {item.quantity} = ${item.subtotal.toLocaleString()}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateItemQuantity(item.productId, item.quantity - 1)}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-8 text-center">{item.quantity}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateItemQuantity(item.productId, item.quantity + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => removeItemFromSale(item.productId)}
+                          >
+                            Eliminar
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateItemQuantity(item.productId, item.quantity - 1)}
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="w-8 text-center">{item.quantity}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateItemQuantity(item.productId, item.quantity + 1)}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => removeItemFromSale(item.productId)}
-                        >
-                          Eliminar
-                        </Button>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-green-600">
+                          Ganancia: ${item.profit.toLocaleString()}
+                        </span>
+                        <Badge variant="secondary" className="text-xs">
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                          {item.margin.toFixed(1)}% margen
+                        </Badge>
                       </div>
                     </div>
                   ))}
                 </div>
                 
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Total:</span>
+                <div className="border-t pt-4 mt-4 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold">Total Venta:</span>
                     <Badge variant="secondary" className="text-lg px-3 py-1">
                       <DollarSign className="h-4 w-4 mr-1" />
                       ${getTotalAmount().toLocaleString()}
                     </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-green-700">Total Ganancia:</span>
+                    <Badge variant="default" className="text-lg px-3 py-1 bg-green-600">
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      ${getTotalProfit().toLocaleString()}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Margen promedio:</span>
+                    <span className="text-sm font-medium">{getAverageMargin().toFixed(1)}%</span>
                   </div>
                 </div>
               </div>

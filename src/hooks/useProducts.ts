@@ -9,6 +9,7 @@ export interface Product {
   stock: number;
   minStock: number;
   price: number;
+  costPrice: number;
   description?: string;
   created_at?: string;
   updated_at?: string;
@@ -23,7 +24,13 @@ export const useProducts = () => {
     const savedProducts = localStorage.getItem('products');
     if (savedProducts) {
       try {
-        setProducts(JSON.parse(savedProducts));
+        const parsedProducts = JSON.parse(savedProducts);
+        // Migrate existing products to include costPrice if they don't have it
+        const migratedProducts = parsedProducts.map((product: any) => ({
+          ...product,
+          costPrice: product.costPrice || (product.price * 0.7) // Default to 70% of sale price if not set
+        }));
+        setProducts(migratedProducts);
       } catch (error) {
         console.error('Error parsing saved products:', error);
         setProducts([]);
