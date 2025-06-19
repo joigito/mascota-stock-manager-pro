@@ -35,13 +35,13 @@ const Index = () => {
       <header className="bg-white shadow-sm border-b border-green-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-green-500 to-orange-500 rounded-lg">
-                <PawPrint className="h-6 w-6 text-white" />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-orange-500 rounded-xl shadow-lg">
+                <PawPrint className="h-10 w-10 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">PetStock Manager Pro</h1>
-                <p className="text-sm text-gray-600">Gestión de inventario para mascotas y forrajería</p>
+                <h1 className="text-3xl font-bold text-gray-900">LA QUERENCIA</h1>
+                <p className="text-base text-gray-600">Gestión de inventario para mascotas y forrajería</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -69,7 +69,7 @@ const Index = () => {
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
           <TabsList className="grid w-full grid-cols-5 mb-8">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="dashboard">Inicio</TabsTrigger>
             <TabsTrigger value="inventory">Inventario</TabsTrigger>
             <TabsTrigger value="sales">Ventas</TabsTrigger>
             <TabsTrigger value="customers">Clientes</TabsTrigger>
