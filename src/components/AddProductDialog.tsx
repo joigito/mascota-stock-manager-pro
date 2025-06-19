@@ -19,12 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Product } from "@/pages/Index";
+import { Product } from "@/hooks/useProducts";
 
 interface AddProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddProduct: (product: Omit<Product, "id">) => void;
+  onAddProduct: (product: Omit<Product, "id">) => Promise<void>;
 }
 
 const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialogProps) => {
@@ -36,34 +36,56 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
     price: "",
     description: ""
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.stock || !formData.minStock || !formData.price) {
+    if (!formData.name.trim() || !formData.stock || !formData.minStock || !formData.price) {
       return;
     }
 
-    onAddProduct({
-      name: formData.name,
-      category: formData.category,
-      stock: parseInt(formData.stock),
-      minStock: parseInt(formData.minStock),
-      price: parseFloat(formData.price),
-      description: formData.description || undefined
-    });
+    // Validation
+    const stock = parseInt(formData.stock);
+    const minStock = parseInt(formData.minStock);
+    const price = parseFloat(formData.price);
 
-    // Reset form
-    setFormData({
-      name: "",
-      category: "mascotas",
-      stock: "",
-      minStock: "",
-      price: "",
-      description: ""
-    });
-    
-    onOpenChange(false);
+    if (stock < 0 || minStock < 0 || price < 0) {
+      return;
+    }
+
+    if (formData.name.length > 200 || (formData.description && formData.description.length > 1000)) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await onAddProduct({
+        name: formData.name.trim(),
+        category: formData.category,
+        stock,
+        minStock,
+        price,
+        description: formData.description.trim() || undefined
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        category: "mascotas",
+        stock: "",
+        minStock: "",
+        price: "",
+        description: ""
+      });
+      
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error adding product:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -90,6 +112,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
               placeholder="Ej: Alimento Premium para Perros"
+              maxLength={200}
               required
             />
           </div>
@@ -117,6 +140,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
                 onChange={(e) => handleInputChange("stock", e.target.value)}
                 placeholder="0"
                 min="0"
+                max="1000000"
                 required
               />
             </div>
@@ -129,6 +153,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
                 onChange={(e) => handleInputChange("minStock", e.target.value)}
                 placeholder="0"
                 min="0"
+                max="1000000"
                 required
               />
             </div>
@@ -143,6 +168,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
               onChange={(e) => handleInputChange("price", e.target.value)}
               placeholder="0"
               min="0"
+              max="1000000"
               step="0.01"
               required
             />
@@ -155,16 +181,17 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
               placeholder="Descripción del producto..."
+              maxLength={1000}
               rows={3}
             />
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
-              Agregar Producto
+            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={loading}>
+              {loading ? 'Agregando...' : 'Agregar Producto'}
             </Button>
           </DialogFooter>
         </form>
