@@ -52,6 +52,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   
   const sales = useMemo(() => {
     const saved = localStorage.getItem('sales');
+    console.log('Loaded sales from localStorage:', saved);
     return saved ? JSON.parse(saved) : [];
   }, []);
 
@@ -142,13 +143,29 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   };
 
   const salesForReport = useMemo(() => {
-    return sales.filter((sale: Sale) => {
+    console.log('Filtering sales for report...');
+    console.log('Start date:', salesReportStartDate);
+    console.log('End date:', salesReportEndDate);
+    console.log('All sales:', sales);
+    
+    const filtered = sales.filter((sale: Sale) => {
       const saleDate = new Date(sale.date);
       const startDate = new Date(salesReportStartDate);
       const endDate = new Date(salesReportEndDate);
-      endDate.setHours(23, 59, 59, 999); // Include the end date
+      
+      // Set start date to beginning of day
+      startDate.setHours(0, 0, 0, 0);
+      // Set end date to end of day
+      endDate.setHours(23, 59, 59, 999);
+      
+      console.log(`Sale ${sale.id}: ${saleDate.toISOString()} between ${startDate.toISOString()} and ${endDate.toISOString()}`);
+      console.log(`Includes sale: ${saleDate >= startDate && saleDate <= endDate}`);
+      
       return saleDate >= startDate && saleDate <= endDate;
     });
+    
+    console.log('Filtered sales for report:', filtered);
+    return filtered;
   }, [sales, salesReportStartDate, salesReportEndDate]);
 
   const handlePrintStock = () => {
