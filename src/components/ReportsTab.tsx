@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { BarChart3, Calendar } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +52,16 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   const sales = useMemo(() => {
     const saved = localStorage.getItem('sales');
     console.log('Loaded sales from localStorage:', saved);
-    return saved ? JSON.parse(saved) : [];
+    const parsedSales = saved ? JSON.parse(saved) : [];
+    console.log('Parsed sales:', parsedSales);
+    
+    // Log each sale's date format
+    parsedSales.forEach((sale: Sale, index: number) => {
+      console.log(`Sale ${index} - ID: ${sale.id}, Date: ${sale.date}, Date type: ${typeof sale.date}`);
+      console.log(`Sale ${index} - Parsed date: ${new Date(sale.date).toISOString()}`);
+    });
+    
+    return parsedSales;
   }, []);
 
   const filteredSales = useMemo(() => {
@@ -143,28 +151,44 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   };
 
   const salesForReport = useMemo(() => {
-    console.log('Filtering sales for report...');
-    console.log('Start date:', salesReportStartDate);
-    console.log('End date:', salesReportEndDate);
-    console.log('All sales:', sales);
+    console.log('=== FILTERING SALES FOR REPORT ===');
+    console.log('Start date input (salesReportStartDate):', salesReportStartDate);
+    console.log('End date input (salesReportEndDate):', salesReportEndDate);
+    console.log('Total sales to filter:', sales.length);
+    
+    if (sales.length === 0) {
+      console.log('No sales found in localStorage');
+      return [];
+    }
+    
+    const startDate = new Date(salesReportStartDate);
+    const endDate = new Date(salesReportEndDate);
+    
+    // Set start date to beginning of day
+    startDate.setHours(0, 0, 0, 0);
+    // Set end date to end of day
+    endDate.setHours(23, 59, 59, 999);
+    
+    console.log('Adjusted start date:', startDate.toISOString());
+    console.log('Adjusted end date:', endDate.toISOString());
     
     const filtered = sales.filter((sale: Sale) => {
       const saleDate = new Date(sale.date);
-      const startDate = new Date(salesReportStartDate);
-      const endDate = new Date(salesReportEndDate);
+      const isInRange = saleDate >= startDate && saleDate <= endDate;
       
-      // Set start date to beginning of day
-      startDate.setHours(0, 0, 0, 0);
-      // Set end date to end of day
-      endDate.setHours(23, 59, 59, 999);
+      console.log(`Sale ${sale.id}:`);
+      console.log(`  - Original date string: "${sale.date}"`);
+      console.log(`  - Parsed date: ${saleDate.toISOString()}`);
+      console.log(`  - Is valid date: ${!isNaN(saleDate.getTime())}`);
+      console.log(`  - Is in range: ${isInRange}`);
+      console.log(`  - Compare: ${saleDate.toISOString()} >= ${startDate.toISOString()} && <= ${endDate.toISOString()}`);
       
-      console.log(`Sale ${sale.id}: ${saleDate.toISOString()} between ${startDate.toISOString()} and ${endDate.toISOString()}`);
-      console.log(`Includes sale: ${saleDate >= startDate && saleDate <= endDate}`);
-      
-      return saleDate >= startDate && saleDate <= endDate;
+      return isInRange;
     });
     
-    console.log('Filtered sales for report:', filtered);
+    console.log('Filtered sales count:', filtered.length);
+    console.log('Filtered sales:', filtered);
+    
     return filtered;
   }, [sales, salesReportStartDate, salesReportEndDate]);
 
@@ -177,6 +201,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   };
 
   const handlePrintSales = () => {
+    console.log('Printing sales report with data:', salesForReport);
     setShowSalesPrint(true);
     setTimeout(() => {
       window.print();
