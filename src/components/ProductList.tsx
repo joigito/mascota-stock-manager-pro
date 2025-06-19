@@ -42,7 +42,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct }: ProductList
 
   if (products.length === 0) {
     return (
-      <div className="p-8 text-center">
+      <div className="p-6 sm:p-8 text-center">
         <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">No hay productos</h3>
         <p className="text-gray-500">Comienza agregando tu primer producto al inventario.</p>
@@ -52,7 +52,61 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct }: ProductList
 
   return (
     <>
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="block sm:hidden">
+        <div className="divide-y divide-gray-200">
+          {products.map((product) => (
+            <div key={product.id} className="p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-gray-900 truncate">{product.name}</h3>
+                  {product.description && (
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                  )}
+                </div>
+                <div className="flex space-x-1 ml-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingProduct(product)}
+                    className="text-blue-600 hover:text-blue-700 p-1 h-8 w-8"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDeleteProduct(product.id)}
+                    className="text-red-600 hover:text-red-700 p-1 h-8 w-8"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {getCategoryBadge(product.category)}
+                {getStockStatus(product.stock, product.minStock)}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-gray-500">Stock:</span>
+                  <div className="font-medium">{product.stock} unidades</div>
+                  <div className="text-gray-400">Mín: {product.minStock}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500">Precio:</span>
+                  <div className="font-medium">{formatCurrency(product.price)}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>

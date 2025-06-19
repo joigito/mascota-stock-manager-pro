@@ -54,33 +54,28 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-green-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-orange-500 rounded-xl shadow-lg">
-                <PawPrint className="h-10 w-10 text-white" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-orange-500 rounded-xl shadow-lg">
+                <PawPrint className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">LA QUERENCIA</h1>
-                <p className="text-base text-gray-600">Gestión de inventario para mascotas y forrajería</p>
+                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">LA QUERENCIA</h1>
+                <p className="text-xs sm:text-base text-gray-600">Gestión de inventario para mascotas y forrajería</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
               <SyncButton />
-              <Button 
-                onClick={() => setIsAddDialogOpen(true)}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Agregar Producto
-              </Button>
               <Button
                 onClick={handleSignOut}
                 variant="outline"
-                className="border-gray-300 hover:bg-gray-50"
+                size="sm"
+                className="border-gray-300 hover:bg-gray-50 flex-1 sm:flex-none"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Cerrar Sesión
+                <span className="hidden sm:inline">Cerrar Sesión</span>
+                <span className="sm:hidden">Salir</span>
               </Button>
             </div>
           </div>
@@ -88,36 +83,59 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Stock Alerts */}
         {lowStockProducts.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <StockAlert products={lowStockProducts} />
           </div>
         )}
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-8">
-            <TabsTrigger value="dashboard">Inicio</TabsTrigger>
-            <TabsTrigger value="inventory">Inventario</TabsTrigger>
-            <TabsTrigger value="sales">Ventas</TabsTrigger>
-            <TabsTrigger value="customers">Clientes</TabsTrigger>
-            <TabsTrigger value="reports">Reportes</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8 h-auto">
+            <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Inicio</span>
+              <span className="sm:hidden">Inicio</span>
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Inventario</span>
+              <span className="sm:hidden">Stock</span>
+            </TabsTrigger>
+            <TabsTrigger value="sales" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              Ventas
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Clientes</span>
+              <span className="sm:hidden">Clientes</span>
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Reportes</span>
+              <span className="sm:hidden">Rep.</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-8">
+          <TabsContent value="dashboard" className="space-y-6 sm:space-y-8">
             <Dashboard products={products} />
           </TabsContent>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center space-x-2">
-                  <Package className="h-5 w-5 text-green-600" />
-                  <h2 className="text-xl font-semibold text-gray-900">Inventario de Productos</h2>
+              <div className="p-4 sm:p-6 border-b border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Package className="h-5 w-5 text-green-600" />
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Inventario de Productos</h2>
+                  </div>
+                  <Button
+                    onClick={() => setIsAddDialogOpen(true)}
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md w-full sm:w-auto"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Producto
+                  </Button>
                 </div>
               </div>
               <ProductList 
