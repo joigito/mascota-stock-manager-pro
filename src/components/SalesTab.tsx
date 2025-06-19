@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ShoppingCart, Plus, Minus, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ interface SaleItem {
 
 interface SalesTabProps {
   products: Product[];
-  onUpdateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  onUpdateProduct: (id: string, updates: Partial<Product>) => Promise<{ error: any }>;
 }
 
 const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
