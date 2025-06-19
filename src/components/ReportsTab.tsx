@@ -1,10 +1,13 @@
-
 import { useState, useMemo } from "react";
-import { BarChart3, Calendar, DollarSign, ShoppingBag, TrendingUp, Package, Target } from "lucide-react";
+import { BarChart3, Calendar, DollarSign, ShoppingBag, TrendingUp, Package, Target, Printer } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Product } from "@/hooks/useProducts";
+import PrintableStockReport from "@/components/reports/PrintableStockReport";
+import PrintableSalesReport from "@/components/reports/PrintableSalesReport";
+import DateRangeSelector from "@/components/reports/DateRangeSelector";
 
 interface Sale {
   id: string;
@@ -31,6 +34,16 @@ interface ReportsTabProps {
 
 const ReportsTab = ({ products }: ReportsTabProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState("7");
+  const [showStockPrint, setShowStockPrint] = useState(false);
+  const [showSalesPrint, setShowSalesPrint] = useState(false);
+  const [salesReportStartDate, setSalesReportStartDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 30);
+    return date.toISOString().split('T')[0];
+  });
+  const [salesReportEndDate, setSalesReportEndDate] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
   
   const sales = useMemo(() => {
     const saved = localStorage.getItem('sales');
@@ -123,8 +136,88 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
     }
   };
 
+  const salesForReport = useMemo(() => {
+    return sales.filter((sale: Sale) => {
+      const saleDate = new Date(sale.date);
+      const startDate = new Date(salesReportStartDate);
+      const endDate = new Date(salesReportEndDate);
+      endDate.setHours(23, 59, 59, 999); // Include the end date
+      return saleDate >= startDate && saleDate <= endDate;
+    });
+  }, [sales, salesReportStartDate, salesReportEndDate]);
+
+  const handlePrintStock = () => {
+    setShowStockPrint(true);
+    setTimeout(() => {
+      window.print();
+      setShowStockPrint(false);
+    }, 100);
+  };
+
+  const handlePrintSales = () => {
+    setShowSalesPrint(true);
+    setTimeout(() => {
+      window.print();
+      setShowSalesPrint(false);
+    }, 100);
+  };
+
+  if (showStockPrint) {
+    return <PrintableStockReport products={products} />;
+  }
+
+  if (showSalesPrint) {
+    return <PrintableSalesReport 
+      sales={salesForReport} 
+      startDate={salesReportStartDate}
+      endDate={salesReportEndDate}
+    />;
+  }
+
   return (
     <div className="space-y-6">
+      {/* Print Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Printer className="h-5 w-5" />
+            <span>Reportes para Imprimir</span>
+          </CardTitle>
+          <CardDescription>
+            Genera reportes imprimibles de stock y ventas
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button 
+              onClick={handlePrintStock}
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center space-y-2"
+            >
+              <Package className="h-8 w-8" />
+              <div className="text-center">
+                <div className="font-semibold">Reporte de Stock</div>
+                <div className="text-sm text-gray-600">Inventario completo con valores</div>
+              </div>
+            </Button>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <ShoppingBag className="h-5 w-5" />
+                <span className="font-semibold">Reporte de Ventas</span>
+              </div>
+              <DateRangeSelector
+                startDate={salesReportStartDate}
+                endDate={salesReportEndDate}
+                onStartDateChange={setSalesReportStartDate}
+                onEndDateChange={setSalesReportEndDate}
+                onGenerateReport={handlePrintSales}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Header with period selector */}
       <Card>
         <CardHeader>
