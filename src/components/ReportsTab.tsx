@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { BarChart3, Calendar } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,7 +152,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   };
 
   const salesForReport = useMemo(() => {
-    console.log('=== FILTERING SALES FOR REPORT ===');
+    console.log('=== FILTERING SALES FOR REPORT (FIXED) ===');
     console.log('Start date input (salesReportStartDate):', salesReportStartDate);
     console.log('End date input (salesReportEndDate):', salesReportEndDate);
     console.log('Total sales to filter:', sales.length);
@@ -161,16 +162,12 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
       return [];
     }
     
-    const startDate = new Date(salesReportStartDate);
-    const endDate = new Date(salesReportEndDate);
+    // Create date objects in UTC to avoid timezone issues
+    const startDate = new Date(salesReportStartDate + 'T00:00:00.000Z');
+    const endDate = new Date(salesReportEndDate + 'T23:59:59.999Z');
     
-    // Set start date to beginning of day
-    startDate.setHours(0, 0, 0, 0);
-    // Set end date to end of day
-    endDate.setHours(23, 59, 59, 999);
-    
-    console.log('Adjusted start date:', startDate.toISOString());
-    console.log('Adjusted end date:', endDate.toISOString());
+    console.log('UTC start date:', startDate.toISOString());
+    console.log('UTC end date:', endDate.toISOString());
     
     const filtered = sales.filter((sale: Sale) => {
       const saleDate = new Date(sale.date);
