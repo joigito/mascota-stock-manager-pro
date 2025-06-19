@@ -10,6 +10,7 @@ import Dashboard from "@/components/Dashboard";
 import SalesTab from "@/components/SalesTab";
 import ReportsTab from "@/components/ReportsTab";
 import CustomersTab from "@/components/CustomersTab";
+import SyncButton from "@/components/SyncButton";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +66,7 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <SyncButton />
               <Button 
                 onClick={() => setIsAddDialogOpen(true)}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md"

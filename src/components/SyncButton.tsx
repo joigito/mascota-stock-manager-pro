@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { RefreshCw, Cloud, CloudOff } from "lucide-react";
+import { RefreshCw, Cloud, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useProducts } from "@/hooks/useProducts";
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 const SyncButton = () => {
   const [syncing, setSyncing] = useState(false);
   const { toast } = useToast();
-  const { syncProducts } = useProducts();
+  const { syncProducts, cleanDuplicates } = useProducts();
   const { syncSales } = useSalesData();
   const { syncCustomers } = useCustomers();
 
@@ -39,12 +39,25 @@ const SyncButton = () => {
     }
   };
 
+  const handleCleanDuplicates = async () => {
+    await cleanDuplicates();
+  };
+
   return (
     <div className="flex items-center space-x-2">
       <Badge variant="outline" className="flex items-center space-x-1">
         <Cloud className="h-3 w-3 text-green-500" />
         <span className="text-xs">En línea</span>
       </Badge>
+      <Button 
+        onClick={handleCleanDuplicates}
+        variant="outline"
+        size="sm"
+        className="text-orange-600 hover:text-orange-700"
+      >
+        <Trash2 className="h-4 w-4 mr-2" />
+        Limpiar Duplicados
+      </Button>
       <Button 
         onClick={handleSyncAll} 
         disabled={syncing}

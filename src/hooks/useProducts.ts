@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,44 +23,119 @@ export const useProducts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Migrar datos de localStorage a Supabase
+  // Verificar si ya existen productos para este usuario
+  const checkExistingProducts = async () => {
+    if (!user) return false;
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1);
+    
+    return !error && data && data.length > 0;
+  };
+
+  // Migrar datos de localStorage a Supabase (mejorado para evitar duplicados)
   const migrateLocalStorageData = async () => {
     if (!user) return;
 
     const savedProducts = localStorage.getItem('products');
-    if (savedProducts) {
-      try {
-        const localProducts = JSON.parse(savedProducts);
-        console.log('Migrando productos de localStorage a Supabase:', localProducts.length);
-        
-        for (const product of localProducts) {
-          const { error } = await supabase
-            .from('products')
-            .insert({
-              name: product.name,
-              category: product.category,
-              stock: product.stock,
-              min_stock: product.minStock,
-              price: product.price,
-              cost_price: product.costPrice || (product.price * 0.7),
-              description: product.description,
-              user_id: user.id
-            });
-          
-          if (error && !error.message.includes('duplicate key')) {
-            console.error('Error migrando producto:', error);
-          }
-        }
-        
-        // Limpiar localStorage después de migrar
+    if (!savedProducts) return;
+
+    try {
+      // Verificar si ya hay productos en la base de datos
+      const hasExistingProducts = await checkExistingProducts();
+      if (hasExistingProducts) {
+        console.log('Ya existen productos en la base de datos, saltando migración');
         localStorage.removeItem('products');
-        toast({
-          title: "Migración completada",
-          description: "Productos migrados a la base de datos",
-        });
-      } catch (error) {
-        console.error('Error durante la migración:', error);
+        return;
       }
+
+      const localProducts = JSON.parse(savedProducts);
+      console.log('Migrando productos de localStorage a Supabase:', localProducts.length);
+      
+      // Migrar productos uno por uno con manejo de duplicados
+      for (const product of localProducts) {
+        const { error } = await supabase
+          .from('products')
+          .insert({
+            name: product.name,
+            category: product.category,
+            stock: product.stock,
+            min_stock: product.minStock,
+            price: product.price,
+            cost_price: product.costPrice || (product.price * 0.7),
+            description: product.description,
+            user_id: user.id
+          });
+        
+        if (error && !error.message.includes('duplicate key')) {
+          console.error('Error migrando producto:', error);
+        }
+      }
+      
+      // Limpiar localStorage después de migrar exitosamente
+      localStorage.removeItem('products');
+      toast({
+        title: "Migración completada",
+        description: "Productos migrados a la base de datos",
+      });
+    } catch (error) {
+      console.error('Error durante la migración:', error);
+    }
+  };
+
+  // Detectar productos duplicados
+  const detectDuplicates = async () => {
+    if (!user) return [];
+
+    try {
+      const { data, error } = await supabase
+        .rpc('detect_duplicate_products', { user_uuid: user.id });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error detectando duplicados:', error);
+      return [];
+    }
+  };
+
+  // Limpiar productos duplicados
+  const cleanDuplicates = async () => {
+    if (!user) return;
+
+    try {
+      setSyncing(true);
+      const { data, error } = await supabase
+        .rpc('clean_duplicate_products', { user_uuid: user.id });
+
+      if (error) throw error;
+
+      const deletedCount = data?.[0]?.deleted_count || 0;
+      
+      if (deletedCount > 0) {
+        toast({
+          title: "Duplicados eliminados",
+          description: `Se eliminaron ${deletedCount} productos duplicados`,
+        });
+        await loadProducts(); // Recargar la lista
+      } else {
+        toast({
+          title: "Sin duplicados",
+          description: "No se encontraron productos duplicados",
+        });
+      }
+    } catch (error) {
+      console.error('Error limpiando duplicados:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron limpiar los duplicados",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -149,7 +223,13 @@ export const useProducts = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Manejar error de duplicado de manera más amigable
+        if (error.message.includes('unique_product_per_user')) {
+          return { error: new Error('Ya existe un producto con este nombre en la misma categoría') };
+        }
+        throw error;
+      }
 
       const newProduct: Product = {
         id: data.id,
@@ -193,7 +273,12 @@ export const useProducts = () => {
         .eq('id', id)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('unique_product_per_user')) {
+          return { error: new Error('Ya existe un producto con este nombre en la misma categoría') };
+        }
+        throw error;
+      }
 
       setProducts(prev => 
         prev.map(product => 
@@ -238,6 +323,8 @@ export const useProducts = () => {
     addProduct,
     updateProduct,
     deleteProduct,
-    syncProducts
+    syncProducts,
+    cleanDuplicates,
+    detectDuplicates
   };
 };
