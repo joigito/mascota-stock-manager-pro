@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Package, PawPrint } from "lucide-react";
+import { Plus, Package, PawPrint, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
@@ -11,12 +11,32 @@ import SalesTab from "@/components/SalesTab";
 import ReportsTab from "@/components/ReportsTab";
 import CustomersTab from "@/components/CustomersTab";
 import { useProducts } from "@/hooks/useProducts";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { signOut } = useAuth();
+  const { toast } = useToast();
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error al cerrar sesión",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -51,6 +71,14 @@ const Index = () => {
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Agregar Producto
+              </Button>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar Sesión
               </Button>
             </div>
           </div>
