@@ -219,6 +219,10 @@ export type Database = {
           duplicate_count: number
         }[]
       }
+      generate_invitation_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       product_category: "mascotas" | "forrajeria"
