@@ -28,7 +28,7 @@ interface DashboardStats {
 
 export const SuperAdminDashboard: React.FC = () => {
   const { signOut, user } = useAuth();
-  const { organizations } = useOrganization();
+  const { organizations, switchOrganization } = useOrganization();
   const { toast } = useToast();
   const [stats, setStats] = useState<DashboardStats>({
     totalOrganizations: 0,
@@ -203,8 +203,8 @@ export const SuperAdminDashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        {/* Quick Actions and Organizations Access */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -258,6 +258,38 @@ export const SuperAdminDashboard: React.FC = () => {
                 <span className="text-sm">Últimas actualizaciones</span>
                 <span className="text-sm text-muted-foreground">Hace 2 min</span>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Building2 className="h-5 w-5 mr-2" />
+                Acceso a Tiendas
+              </CardTitle>
+              <CardDescription>
+                Entra a administrar tiendas específicas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {organizations.slice(0, 3).map((userOrg) => (
+                <Button 
+                  key={userOrg.organization.id}
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={() => {
+                    switchOrganization(userOrg.organization);
+                  }}
+                >
+                  <PawPrint className="h-4 w-4 mr-2" />
+                  {userOrg.organization.name}
+                </Button>
+              ))}
+              {organizations.length > 3 && (
+                <p className="text-xs text-muted-foreground">
+                  +{organizations.length - 3} tiendas más...
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
