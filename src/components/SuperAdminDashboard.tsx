@@ -39,8 +39,14 @@ export const SuperAdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('SuperAdminDashboard: Loading dashboard stats...');
+    console.log('SuperAdminDashboard: Organizations:', organizations);
     loadDashboardStats();
   }, []);
+
+  useEffect(() => {
+    console.log('SuperAdminDashboard: Organizations updated:', organizations);
+  }, [organizations]);
 
   const loadDashboardStats = async () => {
     try {
@@ -278,6 +284,7 @@ export const SuperAdminDashboard: React.FC = () => {
                   className="w-full justify-start" 
                   variant="outline"
                   onClick={() => {
+                    console.log('SuperAdminDashboard: Switching to organization:', userOrg.organization);
                     switchOrganization(userOrg.organization);
                   }}
                 >

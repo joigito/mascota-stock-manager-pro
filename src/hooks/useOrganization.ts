@@ -36,24 +36,60 @@ export const useOrganization = () => {
 
   const loadUserOrganizations = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_organizations')
-        .select(`
-          *,
-          organization:organizations(*)
-        `)
-        .eq('user_id', user?.id);
+      // Check if user is super admin first
+      const isSuper = await isSuperAdmin();
+      console.log('loadUserOrganizations: Is super admin:', isSuper);
+      
+      if (isSuper) {
+        // Super admins can see all organizations
+        const { data: allOrgs, error: orgsError } = await supabase
+          .from('organizations')
+          .select('*');
 
-      if (error) throw error;
+        if (orgsError) throw orgsError;
 
-      setOrganizations(data || []);
+        // Transform to match the expected format
+        const transformedData = allOrgs?.map(org => ({
+          id: `super_admin_${org.id}`,
+          user_id: user?.id || '',
+          organization_id: org.id,
+          role: 'super_admin',
+          created_at: new Date().toISOString(),
+          organization: org
+        })) || [];
+
+        console.log('loadUserOrganizations: Super admin organizations:', transformedData);
+        setOrganizations(transformedData);
+      } else {
+        // Regular users see only their organizations
+        const { data, error } = await supabase
+          .from('user_organizations')
+          .select(`
+            *,
+            organization:organizations(*)
+          `)
+          .eq('user_id', user?.id);
+
+        if (error) throw error;
+
+        console.log('loadUserOrganizations: Regular user organizations:', data);
+        setOrganizations(data || []);
+      }
       
       // Try to restore previously selected organization
       const savedOrgId = localStorage.getItem('selectedOrganizationId');
-      if (savedOrgId && data) {
-        const savedOrg = data.find(userOrg => userOrg.organization.id === savedOrgId);
+      if (savedOrgId) {
+        const allData = isSuper ? 
+          (await supabase.from('organizations').select('*')).data || [] :
+          organizations.map(uo => uo.organization);
+        
+        const savedOrg = allData.find(org => 
+          isSuper ? org.id === savedOrgId : org.id === savedOrgId
+        );
+        
         if (savedOrg) {
-          setCurrentOrganization(savedOrg.organization);
+          const orgToSet = isSuper ? savedOrg : savedOrg;
+          setCurrentOrganization(orgToSet);
         }
       }
     } catch (error) {
