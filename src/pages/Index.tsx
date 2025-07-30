@@ -13,6 +13,7 @@ import CustomersTab from "@/components/CustomersTab";
 import SyncButton from "@/components/SyncButton";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { OrganizationManager } from "@/components/OrganizationManager";
+import { OrganizationDashboard } from "@/components/OrganizationDashboard";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -62,6 +63,11 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+
+  // Show organization dashboard if no organization is selected
+  if (!currentOrganization) {
+    return <OrganizationDashboard />;
   }
 
   return (

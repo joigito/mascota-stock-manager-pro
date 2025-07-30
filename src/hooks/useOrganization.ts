@@ -47,11 +47,6 @@ export const useOrganization = () => {
       if (error) throw error;
 
       setOrganizations(data || []);
-      
-      // Set the first organization as current if none is selected
-      if (data && data.length > 0 && !currentOrganization) {
-        setCurrentOrganization(data[0].organization);
-      }
     } catch (error) {
       console.error('Error loading organizations:', error);
       toast({
