@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { OrganizationManager } from '@/components/OrganizationManager';
 import { QuickActionsDialog } from '@/components/QuickActionsDialog';
+import { TransferOwnershipDialog } from '@/components/TransferOwnershipDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
@@ -40,6 +41,8 @@ export const SuperAdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'system' | 'users' | 'backup' | null>(null);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [selectedOrganization, setSelectedOrganization] = useState<any>(null);
 
   useEffect(() => {
     console.log('SuperAdminDashboard: Loading dashboard stats...');
@@ -303,24 +306,44 @@ export const SuperAdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               {organizations.slice(0, 3).map((userOrg) => (
-                <Button 
-                  key={userOrg.organization.id}
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => {
-                    console.log('SuperAdminDashboard: Switching to organization:', userOrg.organization);
-                    switchOrganization(userOrg.organization);
-                  }}
-                >
-                  <PawPrint className="h-4 w-4 mr-2" />
-                  {userOrg.organization.name}
-                </Button>
+                <div key={userOrg.organization.id} className="flex items-center justify-between">
+                  <Button 
+                    className="flex-1 justify-start mr-2" 
+                    variant="outline"
+                    onClick={() => {
+                      console.log('SuperAdminDashboard: Switching to organization:', userOrg.organization);
+                      switchOrganization(userOrg.organization);
+                    }}
+                  >
+                    <PawPrint className="h-4 w-4 mr-2" />
+                    {userOrg.organization.name}
+                  </Button>
+                  <Button 
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectedOrganization(userOrg.organization);
+                      setTransferDialogOpen(true);
+                    }}
+                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  >
+                    Vender
+                  </Button>
+                </div>
               ))}
               {organizations.length > 3 && (
                 <p className="text-xs text-muted-foreground">
                   +{organizations.length - 3} tiendas más...
                 </p>
               )}
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground mb-2">URLs dedicadas por tienda:</p>
+                {organizations.slice(0, 2).map((userOrg) => (
+                  <div key={userOrg.organization.id} className="text-xs bg-gray-50 p-2 rounded mb-1">
+                    <code>{window.location.origin}/tienda/{userOrg.organization.slug || userOrg.organization.name.toLowerCase().replace(/\s+/g, '-')}</code>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -334,6 +357,17 @@ export const SuperAdminDashboard: React.FC = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         actionType={dialogType}
+      />
+
+      {/* Transfer Ownership Dialog */}
+      <TransferOwnershipDialog
+        open={transferDialogOpen}
+        onOpenChange={setTransferDialogOpen}
+        organization={selectedOrganization}
+        onTransferComplete={() => {
+          // Reload organizations after transfer
+          window.location.reload();
+        }}
       />
     </div>
   );

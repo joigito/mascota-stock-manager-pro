@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 interface Organization {
   id: string;
   name: string;
+  slug?: string;
   description?: string;
   created_at: string;
   updated_at: string;
