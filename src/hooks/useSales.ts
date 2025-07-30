@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from './useOrganization';
 import { Sale } from '@/types/sales';
 
 export const useSales = () => {
@@ -10,77 +10,78 @@ export const useSales = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { toast } = useToast();
 
   // Migrar datos de localStorage a Supabase
   const migrateLocalStorageData = async () => {
-    if (!user) return;
+    if (!user || !currentOrganization) return;
 
     const savedSales = localStorage.getItem('sales');
-    if (savedSales) {
-      try {
-        const localSales = JSON.parse(savedSales);
-        console.log('Migrando ventas de localStorage a Supabase:', localSales.length);
-        
-        for (const sale of localSales) {
-          // Insertar venta
-          const { data: saleData, error: saleError } = await supabase
-            .from('sales')
-            .insert({
-              date: sale.date,
-              customer: sale.customer || 'Cliente General',
-              total: sale.total,
-              total_profit: sale.totalProfit || 0,
-              average_margin: sale.averageMargin || 0,
-              user_id: user.id
-            })
-            .select()
-            .single();
+    if (!savedSales) return;
 
-          if (saleError && !saleError.message.includes('duplicate key')) {
-            console.error('Error migrando venta:', saleError);
-            continue;
-          }
+    try {
+      const localSales = JSON.parse(savedSales);
+      console.log('Migrando ventas de localStorage a Supabase:', localSales.length);
+      
+      for (const sale of localSales) {
+        // Insertar la venta
+        const { data: saleData, error: saleError } = await supabase
+          .from('sales')
+          .insert({
+            date: sale.date,
+            customer: sale.customer,
+            total: sale.total,
+            total_profit: sale.totalProfit,
+            average_margin: sale.averageMargin,
+            user_id: user.id,
+            organization_id: currentOrganization.id
+          })
+          .select()
+          .single();
 
-          // Insertar items de la venta
-          if (saleData && sale.items) {
-            for (const item of sale.items) {
-              const { error: itemError } = await supabase
-                .from('sale_items')
-                .insert({
-                  sale_id: saleData.id,
-                  product_id: item.productId,
-                  product_name: item.productName,
-                  quantity: item.quantity,
-                  price: item.price,
-                  cost_price: item.costPrice || 0,
-                  subtotal: item.subtotal,
-                  profit: item.profit || 0,
-                  margin: item.margin || 0
-                });
+        if (saleError) {
+          console.error('Error migrando venta:', saleError);
+          continue;
+        }
 
-              if (itemError && !itemError.message.includes('duplicate key')) {
-                console.error('Error migrando item de venta:', itemError);
-              }
+        // Insertar los items de la venta
+        if (sale.items && sale.items.length > 0) {
+          for (const item of sale.items) {
+            const { error: itemError } = await supabase
+              .from('sale_items')
+              .insert({
+                sale_id: saleData.id,
+                product_id: item.productId,
+                product_name: item.productName,
+                quantity: item.quantity,
+                price: item.price,
+                cost_price: item.costPrice || 0,
+                subtotal: item.subtotal,
+                profit: item.profit || 0,
+                margin: item.margin || 0
+              });
+            
+            if (itemError) {
+              console.error('Error migrando item de venta:', itemError);
             }
           }
         }
-        
-        // Limpiar localStorage después de migrar
-        localStorage.removeItem('sales');
-        toast({
-          title: "Migración completada",
-          description: "Ventas migradas a la base de datos",
-        });
-      } catch (error) {
-        console.error('Error durante la migración de ventas:', error);
       }
+      
+      localStorage.removeItem('sales');
+      toast({
+        title: "Migración completada",
+        description: "Ventas migradas a la base de datos",
+      });
+    } catch (error) {
+      console.error('Error durante la migración de ventas:', error);
     }
   };
 
   // Cargar ventas desde Supabase
   const loadSales = async () => {
-    if (!user) {
+    if (!user || !currentOrganization) {
       setLoading(false);
       return;
     }
@@ -93,6 +94,7 @@ export const useSales = () => {
           sale_items (*)
         `)
         .eq('user_id', user.id)
+        .eq('organization_id', currentOrganization.id)
         .order('date', { ascending: false });
 
       if (salesError) throw salesError;
@@ -100,7 +102,7 @@ export const useSales = () => {
       const formattedSales: Sale[] = salesData.map(sale => ({
         id: sale.id,
         date: sale.date,
-        customer: sale.customer,
+        customer: sale.customer || 'Cliente General',
         total: Number(sale.total),
         totalProfit: Number(sale.total_profit || 0),
         averageMargin: Number(sale.average_margin || 0),
@@ -140,78 +142,77 @@ export const useSales = () => {
     });
   };
 
-  // Agregar nueva venta
-  const addSale = async (saleData: Omit<Sale, 'id'>) => {
-    if (!user) {
-      return { error: new Error('Usuario no autenticado') };
-    }
-
-    try {
-      // Insertar venta
-      const { data: newSaleData, error: saleError } = await supabase
-        .from('sales')
-        .insert({
-          date: saleData.date,
-          customer: saleData.customer,
-          total: saleData.total,
-          total_profit: saleData.totalProfit || 0,
-          average_margin: saleData.averageMargin || 0,
-          user_id: user.id
-        })
-        .select()
-        .single();
-
-      if (saleError) throw saleError;
-
-      // Insertar items de la venta
-      if (saleData.items && saleData.items.length > 0) {
-        const saleItemsData = saleData.items.map(item => ({
-          sale_id: newSaleData.id,
-          product_id: item.productId,
-          product_name: item.productName,
-          quantity: item.quantity,
-          price: item.price,
-          cost_price: item.costPrice || 0,
-          subtotal: item.subtotal,
-          profit: item.profit || 0,
-          margin: item.margin || 0
-        }));
-
-        const { error: itemsError } = await supabase
-          .from('sale_items')
-          .insert(saleItemsData);
-
-        if (itemsError) throw itemsError;
-      }
-
-      // Actualizar estado local
-      const newSale: Sale = {
-        id: newSaleData.id,
-        date: newSaleData.date,
-        customer: newSaleData.customer,
-        total: Number(newSaleData.total),
-        totalProfit: Number(newSaleData.total_profit || 0),
-        averageMargin: Number(newSaleData.average_margin || 0),
-        items: saleData.items
-      };
-
-      setSales(prev => [newSale, ...prev]);
-      return { error: null };
-    } catch (error) {
-      console.error('Error agregando venta:', error);
-      return { error };
-    }
-  };
-
   useEffect(() => {
-    if (user) {
+    if (user && currentOrganization) {
       migrateLocalStorageData().then(() => {
         loadSales();
       });
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, currentOrganization]);
+
+  const addSale = async (saleData: Omit<Sale, 'id'>) => {
+    if (!user || !currentOrganization) {
+      return { error: new Error('Usuario no autenticado o organización no seleccionada') };
+    }
+
+    try {
+      // Insertar la venta
+      const { data: newSale, error: saleError } = await supabase
+        .from('sales')
+        .insert({
+          date: saleData.date,
+          customer: saleData.customer,
+          total: saleData.total,
+          total_profit: saleData.totalProfit,
+          average_margin: saleData.averageMargin,
+          user_id: user.id,
+          organization_id: currentOrganization.id
+        })
+        .select()
+        .single();
+
+      if (saleError) throw saleError;
+
+      // Insertar los items de la venta
+      if (saleData.items && saleData.items.length > 0) {
+        const { error: itemsError } = await supabase
+          .from('sale_items')
+          .insert(
+            saleData.items.map(item => ({
+              sale_id: newSale.id,
+              product_id: item.productId,
+              product_name: item.productName,
+              quantity: item.quantity,
+              price: item.price,
+              cost_price: item.costPrice || 0,
+              subtotal: item.subtotal,
+              profit: item.profit || 0,
+              margin: item.margin || 0
+            }))
+          );
+
+        if (itemsError) throw itemsError;
+      }
+
+      const completeSale: Sale = {
+        id: newSale.id,
+        date: newSale.date,
+        customer: newSale.customer || 'Cliente General',
+        total: Number(newSale.total),
+        totalProfit: Number(newSale.total_profit || 0),
+        averageMargin: Number(newSale.average_margin || 0),
+        items: saleData.items || []
+      };
+
+      setSales(prev => [completeSale, ...prev]);
+      return { error: null };
+    } catch (error) {
+      console.error('Error agregando venta:', error);
+      return { error };
+    }
+  };
 
   return {
     sales,

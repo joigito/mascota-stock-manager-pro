@@ -25,7 +25,7 @@ import { useToast } from "@/components/ui/use-toast";
 interface AddProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddProduct: (product: Omit<Product, "id" | "created_at" | "updated_at">) => Promise<{ error: any }>;
+  onAddProduct: (product: Omit<Product, "id" | "created_at" | "updated_at" | "organization_id">) => Promise<{ error: any }>;
 }
 
 const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialogProps) => {

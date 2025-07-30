@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from './useOrganization';
 
 export interface Customer {
   id: string;
@@ -10,7 +10,8 @@ export interface Customer {
   email?: string;
   phone?: string;
   address?: string;
-  created_at: string;
+  organization_id: string;
+  created_at?: string;
 }
 
 export const useCustomers = () => {
@@ -18,49 +19,50 @@ export const useCustomers = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { toast } = useToast();
 
   // Migrar datos de localStorage a Supabase
   const migrateLocalStorageData = async () => {
-    if (!user) return;
+    if (!user || !currentOrganization) return;
 
     const savedCustomers = localStorage.getItem('customers');
-    if (savedCustomers) {
-      try {
-        const localCustomers = JSON.parse(savedCustomers);
-        console.log('Migrando clientes de localStorage a Supabase:', localCustomers.length);
+    if (!savedCustomers) return;
+
+    try {
+      const localCustomers = JSON.parse(savedCustomers);
+      console.log('Migrando clientes de localStorage a Supabase:', localCustomers.length);
+      
+      for (const customer of localCustomers) {
+        const { error } = await supabase
+          .from('customers')
+          .insert({
+            name: customer.name,
+            email: customer.email,
+            phone: customer.phone,
+            address: customer.address,
+            user_id: user.id,
+            organization_id: currentOrganization.id
+          });
         
-        for (const customer of localCustomers) {
-          const { error } = await supabase
-            .from('customers')
-            .insert({
-              name: customer.name,
-              email: customer.email,
-              phone: customer.phone,
-              address: customer.address,
-              user_id: user.id
-            });
-          
-          if (error && !error.message.includes('duplicate key')) {
-            console.error('Error migrando cliente:', error);
-          }
+        if (error && !error.message.includes('duplicate key')) {
+          console.error('Error migrando cliente:', error);
         }
-        
-        // Limpiar localStorage después de migrar
-        localStorage.removeItem('customers');
-        toast({
-          title: "Migración completada",
-          description: "Clientes migrados a la base de datos",
-        });
-      } catch (error) {
-        console.error('Error durante la migración de clientes:', error);
       }
+      
+      localStorage.removeItem('customers');
+      toast({
+        title: "Migración completada",
+        description: "Clientes migrados a la base de datos",
+      });
+    } catch (error) {
+      console.error('Error durante la migración de clientes:', error);
     }
   };
 
   // Cargar clientes desde Supabase
   const loadCustomers = async () => {
-    if (!user) {
+    if (!user || !currentOrganization) {
       setLoading(false);
       return;
     }
@@ -70,16 +72,18 @@ export const useCustomers = () => {
         .from('customers')
         .select('*')
         .eq('user_id', user.id)
+        .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const formattedCustomers: Customer[] = data.map(customer => ({
+      const formattedCustomers = data.map(customer => ({
         id: customer.id,
         name: customer.name,
-        email: customer.email || undefined,
-        phone: customer.phone || undefined,
-        address: customer.address || undefined,
+        email: customer.email,
+        phone: customer.phone,
+        address: customer.address,
+        organization_id: customer.organization_id,
         created_at: customer.created_at,
       }));
 
@@ -108,18 +112,18 @@ export const useCustomers = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && currentOrganization) {
       migrateLocalStorageData().then(() => {
         loadCustomers();
       });
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, currentOrganization]);
 
-  const addCustomer = async (customerData: Omit<Customer, 'id' | 'created_at'>) => {
-    if (!user) {
-      return { error: new Error('Usuario no autenticado') };
+  const addCustomer = async (customerData: Omit<Customer, 'id' | 'created_at' | 'organization_id'>) => {
+    if (!user || !currentOrganization) {
+      return { error: new Error('Usuario no autenticado o organización no seleccionada') };
     }
 
     try {
@@ -130,7 +134,8 @@ export const useCustomers = () => {
           email: customerData.email,
           phone: customerData.phone,
           address: customerData.address,
-          user_id: user.id
+          user_id: user.id,
+          organization_id: currentOrganization.id
         })
         .select()
         .single();
@@ -143,6 +148,7 @@ export const useCustomers = () => {
         email: data.email,
         phone: data.phone,
         address: data.address,
+        organization_id: data.organization_id,
         created_at: data.created_at,
       };
 
@@ -162,12 +168,7 @@ export const useCustomers = () => {
     try {
       const { error } = await supabase
         .from('customers')
-        .update({
-          name: updates.name,
-          email: updates.email,
-          phone: updates.phone,
-          address: updates.address
-        })
+        .update(updates)
         .eq('id', id)
         .eq('user_id', user.id);
 
