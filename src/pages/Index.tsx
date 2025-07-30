@@ -23,18 +23,20 @@ const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { currentOrganization, isSuperAdmin: checkSuperAdmin } = useOrganization();
   const { toast } = useToast();
 
   useEffect(() => {
     const loadSuperAdminStatus = async () => {
       const isSuper = await checkSuperAdmin();
-      console.log('Super admin status:', isSuper);
       setIsSuperAdmin(isSuper);
     };
-    loadSuperAdminStatus();
-  }, [checkSuperAdmin]);
+    
+    if (user?.id) {
+      loadSuperAdminStatus();
+    }
+  }, [user?.id]);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
 

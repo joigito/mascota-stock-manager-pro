@@ -29,10 +29,10 @@ export const useOrganization = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       loadUserOrganizations();
     }
-  }, [user]);
+  }, [user?.id]);
 
   const loadUserOrganizations = async () => {
     try {
