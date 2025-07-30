@@ -96,14 +96,17 @@ export const useOrganization = () => {
     
     try {
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'super_admin')
-        .single();
+        .rpc('get_user_roles')
+        .returns<{ role: string }[]>();
       
-      return !error && !!data;
-    } catch {
+      if (error) {
+        console.error('Error checking super admin role:', error);
+        return false;
+      }
+      
+      return data?.some(r => r.role === 'super_admin') || false;
+    } catch (error) {
+      console.error('Exception checking super admin role:', error);
       return false;
     }
   };
