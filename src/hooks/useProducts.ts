@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from './useOrganization';
 
 export interface Product {
   id: string;
@@ -12,6 +13,7 @@ export interface Product {
   price: number;
   costPrice: number;
   description?: string;
+  organization_id: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -21,16 +23,18 @@ export const useProducts = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { toast } = useToast();
 
   // Verificar si ya existen productos para este usuario
   const checkExistingProducts = async () => {
-    if (!user) return false;
+    if (!user || !currentOrganization) return false;
     
     const { data, error } = await supabase
       .from('products')
       .select('id')
       .eq('user_id', user.id)
+      .eq('organization_id', currentOrganization.id)
       .limit(1);
     
     return !error && data && data.length > 0;
@@ -38,7 +42,7 @@ export const useProducts = () => {
 
   // Migrar datos de localStorage a Supabase (mejorado para evitar duplicados)
   const migrateLocalStorageData = async () => {
-    if (!user) return;
+    if (!user || !currentOrganization) return;
 
     const savedProducts = localStorage.getItem('products');
     if (!savedProducts) return;
@@ -67,7 +71,8 @@ export const useProducts = () => {
             price: product.price,
             cost_price: product.costPrice || (product.price * 0.7),
             description: product.description,
-            user_id: user.id
+            user_id: user.id,
+            organization_id: currentOrganization.id
           });
         
         if (error && !error.message.includes('duplicate key')) {
@@ -141,7 +146,7 @@ export const useProducts = () => {
 
   // Cargar productos desde Supabase
   const loadProducts = async () => {
-    if (!user) {
+    if (!user || !currentOrganization) {
       setLoading(false);
       return;
     }
@@ -151,6 +156,7 @@ export const useProducts = () => {
         .from('products')
         .select('*')
         .eq('user_id', user.id)
+        .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -164,6 +170,7 @@ export const useProducts = () => {
         price: Number(product.price),
         costPrice: Number(product.cost_price || 0),
         description: product.description,
+        organization_id: product.organization_id,
         created_at: product.created_at,
         updated_at: product.updated_at,
       }));
@@ -193,18 +200,18 @@ export const useProducts = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && currentOrganization) {
       migrateLocalStorageData().then(() => {
         loadProducts();
       });
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, currentOrganization]);
 
-  const addProduct = async (productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!user) {
-      return { error: new Error('Usuario no autenticado') };
+  const addProduct = async (productData: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'organization_id'>) => {
+    if (!user || !currentOrganization) {
+      return { error: new Error('Usuario no autenticado o organización no seleccionada') };
     }
 
     try {
@@ -218,7 +225,8 @@ export const useProducts = () => {
           price: productData.price,
           cost_price: productData.costPrice,
           description: productData.description,
-          user_id: user.id
+          user_id: user.id,
+          organization_id: currentOrganization.id
         })
         .select()
         .single();
@@ -240,6 +248,7 @@ export const useProducts = () => {
         price: Number(data.price),
         costPrice: Number(data.cost_price),
         description: data.description,
+        organization_id: data.organization_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
       };
