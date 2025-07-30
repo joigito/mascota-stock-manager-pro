@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Package, PawPrint, LogOut, Settings } from "lucide-react";
+import { Plus, Package, PawPrint, LogOut, Settings, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
@@ -24,7 +24,7 @@ const Index = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const { signOut, user } = useAuth();
-  const { currentOrganization, isSuperAdmin: checkSuperAdmin } = useOrganization();
+  const { currentOrganization, isSuperAdmin: checkSuperAdmin, clearOrganization } = useOrganization();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,6 +91,16 @@ const Index = () => {
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
               <OrganizationSelector />
+              <Button
+                onClick={clearOrganization}
+                variant="outline"
+                size="sm"
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Cambiar Tienda</span>
+                <span className="sm:hidden">Tienda</span>
+              </Button>
               <SyncButton />
               <Button
                 onClick={handleSignOut}

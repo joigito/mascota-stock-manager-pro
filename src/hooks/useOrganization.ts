@@ -47,6 +47,15 @@ export const useOrganization = () => {
       if (error) throw error;
 
       setOrganizations(data || []);
+      
+      // Try to restore previously selected organization
+      const savedOrgId = localStorage.getItem('selectedOrganizationId');
+      if (savedOrgId && data) {
+        const savedOrg = data.find(userOrg => userOrg.organization.id === savedOrgId);
+        if (savedOrg) {
+          setCurrentOrganization(savedOrg.organization);
+        }
+      }
     } catch (error) {
       console.error('Error loading organizations:', error);
       toast({
@@ -61,6 +70,13 @@ export const useOrganization = () => {
 
   const switchOrganization = (organization: Organization) => {
     setCurrentOrganization(organization);
+    // Persist the selection in localStorage
+    localStorage.setItem('selectedOrganizationId', organization.id);
+  };
+
+  const clearOrganization = () => {
+    setCurrentOrganization(null);
+    localStorage.removeItem('selectedOrganizationId');
   };
 
   const hasRole = (role: 'admin' | 'user') => {
@@ -97,6 +113,7 @@ export const useOrganization = () => {
     currentOrganization,
     loading,
     switchOrganization,
+    clearOrganization,
     hasRole,
     isAdmin,
     isSuperAdmin,

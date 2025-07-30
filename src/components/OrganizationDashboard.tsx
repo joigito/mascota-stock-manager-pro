@@ -48,7 +48,11 @@ export const OrganizationDashboard: React.FC = () => {
             <Card 
               key={userOrg.organization.id} 
               className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-green-200"
-              onClick={() => switchOrganization(userOrg.organization)}
+              onClick={() => {
+                switchOrganization(userOrg.organization);
+                // Force a page refresh to load the main app
+                window.location.reload();
+              }}
             >
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
