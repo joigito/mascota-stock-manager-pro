@@ -27,7 +27,12 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    checkSuperAdmin().then(setIsSuperAdmin);
+    const loadSuperAdminStatus = async () => {
+      const isSuper = await checkSuperAdmin();
+      console.log('Super admin status:', isSuper);
+      setIsSuperAdmin(isSuper);
+    };
+    loadSuperAdminStatus();
   }, [checkSuperAdmin]);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
