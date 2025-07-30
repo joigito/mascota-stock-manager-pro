@@ -14,6 +14,7 @@ import SyncButton from "@/components/SyncButton";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { OrganizationManager } from "@/components/OrganizationManager";
 import { OrganizationDashboard } from "@/components/OrganizationDashboard";
+import { SuperAdminDashboard } from "@/components/SuperAdminDashboard";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -66,6 +67,11 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+
+  // Show super admin dashboard if no organization is selected and user is super admin
+  if (!currentOrganization && isSuperAdmin) {
+    return <SuperAdminDashboard />;
   }
 
   // Show organization dashboard if no organization is selected
