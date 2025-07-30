@@ -396,6 +396,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_organization_admin: {
+        Args: { _user_id: string; _org_id: string }
+        Returns: boolean
+      }
       user_belongs_to_org: {
         Args: { _user_id: string; _org_id: string }
         Returns: boolean
