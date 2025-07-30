@@ -109,6 +109,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          slug: string
           updated_at: string
         }
         Insert: {
@@ -117,6 +118,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          slug: string
           updated_at?: string
         }
         Update: {
@@ -125,6 +127,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          slug?: string
           updated_at?: string
         }
         Relationships: []
@@ -383,6 +386,10 @@ export type Database = {
       }
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_slug: {
+        Args: { input_text: string }
         Returns: string
       }
       get_user_default_organization: {
