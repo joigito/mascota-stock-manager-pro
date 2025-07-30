@@ -25,7 +25,7 @@ interface Invitation {
 }
 
 export const InvitationManager: React.FC = () => {
-  const { currentOrganization, isAdmin, isSuperAdmin } = useOrganization();
+  const { currentOrganization, isAdmin } = useOrganization();
   const { user } = useAuth();
   const { toast } = useToast();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -33,25 +33,20 @@ export const InvitationManager: React.FC = () => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('user');
-  const [userIsSuperAdmin, setUserIsSuperAdmin] = useState(false);
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
 
   useEffect(() => {
-    const checkSuperAdminStatus = async () => {
-      const isSuper = await isSuperAdmin();
-      setUserIsSuperAdmin(isSuper);
-      console.log('InvitationManager: Super admin status:', isSuper);
+    const checkAdminAccess = async () => {
+      if (user && currentOrganization) {
+        const hasAccess = await isAdmin();
+        setHasAdminAccess(hasAccess);
+        if (hasAccess) {
+          loadInvitations();
+        }
+      }
     };
-    
-    if (user?.id) {
-      checkSuperAdminStatus();
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (currentOrganization && (isAdmin() || userIsSuperAdmin)) {
-      loadInvitations();
-    }
-  }, [currentOrganization, userIsSuperAdmin]);
+    checkAdminAccess();
+  }, [currentOrganization, user]);
 
   const loadInvitations = async () => {
     if (!currentOrganization) return;
@@ -238,7 +233,7 @@ export const InvitationManager: React.FC = () => {
     return <Badge variant="secondary">Pendiente</Badge>;
   };
 
-  if (!currentOrganization || (!isAdmin() && !userIsSuperAdmin)) {
+  if (!currentOrganization || !hasAdminAccess) {
     return (
       <Card>
         <CardContent className="text-center py-12">

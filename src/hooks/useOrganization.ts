@@ -89,7 +89,12 @@ export const useOrganization = () => {
     return userOrg?.role === role || userOrg?.role === 'admin';
   };
 
-  const isAdmin = () => hasRole('admin');
+  const isAdmin = async () => {
+    // Super admins have admin privileges everywhere
+    if (await isSuperAdmin()) return true;
+    // Otherwise check organization-specific role
+    return hasRole('admin');
+  };
 
   const isSuperAdmin = async () => {
     if (!user) {
