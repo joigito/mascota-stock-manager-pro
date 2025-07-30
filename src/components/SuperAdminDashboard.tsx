@@ -14,6 +14,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { OrganizationManager } from '@/components/OrganizationManager';
+import { QuickActionsDialog } from '@/components/QuickActionsDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
@@ -37,6 +38,8 @@ export const SuperAdminDashboard: React.FC = () => {
     totalSales: 0
   });
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<'system' | 'users' | 'backup' | null>(null);
 
   useEffect(() => {
     console.log('SuperAdminDashboard: Loading dashboard stats...');
@@ -222,15 +225,36 @@ export const SuperAdminDashboard: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => {
+                  setDialogType('system');
+                  setDialogOpen(true);
+                }}
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Configuración del Sistema
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => {
+                  setDialogType('users');
+                  setDialogOpen(true);
+                }}
+              >
                 <Users className="h-4 w-4 mr-2" />
                 Gestionar Roles de Usuario
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => {
+                  setDialogType('backup');
+                  setDialogOpen(true);
+                }}
+              >
                 <Database className="h-4 w-4 mr-2" />
                 Respaldos de Base de Datos
               </Button>
@@ -304,6 +328,13 @@ export const SuperAdminDashboard: React.FC = () => {
         {/* Organization Management */}
         <OrganizationManager />
       </main>
+
+      {/* Quick Actions Dialog */}
+      <QuickActionsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        actionType={dialogType}
+      />
     </div>
   );
 };

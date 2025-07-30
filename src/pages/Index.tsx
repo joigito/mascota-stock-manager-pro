@@ -71,8 +71,12 @@ const Index = () => {
 
   // Show super admin dashboard if no organization is selected and user is super admin
   if (!currentOrganization && isSuperAdmin) {
+    console.log('Index: Showing SuperAdminDashboard');
     return <SuperAdminDashboard />;
   }
+
+  // Log current organization for debugging
+  console.log('Index: Current organization:', currentOrganization);
 
   // Show organization dashboard if no organization is selected
   if (!currentOrganization) {
@@ -105,8 +109,8 @@ const Index = () => {
                 className="border-gray-300 hover:bg-gray-50"
               >
                 <Building2 className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Cambiar Tienda</span>
-                <span className="sm:hidden">Tienda</span>
+                <span className="hidden sm:inline">{isSuperAdmin ? 'Panel Central' : 'Cambiar Tienda'}</span>
+                <span className="sm:hidden">{isSuperAdmin ? 'Panel' : 'Tienda'}</span>
               </Button>
               <SyncButton />
               <Button

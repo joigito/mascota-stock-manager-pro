@@ -105,9 +105,15 @@ export const useOrganization = () => {
   };
 
   const switchOrganization = (organization: Organization) => {
+    console.log('switchOrganization: Setting organization:', organization);
     setCurrentOrganization(organization);
     // Persist the selection in localStorage
     localStorage.setItem('selectedOrganizationId', organization.id);
+    
+    // Force a page refresh to ensure the navigation happens properly
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   const clearOrganization = () => {
