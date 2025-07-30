@@ -92,19 +92,28 @@ export const useOrganization = () => {
   const isAdmin = () => hasRole('admin');
 
   const isSuperAdmin = async () => {
-    if (!user) return false;
+    if (!user) {
+      console.log('isSuperAdmin: No user found');
+      return false;
+    }
+    
+    console.log('isSuperAdmin: Checking for user:', user.id);
     
     try {
       const { data, error } = await supabase
         .rpc('get_user_roles')
         .returns<{ role: string }[]>();
       
+      console.log('isSuperAdmin: RPC response:', { data, error });
+      
       if (error) {
         console.error('Error checking super admin role:', error);
         return false;
       }
       
-      return data?.some(r => r.role === 'super_admin') || false;
+      const isSuper = data?.some(r => r.role === 'super_admin') || false;
+      console.log('isSuperAdmin: Final result:', isSuper);
+      return isSuper;
     } catch (error) {
       console.error('Exception checking super admin role:', error);
       return false;

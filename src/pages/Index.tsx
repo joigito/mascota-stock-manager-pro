@@ -30,13 +30,14 @@ const Index = () => {
   useEffect(() => {
     const loadSuperAdminStatus = async () => {
       const isSuper = await checkSuperAdmin();
+      console.log('Index: Super admin status:', isSuper);
       setIsSuperAdmin(isSuper);
     };
     
     if (user?.id) {
       loadSuperAdminStatus();
     }
-  }, [user?.id]);
+  }, [user?.id, checkSuperAdmin]);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
 
