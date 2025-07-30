@@ -11,6 +11,7 @@ import { Plus, Building2, Users, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { InvitationManager } from './InvitationManager';
 
 interface Organization {
   id: string;
@@ -254,6 +255,9 @@ export const OrganizationManager: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Invitation Manager */}
+      <InvitationManager />
     </div>
   );
 };

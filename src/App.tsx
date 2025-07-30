@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import { AcceptInvitation } from "./pages/AcceptInvitation";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <OrganizationProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/accept-invitation" element={<AcceptInvitation />} />
             <Route path="/" element={
               <ProtectedRoute>
                 <Index />
