@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Plus, Package, PawPrint, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Package, PawPrint, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
@@ -11,15 +11,24 @@ import SalesTab from "@/components/SalesTab";
 import ReportsTab from "@/components/ReportsTab";
 import CustomersTab from "@/components/CustomersTab";
 import SyncButton from "@/components/SyncButton";
+import { OrganizationSelector } from "@/components/OrganizationSelector";
+import { OrganizationManager } from "@/components/OrganizationManager";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOrganization } from "@/hooks/useOrganization";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const { signOut } = useAuth();
+  const { currentOrganization, isSuperAdmin: checkSuperAdmin } = useOrganization();
   const { toast } = useToast();
+
+  useEffect(() => {
+    checkSuperAdmin().then(setIsSuperAdmin);
+  }, [checkSuperAdmin]);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
 
@@ -61,11 +70,14 @@ const Index = () => {
                 <PawPrint className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">LA QUERENCIA</h1>
+                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+                  {currentOrganization?.name || 'Sistema de Inventario'}
+                </h1>
                 <p className="text-xs sm:text-base text-gray-600">Gestión de inventario para mascotas y forrajería</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
+              <OrganizationSelector />
               <SyncButton />
               <Button
                 onClick={handleSignOut}
@@ -93,7 +105,7 @@ const Index = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8 h-auto">
+          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Inicio</span>
               <span className="sm:hidden">Inicio</span>
@@ -113,6 +125,12 @@ const Index = () => {
               <span className="hidden sm:inline">Reportes</span>
               <span className="sm:hidden">Rep.</span>
             </TabsTrigger>
+            {isSuperAdmin && (
+              <TabsTrigger value="admin" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+                <span className="hidden sm:inline">Admin</span>
+                <span className="sm:hidden">Admin</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -160,6 +178,13 @@ const Index = () => {
           <TabsContent value="reports">
             <ReportsTab products={products} />
           </TabsContent>
+
+          {/* Admin Tab - Only visible for super admins */}
+          {isSuperAdmin && (
+            <TabsContent value="admin">
+              <OrganizationManager />
+            </TabsContent>
+          )}
         </Tabs>
       </main>
 

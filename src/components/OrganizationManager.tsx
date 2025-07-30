@@ -1,0 +1,259 @@
+import React, { useState } from 'react';
+import { useOrganization } from '@/hooks/useOrganization';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Building2, Users, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface Organization {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  created_by: string;
+}
+
+export const OrganizationManager: React.FC = () => {
+  const { organizations, reload } = useOrganization();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newOrgName, setNewOrgName] = useState('');
+  const [newOrgDescription, setNewOrgDescription] = useState('');
+
+  React.useEffect(() => {
+    loadAllOrganizations();
+  }, []);
+
+  const loadAllOrganizations = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAllOrganizations(data || []);
+    } catch (error) {
+      console.error('Error loading organizations:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las organizaciones",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createOrganization = async () => {
+    if (!newOrgName.trim()) {
+      toast({
+        title: "Error",
+        description: "El nombre de la organización es requerido",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Create organization
+      const { data: org, error: orgError } = await supabase
+        .from('organizations')
+        .insert({
+          name: newOrgName.trim(),
+          description: newOrgDescription.trim() || null,
+          created_by: user?.id
+        })
+        .select()
+        .single();
+
+      if (orgError) throw orgError;
+
+      // Add current user as admin of the new organization
+      const { error: memberError } = await supabase
+        .from('user_organizations')
+        .insert({
+          user_id: user?.id,
+          organization_id: org.id,
+          role: 'admin'
+        });
+
+      if (memberError) throw memberError;
+
+      toast({
+        title: "Éxito",
+        description: `Organización "${newOrgName}" creada exitosamente`,
+      });
+
+      setNewOrgName('');
+      setNewOrgDescription('');
+      setIsCreateDialogOpen(false);
+      loadAllOrganizations();
+      reload();
+    } catch (error) {
+      console.error('Error creating organization:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la organización",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteOrganization = async (orgId: string, orgName: string) => {
+    if (!confirm(`¿Estás seguro de que quieres eliminar la organización "${orgName}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase
+        .from('organizations')
+        .delete()
+        .eq('id', orgId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Éxito",
+        description: `Organización "${orgName}" eliminada exitosamente`,
+      });
+
+      loadAllOrganizations();
+      reload();
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la organización",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Gestión de Organizaciones</h2>
+          <p className="text-muted-foreground">Administra todas las tiendas de la plataforma</p>
+        </div>
+        
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Organización
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Crear Nueva Organización</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="orgName">Nombre de la Organización</Label>
+                <Input
+                  id="orgName"
+                  value={newOrgName}
+                  onChange={(e) => setNewOrgName(e.target.value)}
+                  placeholder="Ejemplo: Tienda Central"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="orgDescription">Descripción (Opcional)</Label>
+                <Textarea
+                  id="orgDescription"
+                  value={newOrgDescription}
+                  onChange={(e) => setNewOrgDescription(e.target.value)}
+                  placeholder="Descripción de la organización..."
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={createOrganization} disabled={loading}>
+                  {loading ? 'Creando...' : 'Crear'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {allOrganizations.map((org) => (
+          <Card key={org.id} className="relative">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-2">
+                  <Building2 className="w-5 h-5" />
+                  <CardTitle className="text-lg">{org.name}</CardTitle>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => deleteOrganization(org.id, org.name)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {org.description && (
+                <p className="text-sm text-muted-foreground">{org.description}</p>
+              )}
+              
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <Users className="w-4 h-4" />
+                <span>Creada: {new Date(org.created_at).toLocaleDateString()}</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary">
+                  {organizations.find(userOrg => userOrg.organization.id === org.id) ? 'Miembro' : 'No miembro'}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {allOrganizations.length === 0 && !loading && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Building2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">No hay organizaciones</h3>
+            <p className="text-muted-foreground mb-4">
+              Crea tu primera organización para comenzar
+            </p>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Crear Primera Organización
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};

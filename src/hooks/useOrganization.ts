@@ -80,6 +80,23 @@ export const useOrganization = () => {
 
   const isAdmin = () => hasRole('admin');
 
+  const isSuperAdmin = async () => {
+    if (!user) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'super_admin')
+        .single();
+      
+      return !error && !!data;
+    } catch {
+      return false;
+    }
+  };
+
   return {
     organizations,
     currentOrganization,
@@ -87,6 +104,7 @@ export const useOrganization = () => {
     switchOrganization,
     hasRole,
     isAdmin,
+    isSuperAdmin,
     reload: loadUserOrganizations
   };
 };
