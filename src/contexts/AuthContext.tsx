@@ -30,10 +30,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Handle new user registration from store URL
+        if (event === 'SIGNED_IN' && session?.user) {
+          const storeSlug = localStorage.getItem('pendingStoreAssociation');
+          if (storeSlug) {
+            setTimeout(async () => {
+              try {
+                // Get organization by slug
+                const { data: org } = await supabase
+                  .from('organizations')
+                  .select('id')
+                  .eq('slug', storeSlug)
+                  .single();
+
+                if (org) {
+                  // Check if user is already associated
+                  const { data: existing } = await supabase
+                    .from('user_organizations')
+                    .select('id')
+                    .eq('user_id', session.user.id)
+                    .eq('organization_id', org.id)
+                    .single();
+
+                  if (!existing) {
+                    // Associate user with organization as admin
+                    await supabase
+                      .from('user_organizations')
+                      .insert({
+                        user_id: session.user.id,
+                        organization_id: org.id,
+                        role: 'admin'
+                      });
+                  }
+                }
+                localStorage.removeItem('pendingStoreAssociation');
+              } catch (error) {
+                console.error('Error associating user with organization:', error);
+              }
+            }, 0);
+          }
+        }
       }
     );
 
@@ -48,7 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Get redirect URL from query params or default to root
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectPath = urlParams.get('redirect') || '/';
+    const redirectUrl = `${window.location.origin}${redirectPath}`;
     
     const { error } = await supabase.auth.signUp({
       email,

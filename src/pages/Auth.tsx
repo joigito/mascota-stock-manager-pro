@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PawPrint, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,18 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, signUp } = useAuth();
+
+  // Get redirect path and store slug from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectPath = urlParams.get('redirect');
+  const storeSlug = redirectPath?.match(/\/tienda\/(.+)/)?.[1];
+
+  // Store the slug for association after registration
+  useEffect(() => {
+    if (storeSlug) {
+      localStorage.setItem('pendingStoreAssociation', storeSlug);
+    }
+  }, [storeSlug]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +48,8 @@ const Auth = () => {
           title: "¡Bienvenido!",
           description: "Has iniciado sesión correctamente",
         });
-        navigate('/');
+        // Redirect to store if coming from store URL, otherwise to root
+        navigate(redirectPath || '/');
       }
     } catch (error) {
       toast({
@@ -65,8 +78,12 @@ const Auth = () => {
       } else {
         toast({
           title: "¡Registro exitoso!",
-          description: "Revisa tu email para confirmar tu cuenta",
+          description: storeSlug ? "¡Bienvenido a tu tienda!" : "Revisa tu email para confirmar tu cuenta",
         });
+        // Redirect immediately if registering for a store
+        if (storeSlug) {
+          navigate(redirectPath || '/');
+        }
       }
     } catch (error) {
       toast({
@@ -88,7 +105,10 @@ const Auth = () => {
           </div>
           <CardTitle className="text-2xl font-bold">LA QUERENCIA</CardTitle>
           <CardDescription>
-            Accede a tu sistema de gestión de inventario
+            {storeSlug 
+              ? `Accede a tu tienda: ${storeSlug}` 
+              : "Accede a tu sistema de gestión de inventario"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -22,7 +22,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    // Preserve the current path for redirect after login
+    const currentPath = window.location.pathname;
+    const redirectUrl = currentPath.startsWith('/tienda/') ? currentPath : '/auth';
+    return <Navigate to={`/auth?redirect=${encodeURIComponent(currentPath)}`} replace />;
   }
 
   return <>{children}</>;
