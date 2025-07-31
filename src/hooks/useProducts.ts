@@ -210,7 +210,12 @@ export const useProducts = () => {
   }, [user, currentOrganization]);
 
   const addProduct = async (productData: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'organization_id'>) => {
+    console.log('addProduct: Starting with data:', productData);
+    console.log('addProduct: User:', user?.id);
+    console.log('addProduct: Current organization:', currentOrganization?.id, currentOrganization?.name);
+    
     if (!user || !currentOrganization) {
+      console.error('addProduct: Missing user or organization');
       return { error: new Error('Usuario no autenticado o organización no seleccionada') };
     }
 
