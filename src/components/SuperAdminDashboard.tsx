@@ -313,6 +313,11 @@ export const SuperAdminDashboard: React.FC = () => {
                     onClick={() => {
                       console.log('SuperAdminDashboard: Switching to organization:', userOrg.organization);
                       switchOrganization(userOrg.organization);
+                      // Force a page refresh after a short delay to ensure state is updated
+                      setTimeout(() => {
+                        console.log('SuperAdminDashboard: Triggering page refresh/re-render');
+                        window.location.reload();
+                      }, 200);
                     }}
                   >
                     <PawPrint className="h-4 w-4 mr-2" />

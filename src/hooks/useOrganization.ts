@@ -112,8 +112,13 @@ export const useOrganization = () => {
     // Persist the selection in localStorage
     localStorage.setItem('selectedOrganizationId', organization.id);
     console.log('switchOrganization: Organization set successfully');
+    console.log('switchOrganization: New currentOrganization should be:', organization);
     // Force re-render by triggering a state change
     setLoading(false);
+    // Force a small delay to ensure state is updated
+    setTimeout(() => {
+      console.log('switchOrganization: After timeout, currentOrganization is:', currentOrganization);
+    }, 100);
   };
 
   const clearOrganization = () => {

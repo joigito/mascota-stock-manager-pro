@@ -24,6 +24,7 @@ const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
   const { signOut, user } = useAuth();
   const { currentOrganization, isSuperAdmin: checkSuperAdmin, clearOrganization, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
@@ -39,6 +40,15 @@ const Index = () => {
       loadSuperAdminStatus();
     }
   }, [user?.id, checkSuperAdmin]);
+
+  useEffect(() => {
+    console.log('Index: currentOrganization changed:', currentOrganization);
+    console.log('Index: orgLoading:', orgLoading);
+    console.log('Index: isSuperAdmin:', isSuperAdmin);
+    console.log('Index: Will show SuperAdminDashboard?', isSuperAdmin && !currentOrganization && !orgLoading);
+    console.log('Index: Will show OrganizationDashboard?', !orgLoading && !currentOrganization && !isSuperAdmin);
+    setForceUpdate(prev => prev + 1);
+  }, [currentOrganization, orgLoading, isSuperAdmin]);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
 
