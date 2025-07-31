@@ -35,19 +35,19 @@ export const useStoreSlug = (slug?: string) => {
         .from('organizations')
         .select('*')
         .eq('slug', organizationSlug)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          setError('Tienda no encontrada');
-          toast({
-            title: "Tienda no encontrada",
-            description: `No se encontró una tienda con la URL "${organizationSlug}"`,
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
+        throw error;
+      }
+
+      if (!data) {
+        setError('Tienda no encontrada');
+        toast({
+          title: "Tienda no encontrada",
+          description: `No se encontró una tienda con la URL "${organizationSlug}"`,
+          variant: "destructive",
+        });
         return;
       }
 
