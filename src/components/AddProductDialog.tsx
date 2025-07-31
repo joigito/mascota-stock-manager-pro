@@ -102,7 +102,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
         description: formData.description.trim() || undefined
       });
 
-      if (!result.error) {
+      if (result.error === null) {
         const margin = ((price - costPrice) / price * 100).toFixed(1);
         toast({
           title: "Producto agregado",
