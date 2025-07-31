@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,15 +20,19 @@ import {
 } from "@/components/ui/select";
 import { Product } from "@/hooks/useProducts";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthPrompt } from "@/components/AuthPrompt";
 
 interface AddProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddProduct: (product: Omit<Product, "id" | "created_at" | "updated_at" | "organization_id">) => Promise<{ error: any }>;
+  storeName?: string;
 }
 
-const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialogProps) => {
+const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddProductDialogProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     category: "mascotas" as "mascotas" | "forrajeria",
@@ -146,6 +149,23 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct }: AddProductDialog
     }
     return "0";
   };
+
+  // Show auth prompt if user is not authenticated
+  if (!user) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Acceso Requerido</DialogTitle>
+          </DialogHeader>
+          <AuthPrompt 
+            storeName={storeName}
+            onClose={() => onOpenChange(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

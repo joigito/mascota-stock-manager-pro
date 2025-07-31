@@ -151,6 +151,7 @@ const Store: React.FC = () => {
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onAddProduct={addProduct}
+        storeName={organization?.name}
       />
     </StoreLayout>
   );
