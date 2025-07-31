@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
+import { useCustomers } from "@/hooks/useCustomers";
 import ProductSelector from "./sales/ProductSelector";
 import SalesList from "./sales/SalesList";
+import CustomerSelector from "./sales/CustomerSelector";
 
 interface SaleItem {
   productId: string;
@@ -29,10 +31,11 @@ interface SalesTabProps {
 const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { toast } = useToast();
   const { addSale } = useSales();
+  const { customers, addCustomer } = useCustomers();
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
-  const [customerName, setCustomerName] = useState<string>("");
+  const [customerName, setCustomerName] = useState<string>("Cliente General");
 
   const addItemToSale = () => {
     if (!selectedProductId) {
@@ -198,7 +201,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
       // Limpiar formulario
       setSaleItems([]);
-      setCustomerName("");
+      setCustomerName("Cliente General");
     } catch (error) {
       toast({
         title: "Error",
@@ -221,16 +224,22 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Customer Info */}
-          <div className="space-y-2">
-            <Label htmlFor="customer">Cliente (Opcional)</Label>
-            <Input
-              id="customer"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              placeholder="Nombre del cliente..."
-            />
-          </div>
+          {/* Customer Selection */}
+          <CustomerSelector
+            customers={customers}
+            selectedCustomer={customerName}
+            onCustomerSelect={setCustomerName}
+            onQuickAddCustomer={async (name) => {
+              const result = await addCustomer({ name });
+              if (!result.error) {
+                setCustomerName(name);
+                toast({
+                  title: "Cliente agregado",
+                  description: `Se agregó el cliente ${name} exitosamente.`,
+                });
+              }
+            }}
+          />
 
           {/* Product Selection */}
           <ProductSelector
