@@ -78,12 +78,11 @@ const Auth = () => {
       } else {
         toast({
           title: "¡Registro exitoso!",
-          description: storeSlug ? "¡Bienvenido a tu tienda!" : "Revisa tu email para confirmar tu cuenta",
+          description: "Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.",
         });
-        // Redirect immediately if registering for a store
-        if (storeSlug) {
-          navigate(redirectPath || '/');
-        }
+        
+        // Don't navigate immediately, wait for email confirmation
+        // The auto-association will happen after email confirmation via AuthContext
       }
     } catch (error) {
       toast({
