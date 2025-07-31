@@ -110,11 +110,6 @@ export const useOrganization = () => {
     setCurrentOrganization(organization);
     // Persist the selection in localStorage
     localStorage.setItem('selectedOrganizationId', organization.id);
-    
-    // Force a page refresh to ensure the navigation happens properly
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
   };
 
   const clearOrganization = () => {

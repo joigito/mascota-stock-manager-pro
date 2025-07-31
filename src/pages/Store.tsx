@@ -28,9 +28,13 @@ const Store: React.FC = () => {
   useEffect(() => {
     if (organization && user) {
       console.log('Store: Auto-switching to organization:', organization);
-      switchOrganization(organization);
+      // Only switch if we're not already in the correct organization
+      const savedOrgId = localStorage.getItem('selectedOrganizationId');
+      if (savedOrgId !== organization.id) {
+        switchOrganization(organization);
+      }
     }
-  }, [organization, user, switchOrganization]);
+  }, [organization?.id, user?.id]);
 
   if (storeLoading) {
     return (
