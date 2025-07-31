@@ -107,9 +107,13 @@ export const useOrganization = () => {
 
   const switchOrganization = (organization: Organization) => {
     console.log('switchOrganization: Setting organization:', organization);
+    console.log('switchOrganization: Previous organization:', currentOrganization);
     setCurrentOrganization(organization);
     // Persist the selection in localStorage
     localStorage.setItem('selectedOrganizationId', organization.id);
+    console.log('switchOrganization: Organization set successfully');
+    // Force re-render by triggering a state change
+    setLoading(false);
   };
 
   const clearOrganization = () => {

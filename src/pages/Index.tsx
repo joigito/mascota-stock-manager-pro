@@ -25,7 +25,7 @@ const Index = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const { signOut, user } = useAuth();
-  const { currentOrganization, isSuperAdmin: checkSuperAdmin, clearOrganization } = useOrganization();
+  const { currentOrganization, isSuperAdmin: checkSuperAdmin, clearOrganization, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const Index = () => {
     }
   };
 
-  if (loading) {
+  if (loading || orgLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center">
         <div className="text-center">
@@ -77,9 +77,11 @@ const Index = () => {
 
   // Log current organization for debugging
   console.log('Index: Current organization:', currentOrganization);
+  console.log('Index: Organization loading:', orgLoading);
+  console.log('Index: Is super admin:', isSuperAdmin);
 
   // Show organization dashboard if no organization is selected
-  if (!currentOrganization) {
+  if (!currentOrganization && !orgLoading) {
     return <OrganizationDashboard />;
   }
 
