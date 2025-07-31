@@ -238,8 +238,8 @@ export const useProducts = () => {
 
       if (error) {
         // Manejar error de duplicado de manera más amigable
-        if (error.message.includes('unique_product_per_user')) {
-          return { error: new Error('Ya existe un producto con este nombre en la misma categoría') };
+        if (error.message.includes('unique_product_per_user_org')) {
+          return { error: new Error('Ya existe un producto con este nombre en la misma categoría en esta organización') };
         }
         throw error;
       }
@@ -288,8 +288,8 @@ export const useProducts = () => {
         .eq('user_id', user.id);
 
       if (error) {
-        if (error.message.includes('unique_product_per_user')) {
-          return { error: new Error('Ya existe un producto con este nombre en la misma categoría') };
+        if (error.message.includes('unique_product_per_user_org')) {
+          return { error: new Error('Ya existe un producto con este nombre en la misma categoría en esta organización') };
         }
         throw error;
       }
