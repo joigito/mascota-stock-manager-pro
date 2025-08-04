@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings, Users, Database, Activity, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { UserManagement } from '@/components/UserManagement';
 
 interface QuickActionsDialogProps {
   open: boolean;
@@ -86,6 +87,26 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
   const content = getContent();
 
   if (!content) return null;
+
+  // Special handling for user management
+  if (actionType === 'users') {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>Gestión de Roles de Usuario</span>
+            </DialogTitle>
+            <DialogDescription>
+              Administra roles globales y de organizaciones para todos los usuarios del sistema
+            </DialogDescription>
+          </DialogHeader>
+          <UserManagement />
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
