@@ -15,6 +15,7 @@ import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { OrganizationManager } from "@/components/OrganizationManager";
 import { OrganizationDashboard } from "@/components/OrganizationDashboard";
 import { SuperAdminDashboard } from "@/components/SuperAdminDashboard";
+import { OrganizationUserManagement } from "@/components/OrganizationUserManagement";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -24,22 +25,26 @@ const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isOrgAdmin, setIsOrgAdmin] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(0);
   const { signOut, user } = useAuth();
-  const { currentOrganization, isSuperAdmin: checkSuperAdmin, clearOrganization, loading: orgLoading } = useOrganization();
+  const { currentOrganization, isSuperAdmin: checkSuperAdmin, isAdmin: checkOrgAdmin, clearOrganization, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
 
   useEffect(() => {
     const loadSuperAdminStatus = async () => {
       const isSuper = await checkSuperAdmin();
+      const isOrgAdm = await checkOrgAdmin();
       console.log('Index: Super admin status:', isSuper);
+      console.log('Index: Org admin status:', isOrgAdm);
       setIsSuperAdmin(isSuper);
+      setIsOrgAdmin(isOrgAdm);
     };
     
-    if (user?.id) {
+    if (user?.id && currentOrganization) {
       loadSuperAdminStatus();
     }
-  }, [user?.id, checkSuperAdmin]);
+  }, [user?.id, currentOrganization, checkSuperAdmin, checkOrgAdmin]);
 
   useEffect(() => {
     console.log('Index: currentOrganization changed:', currentOrganization);
@@ -151,7 +156,7 @@ const Index = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
+          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Inicio</span>
               <span className="sm:hidden">Inicio</span>
@@ -171,10 +176,10 @@ const Index = () => {
               <span className="hidden sm:inline">Reportes</span>
               <span className="sm:hidden">Rep.</span>
             </TabsTrigger>
-            {isSuperAdmin && (
+            {(isSuperAdmin || isOrgAdmin) && (
               <TabsTrigger value="admin" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
-                <span className="hidden sm:inline">Admin</span>
-                <span className="sm:hidden">Admin</span>
+                <span className="hidden sm:inline">{isSuperAdmin ? 'Admin' : 'Usuarios'}</span>
+                <span className="sm:hidden">{isSuperAdmin ? 'Admin' : 'Users'}</span>
               </TabsTrigger>
             )}
           </TabsList>
@@ -225,10 +230,15 @@ const Index = () => {
             <ReportsTab products={products} />
           </TabsContent>
 
-          {/* Admin Tab - Only visible for super admins */}
+          {/* Admin Tab - For super admins and org admins */}
           {isSuperAdmin && (
             <TabsContent value="admin">
               <OrganizationManager />
+            </TabsContent>
+          )}
+          {isOrgAdmin && !isSuperAdmin && (
+            <TabsContent value="admin">
+              <OrganizationUserManagement />
             </TabsContent>
           )}
         </Tabs>

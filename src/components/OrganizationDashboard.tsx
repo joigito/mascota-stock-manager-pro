@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Building2, Users, ChevronRight } from 'lucide-react';
 import { OrganizationManager } from './OrganizationManager';
+import { OrganizationUserManagement } from './OrganizationUserManagement';
 
 export const OrganizationDashboard: React.FC = () => {
   const { organizations, switchOrganization, loading } = useOrganization();

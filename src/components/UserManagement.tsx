@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -19,10 +22,16 @@ import {
   Search,
   Settings,
   User,
-  Calendar
+  Calendar,
+  UserPlus,
+  Mail,
+  Plus
 } from 'lucide-react';
 import { UserRoleDialog } from './UserRoleDialog';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserWithRoles {
   user: {
@@ -60,9 +69,44 @@ export const UserManagement: React.FC = () => {
     removeUserFromOrganization,
   } = useUserRoles();
 
+  const { toast } = useToast();
+  const { user } = useAuth();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
   const [userDialogOpen, setUserDialogOpen] = useState(false);
+  
+  // Create User Dialog State
+  const [createUserOpen, setCreateUserOpen] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState('user');
+  const [newUserOrganization, setNewUserOrganization] = useState('');
+  
+  // Send Invitation Dialog State
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('user');
+  const [inviteOrganization, setInviteOrganization] = useState('');
+  
+  // Organizations for dropdowns
+  const [organizations, setOrganizations] = useState<Array<{id: string, name: string}>>([]);
+  
+  // Load organizations for dropdowns
+  useEffect(() => {
+    const loadOrganizations = async () => {
+      try {
+        const { data } = await supabase
+          .from('organizations')
+          .select('id, name')
+          .order('name');
+        setOrganizations(data || []);
+      } catch (error) {
+        console.error('Error loading organizations:', error);
+      }
+    };
+    loadOrganizations();
+  }, []);
 
   const filteredUsers = users.filter(userWithRoles =>
     userWithRoles.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -100,6 +144,139 @@ export const UserManagement: React.FC = () => {
     setUserDialogOpen(true);
   };
 
+  const handleCreateUser = async () => {
+    if (!newUserEmail || !newUserPassword) {
+      toast({
+        title: "Error",
+        description: "Email y contraseña son requeridos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create user account
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: newUserEmail,
+        password: newUserPassword,
+        email_confirm: true,
+      });
+
+      if (authError) throw authError;
+
+      // Assign global role if specified
+      if (newUserRole && newUserRole !== 'user') {
+        await assignGlobalRole(authData.user.id, newUserRole);
+      }
+
+      // Add to organization if specified
+      if (newUserOrganization) {
+        const { error: orgError } = await supabase
+          .from('user_organizations')
+          .insert({
+            user_id: authData.user.id,
+            organization_id: newUserOrganization,
+            role: 'user'
+          });
+
+        if (orgError) {
+          console.error('Error adding user to organization:', orgError);
+        }
+      }
+
+      toast({
+        title: "Usuario creado",
+        description: `Usuario ${newUserEmail} creado exitosamente`,
+      });
+
+      setNewUserEmail('');
+      setNewUserPassword('');
+      setNewUserRole('user');
+      setNewUserOrganization('');
+      setCreateUserOpen(false);
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo crear el usuario",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSendInvitation = async () => {
+    if (!inviteEmail || !inviteOrganization) {
+      toast({
+        title: "Error",
+        description: "Email y organización son requeridos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create invitation
+      const { data: invitation, error: inviteError } = await supabase
+        .from('organization_invitations')
+        .insert({
+          organization_id: inviteOrganization,
+          email: inviteEmail.trim().toLowerCase(),
+          role: inviteRole,
+          created_by: user?.id
+        })
+        .select()
+        .single();
+
+      if (inviteError) throw inviteError;
+
+      // Send email via edge function
+      const orgName = organizations.find(o => o.id === inviteOrganization)?.name;
+      const { error: emailError } = await supabase.functions.invoke('send-invitation', {
+        body: {
+          invitation_id: invitation.id,
+          email: inviteEmail.trim().toLowerCase(),
+          organization_name: orgName,
+          role: inviteRole
+        }
+      });
+
+      if (emailError) {
+        console.error('Error sending email:', emailError);
+        toast({
+          title: "Invitación creada",
+          description: "La invitación se creó pero hubo un problema enviando el email",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Invitación enviada",
+          description: `Se envió una invitación a ${inviteEmail}`,
+        });
+      }
+
+      setInviteEmail('');
+      setInviteRole('user');
+      setInviteOrganization('');
+      setInviteDialogOpen(false);
+    } catch (error: any) {
+      console.error('Error sending invitation:', error);
+      
+      if (error.code === '23505') {
+        toast({
+          title: "Error",
+          description: "Ya existe una invitación pendiente para este email",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "No se pudo enviar la invitación",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -124,8 +301,8 @@ export const UserManagement: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Search */}
-          <div className="flex items-center space-x-2 mb-6">
+          {/* Search and Actions */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -134,6 +311,143 @@ export const UserManagement: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
               />
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex space-x-2">
+              <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Crear Usuario
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="newUserEmail">Email</Label>
+                      <Input
+                        id="newUserEmail"
+                        type="email"
+                        value={newUserEmail}
+                        onChange={(e) => setNewUserEmail(e.target.value)}
+                        placeholder="usuario@ejemplo.com"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newUserPassword">Contraseña Temporal</Label>
+                      <Input
+                        id="newUserPassword"
+                        type="password"
+                        value={newUserPassword}
+                        onChange={(e) => setNewUserPassword(e.target.value)}
+                        placeholder="Contraseña temporal"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newUserRole">Rol Global</Label>
+                      <Select value={newUserRole} onValueChange={setNewUserRole}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Usuario</SelectItem>
+                          <SelectItem value="admin">Administrador</SelectItem>
+                          <SelectItem value="super_admin">Super Administrador</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newUserOrganization">Organización (Opcional)</Label>
+                      <Select value={newUserOrganization} onValueChange={setNewUserOrganization}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar organización" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Sin organización</SelectItem>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setCreateUserOpen(false)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleCreateUser}>
+                        Crear Usuario
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Enviar Invitación
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Enviar Invitación</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="inviteEmail">Email</Label>
+                      <Input
+                        id="inviteEmail"
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder="usuario@ejemplo.com"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="inviteOrganization">Organización</Label>
+                      <Select value={inviteOrganization} onValueChange={setInviteOrganization}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar organización" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="inviteRole">Rol en la Organización</Label>
+                      <Select value={inviteRole} onValueChange={setInviteRole}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Usuario</SelectItem>
+                          <SelectItem value="admin">Administrador</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleSendInvitation}>
+                        Enviar Invitación
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
