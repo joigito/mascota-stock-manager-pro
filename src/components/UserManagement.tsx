@@ -63,6 +63,7 @@ export const UserManagement: React.FC = () => {
   const {
     users,
     loading,
+    loadUsers,
     assignGlobalRole,
     removeGlobalRole,
     updateOrganizationRole,
@@ -155,33 +156,20 @@ export const UserManagement: React.FC = () => {
     }
 
     try {
-      // Create user account
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: newUserEmail,
-        password: newUserPassword,
-        email_confirm: true,
+      // Call the edge function to create user
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: newUserEmail,
+          password: newUserPassword,
+          role: newUserRole,
+          organizationId: newUserOrganization
+        }
       });
 
-      if (authError) throw authError;
+      if (error) throw error;
 
-      // Assign global role if specified
-      if (newUserRole && newUserRole !== 'user') {
-        await assignGlobalRole(authData.user.id, newUserRole);
-      }
-
-      // Add to organization if specified
-      if (newUserOrganization && newUserOrganization !== 'none') {
-        const { error: orgError } = await supabase
-          .from('user_organizations')
-          .insert({
-            user_id: authData.user.id,
-            organization_id: newUserOrganization,
-            role: 'user'
-          });
-
-        if (orgError) {
-          console.error('Error adding user to organization:', orgError);
-        }
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
@@ -194,6 +182,9 @@ export const UserManagement: React.FC = () => {
       setNewUserRole('user');
       setNewUserOrganization('');
       setCreateUserOpen(false);
+      
+      // Reload users list
+      await loadUsers();
     } catch (error: any) {
       console.error('Error creating user:', error);
       toast({
