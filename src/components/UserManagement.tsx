@@ -170,7 +170,7 @@ export const UserManagement: React.FC = () => {
       }
 
       // Add to organization if specified
-      if (newUserOrganization) {
+      if (newUserOrganization && newUserOrganization !== 'none') {
         const { error: orgError } = await supabase
           .from('user_organizations')
           .insert({
@@ -367,7 +367,7 @@ export const UserManagement: React.FC = () => {
                           <SelectValue placeholder="Seleccionar organización" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Sin organización</SelectItem>
+                          <SelectItem value="none">Sin organización</SelectItem>
                           {organizations.map((org) => (
                             <SelectItem key={org.id} value={org.id}>
                               {org.name}
