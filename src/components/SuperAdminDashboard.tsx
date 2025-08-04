@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Building2, 
   Users, 
@@ -11,9 +12,11 @@ import {
   Database,
   Activity,
   PawPrint,
-  LogOut
+  LogOut,
+  UserCog
 } from 'lucide-react';
 import { OrganizationManager } from '@/components/OrganizationManager';
+import { UserManagement } from '@/components/UserManagement';
 import { QuickActionsDialog } from '@/components/QuickActionsDialog';
 import { TransferOwnershipDialog } from '@/components/TransferOwnershipDialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -353,8 +356,27 @@ export const SuperAdminDashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Organization Management */}
-        <OrganizationManager />
+        {/* Unified Management Tabs */}
+        <Tabs defaultValue="organizations" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="organizations" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Organizaciones
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <UserCog className="h-4 w-4" />
+              Usuarios y Roles
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="organizations" className="mt-6">
+            <OrganizationManager />
+          </TabsContent>
+          
+          <TabsContent value="users" className="mt-6">
+            <UserManagement />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Quick Actions Dialog */}
