@@ -77,6 +77,9 @@ serve(async (req) => {
     })
 
     if (createError) {
+      if (createError.message?.includes('email_exists') || createError.message?.includes('already been registered')) {
+        throw new Error(`Ya existe un usuario con el email: ${email}`)
+      }
       throw createError
     }
 
