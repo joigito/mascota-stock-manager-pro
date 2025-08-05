@@ -41,6 +41,9 @@ export const useOrganization = () => {
       const isSuper = await isSuperAdmin();
       console.log('loadUserOrganizations: Is super admin:', isSuper);
       
+      let allOrgsData: any[] = [];
+      let userOrgsData: UserOrganization[] = [];
+
       if (isSuper) {
         // Super admins can see all organizations
         const { data: allOrgs, error: orgsError } = await supabase
@@ -49,18 +52,21 @@ export const useOrganization = () => {
 
         if (orgsError) throw orgsError;
 
+        allOrgsData = allOrgs || [];
+
         // Transform to match the expected format
-        const transformedData = allOrgs?.map(org => ({
+        const transformedData = allOrgsData.map(org => ({
           id: `super_admin_${org.id}`,
           user_id: user?.id || '',
           organization_id: org.id,
           role: 'super_admin',
           created_at: new Date().toISOString(),
           organization: org
-        })) || [];
+        }));
 
         console.log('loadUserOrganizations: Super admin organizations:', transformedData);
         setOrganizations(transformedData);
+        userOrgsData = transformedData;
       } else {
         // Regular users see only their organizations
         const { data, error } = await supabase
@@ -73,24 +79,31 @@ export const useOrganization = () => {
 
         if (error) throw error;
 
-        console.log('loadUserOrganizations: Regular user organizations:', data);
-        setOrganizations(data || []);
+        userOrgsData = data || [];
+        console.log('loadUserOrganizations: Regular user organizations:', userOrgsData);
+        setOrganizations(userOrgsData);
       }
       
-      // Try to restore previously selected organization
-      const savedOrgId = localStorage.getItem('selectedOrganizationId');
-      if (savedOrgId) {
-        const allData = isSuper ? 
-          (await supabase.from('organizations').select('*')).data || [] :
-          organizations.map(uo => uo.organization);
-        
-        const savedOrg = allData.find(org => 
-          isSuper ? org.id === savedOrgId : org.id === savedOrgId
-        );
-        
-        if (savedOrg) {
-          const orgToSet = isSuper ? savedOrg : savedOrg;
-          setCurrentOrganization(orgToSet);
+      console.log('loadUserOrganizations: Organizations count:', userOrgsData.length);
+      console.log('loadUserOrganizations: Is super admin:', isSuper);
+      
+      // Auto-select organization if user has exactly one and is not super admin
+      if (!isSuper && userOrgsData.length === 1) {
+        const singleOrg = userOrgsData[0].organization;
+        console.log('loadUserOrganizations: Auto-selecting single organization:', singleOrg.name);
+        setCurrentOrganization(singleOrg);
+        localStorage.setItem('selectedOrganizationId', singleOrg.id);
+      } else {
+        // Try to restore previously selected organization for multi-org users
+        const savedOrgId = localStorage.getItem('selectedOrganizationId');
+        if (savedOrgId) {
+          const orgData = isSuper ? allOrgsData : userOrgsData.map(uo => uo.organization);
+          const savedOrg = orgData.find(org => org.id === savedOrgId);
+          
+          if (savedOrg) {
+            console.log('loadUserOrganizations: Restoring saved organization:', savedOrg.name);
+            setCurrentOrganization(savedOrg);
+          }
         }
       }
     } catch (error) {
