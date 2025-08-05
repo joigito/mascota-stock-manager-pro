@@ -59,14 +59,32 @@ serve(async (req) => {
       .single()
 
     if (rolesError || !userRoles) {
-      throw new Error('Only super admins can create users')
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Solo los super administradores pueden crear usuarios' 
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 403,
+        },
+      )
     }
 
     // Get request body
     const { email, password, role, organizationId } = await req.json()
 
     if (!email || !password) {
-      throw new Error('Email and password are required')
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Email y contraseña son requeridos' 
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        },
+      )
     }
 
     // Create the user using admin client
@@ -77,10 +95,25 @@ serve(async (req) => {
     })
 
     if (createError) {
+      console.error('Error creating user:', createError)
+      let errorMessage = 'Error al crear el usuario'
+      
       if (createError.message?.includes('email_exists') || createError.message?.includes('already been registered')) {
-        throw new Error(`Ya existe un usuario con el email: ${email}`)
+        errorMessage = `Ya existe un usuario con el email: ${email}`
+      } else if (createError.message) {
+        errorMessage = createError.message
       }
-      throw createError
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: errorMessage 
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        },
+      )
     }
 
     console.log('User created:', newUser.user.id)

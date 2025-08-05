@@ -166,12 +166,29 @@ export const UserManagement: React.FC = () => {
         }
       });
 
-      if (error) throw error;
-
-      if (data?.error) {
-        throw new Error(data.error);
+      // Handle Supabase function errors (like 400, 403, etc.)
+      if (error) {
+        console.error('Edge function error:', error);
+        toast({
+          title: "Error",
+          description: error.message || "No se pudo crear el usuario",
+          variant: "destructive",
+        });
+        return;
       }
 
+      // Handle application-level errors returned in the response data
+      if (data && !data.success && data.error) {
+        console.error('Application error:', data.error);
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Success case
       toast({
         title: "Usuario creado",
         description: `Usuario ${newUserEmail} creado exitosamente`,
@@ -186,10 +203,10 @@ export const UserManagement: React.FC = () => {
       // Reload users list
       await loadUsers();
     } catch (error: any) {
-      console.error('Error creating user:', error);
+      console.error('Unexpected error creating user:', error);
       toast({
         title: "Error",
-        description: error.message || "No se pudo crear el usuario",
+        description: "Error inesperado al crear el usuario",
         variant: "destructive",
       });
     }
