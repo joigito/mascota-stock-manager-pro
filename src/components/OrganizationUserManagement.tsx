@@ -152,7 +152,19 @@ export const OrganizationUserManagement: React.FC = () => {
     }
 
     try {
-      // Create invitation
+      // Check if there's an existing invitation and delete it first
+      const { error: deleteError } = await supabase
+        .from('organization_invitations')
+        .delete()
+        .eq('organization_id', currentOrganization.id)
+        .eq('email', inviteEmail.trim().toLowerCase())
+        .eq('used_at', null); // Only delete unused invitations
+
+      if (deleteError && deleteError.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.warn('Error deleting existing invitation:', deleteError);
+      }
+
+      // Create new invitation
       const { data: invitation, error: inviteError } = await supabase
         .from('organization_invitations')
         .insert({
@@ -197,19 +209,11 @@ export const OrganizationUserManagement: React.FC = () => {
     } catch (error: any) {
       console.error('Error sending invitation:', error);
       
-      if (error.code === '23505') {
-        toast({
-          title: "Error",
-          description: "Ya existe una invitación pendiente para este email",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "No se pudo enviar la invitación",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: "No se pudo enviar la invitación",
+        variant: "destructive",
+      });
     }
   };
 
