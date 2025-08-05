@@ -402,6 +402,15 @@ export type Database = {
           role: Database["public"]["Enums"]["app_role"]
         }[]
       }
+      get_users_with_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          email: string
+          created_at: string
+          last_sign_in_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string

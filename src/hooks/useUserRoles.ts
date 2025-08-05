@@ -44,6 +44,12 @@ export const useUserRoles = () => {
     try {
       setLoading(true);
 
+      // Get real user data using secure function
+      const { data: realUsersData, error: usersError } = await supabase
+        .rpc('get_users_with_roles');
+
+      if (usersError) throw usersError;
+
       // Get all users who have organization memberships
       const { data: userOrgData, error: userOrgError } = await supabase
         .from('user_organizations')
@@ -65,28 +71,27 @@ export const useUserRoles = () => {
 
       if (userRolesError) throw userRolesError;
 
-      // Get unique user IDs
-      const userIds = Array.from(new Set(userOrgData?.map(uo => uo.user_id) || []));
-
-      // Get user details from auth.users via a function call
+      // Create users with roles using real user data
       const usersWithRoles: UserWithRoles[] = [];
 
-      for (const userId of userIds) {
-        // Create a mock user object since we can't access auth.users directly
-        const mockUser: User = {
-          id: userId,
-          email: `user-${userId.slice(0, 8)}@example.com`, // We'll need to get this differently
-          created_at: new Date().toISOString(),
-        };
+      if (realUsersData) {
+        for (const userData of realUsersData) {
+          const realUser: User = {
+            id: userData.user_id,
+            email: userData.email,
+            created_at: userData.created_at,
+            last_sign_in_at: userData.last_sign_in_at,
+          };
 
-        const globalRoles = userRolesData?.filter(ur => ur.user_id === userId) || [];
-        const organizationRoles = userOrgData?.filter(uo => uo.user_id === userId) || [];
+          const globalRoles = userRolesData?.filter(ur => ur.user_id === userData.user_id) || [];
+          const organizationRoles = userOrgData?.filter(uo => uo.user_id === userData.user_id) || [];
 
-        usersWithRoles.push({
-          user: mockUser,
-          globalRoles,
-          organizationRoles
-        });
+          usersWithRoles.push({
+            user: realUser,
+            globalRoles,
+            organizationRoles
+          });
+        }
       }
 
       setUsers(usersWithRoles);
