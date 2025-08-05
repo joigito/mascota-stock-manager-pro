@@ -93,7 +93,6 @@ export const useSales = () => {
           *,
           sale_items (*)
         `)
-        .eq('user_id', user.id)
         .eq('organization_id', currentOrganization.id)
         .order('date', { ascending: false });
 

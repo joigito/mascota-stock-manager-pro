@@ -71,7 +71,6 @@ export const useCustomers = () => {
       const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .eq('user_id', user.id)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
@@ -169,8 +168,7 @@ export const useCustomers = () => {
       const { error } = await supabase
         .from('customers')
         .update(updates)
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
       if (error) throw error;
 
@@ -197,8 +195,7 @@ export const useCustomers = () => {
       const { error } = await supabase
         .from('customers')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
       if (error) throw error;
 

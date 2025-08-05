@@ -26,14 +26,13 @@ export const useProducts = () => {
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
 
-  // Verificar si ya existen productos para este usuario
+  // Verificar si ya existen productos para esta organización
   const checkExistingProducts = async () => {
     if (!user || !currentOrganization) return false;
     
     const { data, error } = await supabase
       .from('products')
       .select('id')
-      .eq('user_id', user.id)
       .eq('organization_id', currentOrganization.id)
       .limit(1);
     
@@ -155,7 +154,6 @@ export const useProducts = () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('user_id', user.id)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
@@ -284,8 +282,7 @@ export const useProducts = () => {
       const { error } = await supabase
         .from('products')
         .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
       if (error) {
         if (error.message.includes('unique_product_per_user_org')) {
@@ -317,8 +314,7 @@ export const useProducts = () => {
       const { error } = await supabase
         .from('products')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
       if (error) throw error;
 
