@@ -146,11 +146,13 @@ export const useProducts = () => {
   // Cargar productos desde Supabase
   const loadProducts = async () => {
     if (!user || !currentOrganization) {
+      console.log('useProducts: loadProducts called without user or organization');
       setLoading(false);
       return;
     }
 
     try {
+      console.log('useProducts: Loading products for organization:', currentOrganization.id);
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -158,6 +160,8 @@ export const useProducts = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      console.log('useProducts: Loaded products count:', data?.length || 0);
 
       const formattedProducts = data.map(product => ({
         id: product.id,
@@ -174,8 +178,9 @@ export const useProducts = () => {
       }));
 
       setProducts(formattedProducts);
+      console.log('useProducts: Products set successfully');
     } catch (error) {
-      console.error('Error cargando productos:', error);
+      console.error('useProducts: Error loading products:', error);
       toast({
         title: "Error",
         description: "No se pudieron cargar los productos",
@@ -198,11 +203,18 @@ export const useProducts = () => {
   };
 
   useEffect(() => {
+    console.log('useProducts: Effect triggered with:', { user: user?.id, currentOrganization: currentOrganization?.id });
+    
     if (user && currentOrganization) {
-      migrateLocalStorageData().then(() => {
-        loadProducts();
-      });
+      console.log('useProducts: Starting data loading...');
+      migrateLocalStorageData()
+        .then(() => loadProducts())
+        .catch(error => {
+          console.error('useProducts: Error in data loading:', error);
+          setLoading(false);
+        });
     } else {
+      console.log('useProducts: Missing dependencies - user or organization not ready');
       setLoading(false);
     }
   }, [user, currentOrganization]);

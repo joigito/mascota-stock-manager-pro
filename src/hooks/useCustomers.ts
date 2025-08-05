@@ -111,11 +111,18 @@ export const useCustomers = () => {
   };
 
   useEffect(() => {
+    console.log('useCustomers: Effect triggered with:', { user: user?.id, currentOrganization: currentOrganization?.id });
+    
     if (user && currentOrganization) {
-      migrateLocalStorageData().then(() => {
-        loadCustomers();
-      });
+      console.log('useCustomers: Starting data loading...');
+      migrateLocalStorageData()
+        .then(() => loadCustomers())
+        .catch(error => {
+          console.error('useCustomers: Error in data loading:', error);
+          setLoading(false);
+        });
     } else {
+      console.log('useCustomers: Missing dependencies - user or organization not ready');
       setLoading(false);
     }
   }, [user, currentOrganization]);

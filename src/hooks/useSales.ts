@@ -142,11 +142,18 @@ export const useSales = () => {
   };
 
   useEffect(() => {
+    console.log('useSales: Effect triggered with:', { user: user?.id, currentOrganization: currentOrganization?.id });
+    
     if (user && currentOrganization) {
-      migrateLocalStorageData().then(() => {
-        loadSales();
-      });
+      console.log('useSales: Starting data loading...');
+      migrateLocalStorageData()
+        .then(() => loadSales())
+        .catch(error => {
+          console.error('useSales: Error in data loading:', error);
+          setLoading(false);
+        });
     } else {
+      console.log('useSales: Missing dependencies - user or organization not ready');
       setLoading(false);
     }
   }, [user, currentOrganization]);
