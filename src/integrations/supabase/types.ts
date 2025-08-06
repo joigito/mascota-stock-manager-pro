@@ -312,6 +312,47 @@ export type Database = {
           },
         ]
       }
+      system_configurations: {
+        Row: {
+          config_key: string
+          config_type: string
+          config_value: Json
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          config_key: string
+          config_type: string
+          config_value: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          config_key?: string
+          config_type?: string
+          config_value?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_configurations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_organizations: {
         Row: {
           created_at: string
@@ -429,7 +470,19 @@ export type Database = {
     }
     Enums: {
       app_role: "super_admin" | "admin" | "user"
-      product_category: "mascotas" | "forrajeria"
+      product_category:
+        | "mascotas"
+        | "forrajeria"
+        | "electronica"
+        | "ropa"
+        | "hogar"
+        | "alimentacion"
+        | "salud"
+        | "deportes"
+        | "libros"
+        | "vehiculos"
+        | "servicios"
+        | "otros"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -558,7 +611,20 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["super_admin", "admin", "user"],
-      product_category: ["mascotas", "forrajeria"],
+      product_category: [
+        "mascotas",
+        "forrajeria",
+        "electronica",
+        "ropa",
+        "hogar",
+        "alimentacion",
+        "salud",
+        "deportes",
+        "libros",
+        "vehiculos",
+        "servicios",
+        "otros",
+      ],
     },
   },
 } as const

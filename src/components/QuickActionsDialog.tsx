@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Settings, Users, Database, Activity, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { UserManagement } from '@/components/UserManagement';
+import { SystemConfigurationDialog } from '@/components/SystemConfigurationDialog';
 
 interface QuickActionsDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [systemConfigOpen, setSystemConfigOpen] = useState(false);
 
   const handleAction = async (action: string) => {
     setLoading(true);
@@ -105,6 +107,94 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
           <UserManagement />
         </DialogContent>
       </Dialog>
+    );
+  }
+
+  // Special handling for system configuration
+  if (actionType === 'system') {
+    return (
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <Settings className="h-6 w-6" />
+                <span>Configuración del Sistema</span>
+              </DialogTitle>
+              <DialogDescription>
+                Administra los parámetros globales para adaptar el sistema a cualquier rubro
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Settings className="h-5 w-5 text-blue-500" />
+                    <span>Parámetros Globales de Stock</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Configura categorías, unidades de medida, stock mínimo y márgenes por categoría
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={() => {
+                      setSystemConfigOpen(true);
+                      onOpenChange(false);
+                    }}
+                    className="w-full"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Abrir Configuración Avanzada
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Haz que tu sistema se adapte a cualquier rubro: forrajería, electrónica, ropa, servicios y más.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <AlertCircle className="h-5 w-5 text-amber-500" />
+                    <span>Próximas Funcionalidades</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Estas funciones estarán disponibles en futuras versiones
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3">
+                    {content.actions.slice(1).map((action, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        className="justify-start h-auto p-4"
+                        onClick={() => handleAction(action.action)}
+                        disabled={loading}
+                      >
+                        <Activity className="h-4 w-4 mr-3" />
+                        <div className="text-left">
+                          <div className="font-medium">{action.label}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Próximamente disponible
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </DialogContent>
+        </Dialog>
+        
+        <SystemConfigurationDialog 
+          open={systemConfigOpen} 
+          onOpenChange={setSystemConfigOpen} 
+        />
+      </>
     );
   }
 
