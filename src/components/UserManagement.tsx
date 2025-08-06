@@ -24,7 +24,6 @@ import {
   User,
   Calendar,
   UserPlus,
-  Mail,
   Plus
 } from 'lucide-react';
 import { UserRoleDialog } from './UserRoleDialog';
@@ -84,11 +83,6 @@ export const UserManagement: React.FC = () => {
   const [newUserRole, setNewUserRole] = useState('user');
   const [newUserOrganization, setNewUserOrganization] = useState('');
   
-  // Send Invitation Dialog State
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('user');
-  const [inviteOrganization, setInviteOrganization] = useState('');
   
   // Organizations for dropdowns
   const [organizations, setOrganizations] = useState<Array<{id: string, name: string}>>([]);
@@ -212,82 +206,6 @@ export const UserManagement: React.FC = () => {
     }
   };
 
-  const handleSendInvitation = async () => {
-    if (!inviteEmail || !inviteOrganization) {
-      toast({
-        title: "Error",
-        description: "Email y organización son requeridos",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Check if there's an existing invitation and delete it first
-      const { error: deleteError } = await supabase
-        .from('organization_invitations')
-        .delete()
-        .eq('organization_id', inviteOrganization)
-        .eq('email', inviteEmail.trim().toLowerCase())
-        .eq('used_at', null); // Only delete unused invitations
-
-      if (deleteError && deleteError.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.warn('Error deleting existing invitation:', deleteError);
-      }
-
-      // Create new invitation
-      const { data: invitation, error: inviteError } = await supabase
-        .from('organization_invitations')
-        .insert({
-          organization_id: inviteOrganization,
-          email: inviteEmail.trim().toLowerCase(),
-          role: inviteRole,
-          created_by: user?.id
-        })
-        .select()
-        .single();
-
-      if (inviteError) throw inviteError;
-
-      // Send email via edge function
-      const orgName = organizations.find(o => o.id === inviteOrganization)?.name;
-      const { error: emailError } = await supabase.functions.invoke('send-invitation', {
-        body: {
-          invitation_id: invitation.id,
-          email: inviteEmail.trim().toLowerCase(),
-          organization_name: orgName,
-          role: inviteRole
-        }
-      });
-
-      if (emailError) {
-        console.error('Error sending email:', emailError);
-        toast({
-          title: "Invitación creada",
-          description: "La invitación se creó pero hubo un problema enviando el email",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Invitación enviada",
-          description: `Se envió una invitación a ${inviteEmail}`,
-        });
-      }
-
-      setInviteEmail('');
-      setInviteRole('user');
-      setInviteOrganization('');
-      setInviteDialogOpen(false);
-    } catch (error: any) {
-      console.error('Error sending invitation:', error);
-      
-      toast({
-        title: "Error",
-        description: "No se pudo enviar la invitación",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -400,66 +318,6 @@ export const UserManagement: React.FC = () => {
                 </DialogContent>
               </Dialog>
 
-              <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Mail className="w-4 h-4 mr-2" />
-                    Enviar Invitación
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Enviar Invitación</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="inviteEmail">Email</Label>
-                      <Input
-                        id="inviteEmail"
-                        type="email"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                        placeholder="usuario@ejemplo.com"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="inviteOrganization">Organización</Label>
-                      <Select value={inviteOrganization} onValueChange={setInviteOrganization}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar organización" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {organizations.map((org) => (
-                            <SelectItem key={org.id} value={org.id}>
-                              {org.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="inviteRole">Rol en la Organización</Label>
-                      <Select value={inviteRole} onValueChange={setInviteRole}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">Usuario</SelectItem>
-                          <SelectItem value="admin">Administrador</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleSendInvitation}>
-                        Enviar Invitación
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </div>
           </div>
 

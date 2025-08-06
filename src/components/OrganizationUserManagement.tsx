@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { 
+import {
   Users, 
   Shield, 
   Building2, 
@@ -22,7 +22,6 @@ import {
   Settings,
   User,
   Calendar,
-  Mail,
   UserMinus,
   Trash2
 } from 'lucide-react';
@@ -41,14 +40,6 @@ interface OrganizationUser {
   user_created_at?: string;
 }
 
-interface Invitation {
-  id: string;
-  email: string;
-  role: string;
-  expires_at: string;
-  used_at: string | null;
-  created_at: string;
-}
 
 export const OrganizationUserManagement: React.FC = () => {
   const { currentOrganization, isAdmin } = useOrganization();
@@ -56,14 +47,13 @@ export const OrganizationUserManagement: React.FC = () => {
   const { toast } = useToast();
   
   const [users, setUsers] = useState<OrganizationUser[]>([]);
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Invitation Dialog State
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('user');
+  // Add User Dialog State
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
+  const [addUserEmail, setAddUserEmail] = useState('');
+  const [addUserRole, setAddUserRole] = useState('user');
   
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
 
@@ -100,34 +90,25 @@ export const OrganizationUserManagement: React.FC = () => {
 
       if (usersError) throw usersError;
 
-      // Get user emails by querying auth metadata (we'll need to get this from user_roles or handle differently)
-      // For now, let's get the users and their emails from a different approach
-      const userIds = orgUsers?.map(u => u.user_id) || [];
-      
-      // Since we can't directly query auth.users, we'll need to get emails differently
-      // Let's get users with their basic info
-      const usersWithEmails = await Promise.all(
-        (orgUsers || []).map(async (orgUser) => {
-          // We'll need to find a way to get user email - for now use a placeholder
-          return {
-            ...orgUser,
-            user_email: `user-${orgUser.user_id.slice(0, 8)}@example.com`, // Placeholder
-            user_created_at: orgUser.created_at
-          };
-        })
-      );
+      // Get user emails using the secure function
+      const { data: allUsersData, error: allUsersError } = await supabase
+        .rpc('get_users_with_roles');
+
+      if (allUsersError) {
+        console.warn('Error getting user emails:', allUsersError);
+      }
+
+      // Map organization users with their email data
+      const usersWithEmails = (orgUsers || []).map((orgUser) => {
+        const userData = allUsersData?.find(u => u.user_id === orgUser.user_id);
+        return {
+          ...orgUser,
+          user_email: userData?.email || `user-${orgUser.user_id.slice(0, 8)}@example.com`,
+          user_created_at: userData?.created_at || orgUser.created_at
+        };
+      });
 
       setUsers(usersWithEmails);
-
-      // Load invitations
-      const { data: inviteData, error: inviteError } = await supabase
-        .from('organization_invitations')
-        .select('*')
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false });
-
-      if (inviteError) throw inviteError;
-      setInvitations(inviteData || []);
 
     } catch (error) {
       console.error('Error loading data:', error);
@@ -141,8 +122,8 @@ export const OrganizationUserManagement: React.FC = () => {
     }
   };
 
-  const handleSendInvitation = async () => {
-    if (!inviteEmail || !currentOrganization) {
+  const handleAddUser = async () => {
+    if (!addUserEmail || !currentOrganization) {
       toast({
         title: "Error",
         description: "El email es requerido",
@@ -152,66 +133,66 @@ export const OrganizationUserManagement: React.FC = () => {
     }
 
     try {
-      // Check if there's an existing invitation and delete it first
-      const { error: deleteError } = await supabase
-        .from('organization_invitations')
-        .delete()
-        .eq('organization_id', currentOrganization.id)
-        .eq('email', inviteEmail.trim().toLowerCase())
-        .eq('used_at', null); // Only delete unused invitations
+      // Get user by email using the secure function
+      const { data: usersData, error: userError } = await supabase
+        .rpc('get_users_with_roles');
 
-      if (deleteError && deleteError.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.warn('Error deleting existing invitation:', deleteError);
+      if (userError) throw userError;
+
+      const existingUser = usersData?.find(u => u.email.toLowerCase() === addUserEmail.trim().toLowerCase());
+      
+      if (!existingUser) {
+        toast({
+          title: "Error",
+          description: "No se encontró un usuario con ese email",
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Create new invitation
-      const { data: invitation, error: inviteError } = await supabase
-        .from('organization_invitations')
-        .insert({
-          organization_id: currentOrganization.id,
-          email: inviteEmail.trim().toLowerCase(),
-          role: inviteRole,
-          created_by: user?.id
-        })
-        .select()
+      // Check if user is already in the organization
+      const { data: existingMembership } = await supabase
+        .from('user_organizations')
+        .select('id')
+        .eq('user_id', existingUser.user_id)
+        .eq('organization_id', currentOrganization.id)
         .single();
 
-      if (inviteError) throw inviteError;
-
-      // Send email via edge function
-      const { error: emailError } = await supabase.functions.invoke('send-invitation', {
-        body: {
-          invitation_id: invitation.id,
-          email: inviteEmail.trim().toLowerCase(),
-          organization_name: currentOrganization.name,
-          role: inviteRole
-        }
-      });
-
-      if (emailError) {
-        console.error('Error sending email:', emailError);
+      if (existingMembership) {
         toast({
-          title: "Invitación creada",
-          description: "La invitación se creó pero hubo un problema enviando el email",
-          variant: "default",
+          title: "Error",
+          description: "El usuario ya pertenece a esta organización",
+          variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Invitación enviada",
-          description: `Se envió una invitación a ${inviteEmail}`,
-        });
+        return;
       }
 
-      setInviteEmail('');
-      setInviteRole('user');
-      setInviteDialogOpen(false);
+      // Add user to organization
+      const { error: insertError } = await supabase
+        .from('user_organizations')
+        .insert({
+          user_id: existingUser.user_id,
+          organization_id: currentOrganization.id,
+          role: addUserRole
+        });
+
+      if (insertError) throw insertError;
+
+      toast({
+        title: "Usuario agregado",
+        description: `${addUserEmail} ha sido agregado a la organización`,
+      });
+
+      setAddUserEmail('');
+      setAddUserRole('user');
+      setAddUserDialogOpen(false);
       loadData();
     } catch (error: any) {
-      console.error('Error sending invitation:', error);
+      console.error('Error adding user:', error);
       
       toast({
         title: "Error",
-        description: "No se pudo enviar la invitación",
+        description: "No se pudo agregar el usuario",
         variant: "destructive",
       });
     }
@@ -269,43 +250,6 @@ export const OrganizationUserManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteInvitation = async (invitationId: string) => {
-    try {
-      const { error } = await supabase
-        .from('organization_invitations')
-        .delete()
-        .eq('id', invitationId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Invitación eliminada",
-        description: "La invitación ha sido eliminada",
-      });
-
-      loadData();
-    } catch (error) {
-      console.error('Error deleting invitation:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar la invitación",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const getStatusBadge = (invitation: Invitation) => {
-    if (invitation.used_at) {
-      return <Badge variant="default" className="bg-green-100 text-green-800">Aceptada</Badge>;
-    }
-    
-    const isExpired = new Date(invitation.expires_at) < new Date();
-    if (isExpired) {
-      return <Badge variant="destructive">Expirada</Badge>;
-    }
-    
-    return <Badge variant="secondary">Pendiente</Badge>;
-  };
 
   const filteredUsers = users.filter(user =>
     user.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -362,31 +306,31 @@ export const OrganizationUserManagement: React.FC = () => {
               />
             </div>
             
-            <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+            <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Invitar Usuario
+                  <User className="w-4 h-4 mr-2" />
+                  Agregar Usuario
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Invitar Usuario a {currentOrganization.name}</DialogTitle>
+                  <DialogTitle>Agregar Usuario a {currentOrganization.name}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="inviteEmail">Email</Label>
+                    <Label htmlFor="addUserEmail">Email del Usuario Existente</Label>
                     <Input
-                      id="inviteEmail"
+                      id="addUserEmail"
                       type="email"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
+                      value={addUserEmail}
+                      onChange={(e) => setAddUserEmail(e.target.value)}
                       placeholder="usuario@ejemplo.com"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="inviteRole">Rol</Label>
-                    <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <Label htmlFor="addUserRole">Rol</Label>
+                    <Select value={addUserRole} onValueChange={setAddUserRole}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -397,11 +341,11 @@ export const OrganizationUserManagement: React.FC = () => {
                     </Select>
                   </div>
                   <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+                    <Button variant="outline" onClick={() => setAddUserDialogOpen(false)}>
                       Cancelar
                     </Button>
-                    <Button onClick={handleSendInvitation}>
-                      Enviar Invitación
+                    <Button onClick={handleAddUser}>
+                      Agregar Usuario
                     </Button>
                   </div>
                 </div>
@@ -486,49 +430,6 @@ export const OrganizationUserManagement: React.FC = () => {
             </Table>
           </div>
 
-          {/* Invitations Table */}
-          {invitations.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Invitaciones Pendientes</h3>
-              <div className="border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Rol</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Enviada</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invitations.map((invitation) => (
-                      <TableRow key={invitation.id}>
-                        <TableCell className="font-medium">{invitation.email}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {invitation.role === 'admin' ? 'Administrador' : 'Usuario'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(invitation)}</TableCell>
-                        <TableCell>{new Date(invitation.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteInvitation(invitation.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          )}
 
           {/* Summary Stats */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -544,9 +445,9 @@ export const OrganizationUserManagement: React.FC = () => {
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-orange-600">
-                {invitations.filter(i => !i.used_at && new Date(i.expires_at) > new Date()).length}
+                {users.filter(u => u.role === 'user').length}
               </p>
-              <p className="text-sm text-muted-foreground">Invitaciones Pendientes</p>
+              <p className="text-sm text-muted-foreground">Usuarios Regulares</p>
             </div>
           </div>
         </CardContent>
