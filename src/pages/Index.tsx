@@ -16,6 +16,7 @@ import { OrganizationManager } from "@/components/OrganizationManager";
 import { OrganizationDashboard } from "@/components/OrganizationDashboard";
 import { SuperAdminDashboard } from "@/components/SuperAdminDashboard";
 import { OrganizationUserManagement } from "@/components/OrganizationUserManagement";
+import { UserIndicator } from "@/components/UserIndicator";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -118,18 +119,21 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-              <OrganizationSelector />
-              <Button
-                onClick={clearOrganization}
-                variant="outline"
-                size="sm"
-                className="border-gray-300 hover:bg-gray-50"
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">{isSuperAdmin ? 'Panel Central' : 'Cambiar Tienda'}</span>
-                <span className="sm:hidden">{isSuperAdmin ? 'Panel' : 'Tienda'}</span>
-              </Button>
+              {isSuperAdmin && <OrganizationSelector />}
+              {isSuperAdmin && (
+                <Button
+                  onClick={clearOrganization}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Panel Central</span>
+                  <span className="sm:hidden">Panel</span>
+                </Button>
+              )}
               <SyncButton />
+              <UserIndicator />
               <Button
                 onClick={handleSignOut}
                 variant="outline"
