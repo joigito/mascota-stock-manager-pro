@@ -140,6 +140,9 @@ export const useSystemConfiguration = () => {
 
   const getEnabledCategories = (): string[] => {
     const config = getConfiguration('category_settings', 'enabled_categories');
+    console.log('getEnabledCategories - config found:', config);
+    console.log('getEnabledCategories - all configurations:', configurations);
+    console.log('getEnabledCategories - organization:', currentOrganization?.id);
     return config?.config_value || ['forrajeria', 'mascotas', 'veterinarios', 'limpieza', 'bebidas'];
   };
 
