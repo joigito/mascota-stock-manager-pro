@@ -26,21 +26,32 @@ export const useOrganization = () => {
   const [organizations, setOrganizations] = useState<UserOrganization[]>([]);
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Initialize immediately when component mounts if user exists
   useEffect(() => {
-    if (user?.id) {
-      console.log('useOrganization: User loaded, loading organizations...');
-      loadUserOrganizations();
+    if (user?.id && !initialized) {
+      console.log('useOrganization: User loaded, initializing...');
+      initializeOrganizations();
     }
-  }, [user?.id]);
+  }, [user?.id, initialized]);
 
-  const loadUserOrganizations = async () => {
+  const initializeOrganizations = async () => {
+    if (!user?.id) return;
+    
     try {
-      // Check if user is super admin first
+      setLoading(true);
+      console.log('initializeOrganizations: Starting initialization...');
+      
+      // First, try to restore from localStorage synchronously if available
+      const savedOrgId = localStorage.getItem('selectedOrganizationId');
+      console.log('initializeOrganizations: Saved organization ID:', savedOrgId);
+      
+      // Check if user is super admin
       const isSuper = await isSuperAdmin();
-      console.log('loadUserOrganizations: Is super admin:', isSuper);
+      console.log('initializeOrganizations: Is super admin:', isSuper);
       
       let allOrgsData: any[] = [];
       let userOrgsData: UserOrganization[] = [];
@@ -65,7 +76,7 @@ export const useOrganization = () => {
           organization: org
         }));
 
-        console.log('loadUserOrganizations: Super admin organizations:', transformedData);
+        console.log('initializeOrganizations: Super admin organizations:', transformedData);
         setOrganizations(transformedData);
         userOrgsData = transformedData;
       } else {
@@ -81,40 +92,46 @@ export const useOrganization = () => {
         if (error) throw error;
 
         userOrgsData = data || [];
-        console.log('loadUserOrganizations: Regular user organizations:', userOrgsData);
+        console.log('initializeOrganizations: Regular user organizations:', userOrgsData);
         setOrganizations(userOrgsData);
       }
       
-      console.log('loadUserOrganizations: Organizations count:', userOrgsData.length);
-      console.log('loadUserOrganizations: Is super admin:', isSuper);
+      console.log('initializeOrganizations: Organizations loaded, count:', userOrgsData.length);
       
-      // Try to restore previously selected organization first
-      const savedOrgId = localStorage.getItem('selectedOrganizationId');
-      console.log('loadUserOrganizations: Saved organization ID:', savedOrgId);
+      // Now handle organization selection with proper priority
+      let organizationToSelect: Organization | null = null;
       
+      // Priority 1: Restore from localStorage if valid
       if (savedOrgId) {
         const orgData = isSuper ? allOrgsData : userOrgsData.map(uo => uo.organization);
         const savedOrg = orgData.find(org => org.id === savedOrgId);
         
         if (savedOrg) {
-          console.log('loadUserOrganizations: Restoring saved organization:', savedOrg.name);
-          setCurrentOrganization(savedOrg);
-          return; // Exit early to prevent auto-selection override
+          console.log('initializeOrganizations: Restoring saved organization:', savedOrg.name);
+          organizationToSelect = savedOrg;
         } else {
-          console.log('loadUserOrganizations: Saved organization not found, clearing localStorage');
+          console.log('initializeOrganizations: Saved organization not found, clearing localStorage');
           localStorage.removeItem('selectedOrganizationId');
         }
       }
       
-      // Auto-select organization if user has exactly one and is not super admin (only if no saved org)
-      if (!isSuper && userOrgsData.length === 1) {
-        const singleOrg = userOrgsData[0].organization;
-        console.log('loadUserOrganizations: Auto-selecting single organization:', singleOrg.name);
-        setCurrentOrganization(singleOrg);
-        localStorage.setItem('selectedOrganizationId', singleOrg.id);
+      // Priority 2: Auto-select if user has exactly one org and is not super admin
+      if (!organizationToSelect && !isSuper && userOrgsData.length === 1) {
+        organizationToSelect = userOrgsData[0].organization;
+        console.log('initializeOrganizations: Auto-selecting single organization:', organizationToSelect.name);
+        localStorage.setItem('selectedOrganizationId', organizationToSelect.id);
       }
+      
+      // Set the organization immediately and synchronously
+      if (organizationToSelect) {
+        setCurrentOrganization(organizationToSelect);
+        console.log('initializeOrganizations: Organization set to:', organizationToSelect.name);
+      } else {
+        console.log('initializeOrganizations: No organization to select');
+      }
+      
     } catch (error) {
-      console.error('Error loading organizations:', error);
+      console.error('Error initializing organizations:', error);
       toast({
         title: "Error",
         description: "No se pudieron cargar las organizaciones",
@@ -122,6 +139,8 @@ export const useOrganization = () => {
       });
     } finally {
       setLoading(false);
+      setInitialized(true);
+      console.log('initializeOrganizations: Initialization completed');
     }
   };
 
@@ -199,12 +218,12 @@ export const useOrganization = () => {
   return {
     organizations,
     currentOrganization,
-    loading,
+    loading: loading || !initialized,
     switchOrganization,
     clearOrganization,
     hasRole,
     isAdmin,
     isSuperAdmin,
-    reload: loadUserOrganizations
+    reload: initializeOrganizations
   };
 };
