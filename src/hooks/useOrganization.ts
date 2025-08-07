@@ -124,14 +124,18 @@ export const useOrganization = () => {
     setCurrentOrganization(organization);
     // Persist the selection in localStorage
     localStorage.setItem('selectedOrganizationId', organization.id);
-    console.log('switchOrganization: Organization set successfully');
-    console.log('switchOrganization: New currentOrganization should be:', organization);
-    // Force re-render by triggering a state change
-    setLoading(false);
-    // Force a small delay to ensure state is updated
+    console.log('switchOrganization: Organization set successfully, reloading page...');
+    
+    // Show toast notification
+    toast({
+      title: "Organización seleccionada",
+      description: `Cambiando a ${organization.name}...`,
+    });
+    
+    // Reload the page to ensure clean state
     setTimeout(() => {
-      console.log('switchOrganization: After timeout, currentOrganization is:', currentOrganization);
-    }, 100);
+      window.location.reload();
+    }, 500);
   };
 
   const clearOrganization = () => {
