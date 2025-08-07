@@ -3,11 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from './useOrganization';
+import type { Database } from '@/integrations/supabase/types';
 
 export interface Product {
   id: string;
   name: string;
-  category: 'mascotas' | 'forrajeria';
+  category: Database['public']['Enums']['product_category'];
   stock: number;
   minStock: number;
   price: number;
@@ -166,7 +167,7 @@ export const useProducts = () => {
       const formattedProducts = data.map(product => ({
         id: product.id,
         name: product.name,
-        category: product.category as 'mascotas' | 'forrajeria',
+        category: product.category,
         stock: product.stock,
         minStock: product.min_stock,
         price: Number(product.price),
@@ -257,7 +258,7 @@ export const useProducts = () => {
       const newProduct: Product = {
         id: data.id,
         name: data.name,
-        category: data.category as 'mascotas' | 'forrajeria',
+        category: data.category,
         stock: data.stock,
         minStock: data.min_stock,
         price: Number(data.price),

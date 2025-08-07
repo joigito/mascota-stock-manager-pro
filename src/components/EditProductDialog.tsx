@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Product } from "@/hooks/useProducts";
 import { useToast } from "@/components/ui/use-toast";
+import { useSystemConfiguration } from "@/hooks/useSystemConfiguration";
 
 interface EditProductDialogProps {
   product: Product;
@@ -31,9 +32,10 @@ interface EditProductDialogProps {
 
 const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: EditProductDialogProps) => {
   const { toast } = useToast();
+  const { getAvailableCategoriesForSelect } = useSystemConfiguration();
   const [formData, setFormData] = useState({
     name: "",
-    category: "mascotas" as "mascotas" | "forrajeria",
+    category: "",
     stock: "",
     minStock: "",
     price: "",
@@ -81,7 +83,7 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
 
     onUpdateProduct({
       name: formData.name,
-      category: formData.category,
+      category: formData.category as any,
       stock: parseInt(formData.stock),
       minStock: parseInt(formData.minStock),
       price: price,
@@ -137,13 +139,16 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
 
           <div className="space-y-2">
             <Label htmlFor="edit-category">Categoría</Label>
-            <Select value={formData.category} onValueChange={(value: "mascotas" | "forrajeria") => handleInputChange("category", value)}>
+            <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mascotas">Mascotas</SelectItem>
-                <SelectItem value="forrajeria">Forrajería</SelectItem>
+                {getAvailableCategoriesForSelect().map((category) => (
+                  <SelectItem key={category.key} value={category.key}>
+                    {category.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

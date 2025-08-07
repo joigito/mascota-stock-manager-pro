@@ -22,6 +22,7 @@ import { Product } from "@/hooks/useProducts";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthPrompt } from "@/components/AuthPrompt";
+import { useSystemConfiguration } from "@/hooks/useSystemConfiguration";
 
 interface AddProductDialogProps {
   open: boolean;
@@ -33,9 +34,10 @@ interface AddProductDialogProps {
 const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddProductDialogProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { getAvailableCategoriesForSelect } = useSystemConfiguration();
   const [formData, setFormData] = useState({
     name: "",
-    category: "mascotas" as "mascotas" | "forrajeria",
+    category: "",
     stock: "",
     minStock: "",
     price: "",
@@ -94,7 +96,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
     try {
       const result = await onAddProduct({
         name: formData.name.trim(),
-        category: formData.category,
+        category: formData.category as any,
         stock,
         minStock,
         price,
@@ -112,7 +114,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
         // Reset form
         setFormData({
           name: "",
-          category: "mascotas",
+          category: "",
           stock: "",
           minStock: "",
           price: "",
@@ -191,13 +193,16 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
 
           <div className="space-y-2">
             <Label htmlFor="category">Categoría</Label>
-            <Select value={formData.category} onValueChange={(value: "mascotas" | "forrajeria") => handleInputChange("category", value)}>
+            <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mascotas">Mascotas</SelectItem>
-                <SelectItem value="forrajeria">Forrajería</SelectItem>
+                {getAvailableCategoriesForSelect().map((category) => (
+                  <SelectItem key={category.key} value={category.key}>
+                    {category.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

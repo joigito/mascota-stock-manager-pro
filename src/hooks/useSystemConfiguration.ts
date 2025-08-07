@@ -32,6 +32,28 @@ export const useSystemConfiguration = () => {
   const { toast } = useToast();
   const { currentOrganization } = useOrganization();
 
+  // Available categories by industry type
+  const AVAILABLE_CATEGORIES = [
+    { key: 'forrajeria', label: 'Forrajería', description: 'Alimentos para animales' },
+    { key: 'mascotas', label: 'Mascotas', description: 'Accesorios y productos para mascotas' },
+    { key: 'veterinarios', label: 'Veterinarios', description: 'Productos veterinarios' },
+    { key: 'limpieza', label: 'Limpieza', description: 'Productos de limpieza' },
+    { key: 'bebidas', label: 'Bebidas', description: 'Todo tipo de bebidas' },
+    { key: 'informatica', label: 'Informática', description: 'Equipos y software informático' },
+    { key: 'electronica', label: 'Electrónica', description: 'Dispositivos electrónicos' },
+    { key: 'accesorios_tecnologia', label: 'Accesorios Tecnología', description: 'Accesorios para dispositivos' },
+    { key: 'electrodomesticos', label: 'Electrodomésticos', description: 'Aparatos para el hogar' },
+    { key: 'ferreteria', label: 'Ferretería', description: 'Herramientas y materiales' },
+    { key: 'construccion', label: 'Construcción', description: 'Materiales de construcción' },
+    { key: 'textil', label: 'Textil', description: 'Ropa y textiles' },
+    { key: 'calzado', label: 'Calzado', description: 'Zapatos y calzado' },
+    { key: 'juguetes', label: 'Juguetes', description: 'Juguetes para niños' },
+    { key: 'deportes', label: 'Deportes', description: 'Artículos deportivos' },
+    { key: 'jardineria', label: 'Jardinería', description: 'Plantas y herramientas de jardín' },
+    { key: 'automotriz', label: 'Automotriz', description: 'Repuestos y accesorios de vehículos' },
+    { key: 'otros', label: 'Otros', description: 'Otros productos diversos' }
+  ];
+
   const loadConfigurations = async () => {
     if (!currentOrganization?.id) {
       setLoading(false);
@@ -116,6 +138,16 @@ export const useSystemConfiguration = () => {
     return config?.config_value || {};
   };
 
+  const getEnabledCategories = (): string[] => {
+    const config = getConfiguration('category_settings', 'enabled_categories');
+    return config?.config_value || ['forrajeria', 'mascotas', 'veterinarios', 'limpieza', 'bebidas'];
+  };
+
+  const getAvailableCategoriesForSelect = () => {
+    const enabledKeys = getEnabledCategories();
+    return AVAILABLE_CATEGORIES.filter(cat => enabledKeys.includes(cat.key));
+  };
+
   useEffect(() => {
     loadConfigurations();
   }, [currentOrganization?.id]);
@@ -128,6 +160,9 @@ export const useSystemConfiguration = () => {
     getUnits,
     getCategoryMargins,
     getCategoryMinStock,
+    getEnabledCategories,
+    getAvailableCategoriesForSelect,
+    AVAILABLE_CATEGORIES,
     loadConfigurations
   };
 };
