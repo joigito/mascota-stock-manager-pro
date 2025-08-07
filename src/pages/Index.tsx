@@ -236,17 +236,13 @@ const Index = () => {
           </TabsContent>
 
           {/* Admin Tab - For super admins and org admins */}
-          {isSuperAdmin && (
+          {(isSuperAdmin || isOrgAdmin) && (
             <TabsContent value="admin">
               <div className="space-y-6">
-                <OrganizationManager />
+                {isSuperAdmin && <OrganizationManager />}
                 <OrganizationUrlGenerator />
+                {!isSuperAdmin && <OrganizationUserManagement />}
               </div>
-            </TabsContent>
-          )}
-          {isOrgAdmin && !isSuperAdmin && (
-            <TabsContent value="admin">
-              <OrganizationUserManagement />
             </TabsContent>
           )}
         </Tabs>

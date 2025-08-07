@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Copy, ExternalLink, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface Organization {
   id: string;
@@ -19,6 +20,7 @@ export const OrganizationUrlGenerator: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { isSuperAdmin, organizations: userOrganizations } = useOrganization();
 
   useEffect(() => {
     loadOrganizations();
@@ -26,13 +28,28 @@ export const OrganizationUrlGenerator: React.FC = () => {
 
   const loadOrganizations = async () => {
     try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('id, name, slug, description')
-        .order('name');
+      const isSuperAdminUser = await isSuperAdmin();
+      
+      if (isSuperAdminUser) {
+        // Super admins can see all organizations
+        const { data, error } = await supabase
+          .from('organizations')
+          .select('id, name, slug, description')
+          .order('name');
 
-      if (error) throw error;
-      setOrganizations(data || []);
+        if (error) throw error;
+        setOrganizations(data || []);
+      } else {
+        // Organization admins only see their organizations
+        const userOrgList = userOrganizations || [];
+        const filteredOrgs = userOrgList.map(userOrg => ({
+          id: userOrg.organization.id,
+          name: userOrg.organization.name,
+          slug: userOrg.organization.slug,
+          description: userOrg.organization.description
+        }));
+        setOrganizations(filteredOrgs);
+      }
     } catch (error) {
       console.error('Error loading organizations:', error);
       toast({
