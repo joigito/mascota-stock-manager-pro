@@ -24,10 +24,29 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct }: ProductList
   };
 
   const getCategoryBadge = (category: string) => {
-    if (category === "mascotas") {
-      return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Mascotas</Badge>;
-    }
-    return <Badge variant="secondary" className="bg-green-100 text-green-800">Forrajería</Badge>;
+    const categoryMap: Record<string, { label: string; className: string }> = {
+      'informatica': { label: 'Informática', className: 'bg-blue-100 text-blue-800' },
+      'electronica': { label: 'Electrónica', className: 'bg-purple-100 text-purple-800' },
+      'accesorios_tecnologia': { label: 'Accesorios Tecnología', className: 'bg-indigo-100 text-indigo-800' },
+      'electrodomesticos': { label: 'Electrodomésticos', className: 'bg-orange-100 text-orange-800' },
+      'ferreteria': { label: 'Ferretería', className: 'bg-gray-100 text-gray-800' },
+      'construccion': { label: 'Construcción', className: 'bg-yellow-100 text-yellow-800' },
+      'textil': { label: 'Textil', className: 'bg-pink-100 text-pink-800' },
+      'calzado': { label: 'Calzado', className: 'bg-red-100 text-red-800' },
+      'juguetes': { label: 'Juguetes', className: 'bg-cyan-100 text-cyan-800' },
+      'jardineria': { label: 'Jardinería', className: 'bg-green-100 text-green-800' },
+      'automotriz': { label: 'Automotriz', className: 'bg-slate-100 text-slate-800' },
+      'bebidas': { label: 'Bebidas', className: 'bg-emerald-100 text-emerald-800' },
+      'limpieza': { label: 'Limpieza', className: 'bg-teal-100 text-teal-800' },
+      'veterinarios': { label: 'Veterinarios', className: 'bg-lime-100 text-lime-800' },
+      'mascotas': { label: 'Mascotas', className: 'bg-blue-100 text-blue-800' },
+      'forrajeria': { label: 'Forrajería', className: 'bg-green-100 text-green-800' },
+      'alimentos': { label: 'Alimentos', className: 'bg-amber-100 text-amber-800' },
+      'general': { label: 'General', className: 'bg-neutral-100 text-neutral-800' }
+    };
+
+    const categoryInfo = categoryMap[category] || { label: category, className: 'bg-gray-100 text-gray-800' };
+    return <Badge variant="secondary" className={categoryInfo.className}>{categoryInfo.label}</Badge>;
   };
 
   const getStockStatus = (stock: number, minStock: number) => {
