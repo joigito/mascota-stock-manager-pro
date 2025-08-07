@@ -86,7 +86,17 @@ export const useSystemConfiguration = () => {
     configKey: string,
     configValue: any
   ) => {
-    if (!currentOrganization?.id) return;
+    if (!currentOrganization?.id) {
+      console.error('useSystemConfiguration: No current organization');
+      return;
+    }
+
+    console.log('useSystemConfiguration: Updating configuration:', {
+      organization_id: currentOrganization.id,
+      config_type: configType,
+      config_key: configKey,
+      config_value: configValue
+    });
 
     try {
       const { error } = await supabase
@@ -99,7 +109,12 @@ export const useSystemConfiguration = () => {
           created_by: (await supabase.auth.getUser()).data.user?.id || ''
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('useSystemConfiguration: Database error:', error);
+        throw error;
+      }
+
+      console.log('useSystemConfiguration: Configuration updated successfully');
 
       toast({
         title: "Configuración actualizada",

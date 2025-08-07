@@ -30,8 +30,14 @@ export const CategoryConfiguration: React.FC = () => {
   };
 
   const saveChanges = async () => {
-    await updateConfiguration('category_settings', 'enabled_categories', selectedCategories);
-    setIsModified(false);
+    console.log('CategoryConfiguration: Saving categories:', selectedCategories);
+    try {
+      await updateConfiguration('category_settings', 'enabled_categories', selectedCategories);
+      console.log('CategoryConfiguration: Categories saved successfully');
+      setIsModified(false);
+    } catch (error) {
+      console.error('CategoryConfiguration: Error saving categories:', error);
+    }
   };
 
   const resetChanges = () => {
