@@ -121,21 +121,21 @@ export const useOrganization = () => {
   const switchOrganization = (organization: Organization) => {
     console.log('switchOrganization: Setting organization:', organization);
     console.log('switchOrganization: Previous organization:', currentOrganization);
+    
+    // Set the organization immediately
     setCurrentOrganization(organization);
+    
     // Persist the selection in localStorage
     localStorage.setItem('selectedOrganizationId', organization.id);
-    console.log('switchOrganization: Organization set successfully, reloading page...');
     
-    // Show toast notification
+    console.log('switchOrganization: Organization set successfully');
+    console.log('switchOrganization: New organization is:', organization.name);
+    
+    // Show success notification
     toast({
       title: "Organización seleccionada",
-      description: `Cambiando a ${organization.name}...`,
+      description: `Ahora estás trabajando en ${organization.name}`,
     });
-    
-    // Reload the page to ensure clean state
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
   };
 
   const clearOrganization = () => {
