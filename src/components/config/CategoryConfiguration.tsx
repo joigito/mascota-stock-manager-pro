@@ -8,15 +8,17 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSystemConfiguration } from '@/hooks/useSystemConfiguration';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Package, Info, Building2, AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const CategoryConfiguration: React.FC = () => {
-  const { AVAILABLE_CATEGORIES, getEnabledCategories, updateConfiguration, loading } = useSystemConfiguration();
+  const { AVAILABLE_CATEGORIES, STORE_TYPES, getEnabledCategories, getStoreType, getRecommendedCategoriesByStoreType, updateConfiguration, loading } = useSystemConfiguration();
   const { currentOrganization } = useOrganization();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [storeType, setStoreType] = useState<string>('generico');
   const [isModified, setIsModified] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     console.log('CategoryConfiguration: Loading effect triggered', { 
       loading, 
       currentOrganization: currentOrganization?.name || 'none'
@@ -24,13 +26,15 @@ export const CategoryConfiguration: React.FC = () => {
     
     if (!loading && currentOrganization) {
       const enabled = getEnabledCategories();
-      console.log('CategoryConfiguration: Setting enabled categories:', enabled);
+      const currentType = getStoreType();
+      console.log('CategoryConfiguration: Setting enabled categories:', enabled, 'storeType:', currentType);
       setSelectedCategories(enabled);
+      setStoreType(currentType);
       setIsModified(false);
     }
-  }, [loading, currentOrganization?.id, getEnabledCategories]);
+  }, [loading, currentOrganization?.id, getEnabledCategories, getStoreType]);
 
-  const handleCategoryToggle = (categoryKey: string, checked: boolean | 'indeterminate') => {
+const handleCategoryToggle = (categoryKey: string, checked: boolean | 'indeterminate') => {
     if (checked === 'indeterminate') return;
     
     console.log('CategoryConfiguration: Toggle category', { categoryKey, checked, currentSelected: selectedCategories });
@@ -53,21 +57,32 @@ export const CategoryConfiguration: React.FC = () => {
     setIsModified(true);
   };
 
-  const saveChanges = async () => {
+  const handleStoreTypeChange = (value: string) => {
+    console.log('CategoryConfiguration: Store type changed to', value);
+    setStoreType(value);
+    const recommended = getRecommendedCategoriesByStoreType(value);
+    setSelectedCategories(recommended);
+    setIsModified(true);
+  };
+
+const saveChanges = async () => {
     if (!currentOrganization) {
       console.error('CategoryConfiguration: No organization selected');
       return;
     }
 
-    console.log('CategoryConfiguration: Saving categories for org:', currentOrganization.name, selectedCategories);
+    console.log('CategoryConfiguration: Saving categories and store type for org:', currentOrganization.name, { selectedCategories, storeType });
     setSaving(true);
     
     try {
-      await updateConfiguration('category_settings', 'enabled_categories', selectedCategories);
-      console.log('CategoryConfiguration: Categories saved successfully');
+      await Promise.all([
+        updateConfiguration('category_settings', 'enabled_categories', selectedCategories),
+        updateConfiguration('store_settings', 'store_type', storeType)
+      ]);
+      console.log('CategoryConfiguration: Settings saved successfully');
       setIsModified(false);
     } catch (error) {
-      console.error('CategoryConfiguration: Error saving categories:', error);
+      console.error('CategoryConfiguration: Error saving settings:', error);
     } finally {
       setSaving(false);
     }
@@ -138,8 +153,28 @@ export const CategoryConfiguration: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+              <div className="w-full md:w-1/2">
+                <label className="text-sm font-medium">Tipo de tienda</label>
+                <Select value={storeType} onValueChange={handleStoreTypeChange}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Selecciona el tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STORE_TYPES.map((t) => (
+                      <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Filtramos categorías sugeridas según el rubro seleccionado. Puedes ajustar manualmente.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            {AVAILABLE_CATEGORIES.map((category) => {
+            {AVAILABLE_CATEGORIES.filter((cat) => getRecommendedCategoriesByStoreType(storeType).includes(cat.key)).map((category) => {
               const isChecked = selectedCategories.includes(category.key);
               const isLastCategory = selectedCategories.length === 1 && isChecked;
               

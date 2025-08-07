@@ -54,6 +54,24 @@ export const useSystemConfiguration = () => {
     { key: 'otros', label: 'Otros', description: 'Otros productos diversos' }
   ];
 
+  // Store types for quick filtering of relevant categories
+  const STORE_TYPES = [
+    { key: 'generico', label: 'General' },
+    { key: 'deportes', label: 'Deportes' },
+    { key: 'alimentos', label: 'Alimentos' },
+    { key: 'mascotas', label: 'Mascotas' },
+    { key: 'electronica', label: 'Electrónica' }
+  ];
+
+  // Recommended categories per store type
+  const STORE_TYPE_CATEGORY_MAP: Record<string, string[]> = {
+    generico: AVAILABLE_CATEGORIES.map(c => c.key),
+    deportes: ['deportes', 'calzado', 'textil', 'otros'],
+    alimentos: ['forrajeria', 'bebidas', 'limpieza', 'otros'],
+    mascotas: ['mascotas', 'veterinarios', 'otros'],
+    electronica: ['electronica', 'informatica', 'accesorios_tecnologia', 'electrodomesticos', 'otros']
+  };
+
   const loadConfigurations = async () => {
     if (!currentOrganization?.id) {
       setLoading(false);
@@ -163,6 +181,16 @@ export const useSystemConfiguration = () => {
     return AVAILABLE_CATEGORIES.filter(cat => enabledKeys.includes(cat.key));
   };
 
+  const getStoreType = (): string => {
+    const config = getConfiguration('store_settings', 'store_type');
+    return config?.config_value || 'generico';
+  };
+
+  const getRecommendedCategoriesByStoreType = (type?: string): string[] => {
+    const t = type || getStoreType();
+    return STORE_TYPE_CATEGORY_MAP[t] || STORE_TYPE_CATEGORY_MAP['generico'];
+  };
+
   useEffect(() => {
     loadConfigurations();
   }, [currentOrganization?.id]);
@@ -177,7 +205,10 @@ export const useSystemConfiguration = () => {
     getCategoryMinStock,
     getEnabledCategories,
     getAvailableCategoriesForSelect,
+    getStoreType,
+    getRecommendedCategoriesByStoreType,
     AVAILABLE_CATEGORIES,
+    STORE_TYPES,
     loadConfigurations
   };
 };
