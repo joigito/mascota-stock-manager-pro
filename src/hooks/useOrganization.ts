@@ -31,6 +31,7 @@ export const useOrganization = () => {
 
   useEffect(() => {
     if (user?.id) {
+      console.log('useOrganization: User loaded, loading organizations...');
       loadUserOrganizations();
     }
   }, [user?.id]);
@@ -87,24 +88,30 @@ export const useOrganization = () => {
       console.log('loadUserOrganizations: Organizations count:', userOrgsData.length);
       console.log('loadUserOrganizations: Is super admin:', isSuper);
       
-      // Auto-select organization if user has exactly one and is not super admin
+      // Try to restore previously selected organization first
+      const savedOrgId = localStorage.getItem('selectedOrganizationId');
+      console.log('loadUserOrganizations: Saved organization ID:', savedOrgId);
+      
+      if (savedOrgId) {
+        const orgData = isSuper ? allOrgsData : userOrgsData.map(uo => uo.organization);
+        const savedOrg = orgData.find(org => org.id === savedOrgId);
+        
+        if (savedOrg) {
+          console.log('loadUserOrganizations: Restoring saved organization:', savedOrg.name);
+          setCurrentOrganization(savedOrg);
+          return; // Exit early to prevent auto-selection override
+        } else {
+          console.log('loadUserOrganizations: Saved organization not found, clearing localStorage');
+          localStorage.removeItem('selectedOrganizationId');
+        }
+      }
+      
+      // Auto-select organization if user has exactly one and is not super admin (only if no saved org)
       if (!isSuper && userOrgsData.length === 1) {
         const singleOrg = userOrgsData[0].organization;
         console.log('loadUserOrganizations: Auto-selecting single organization:', singleOrg.name);
         setCurrentOrganization(singleOrg);
         localStorage.setItem('selectedOrganizationId', singleOrg.id);
-      } else {
-        // Try to restore previously selected organization for multi-org users
-        const savedOrgId = localStorage.getItem('selectedOrganizationId');
-        if (savedOrgId) {
-          const orgData = isSuper ? allOrgsData : userOrgsData.map(uo => uo.organization);
-          const savedOrg = orgData.find(org => org.id === savedOrgId);
-          
-          if (savedOrg) {
-            console.log('loadUserOrganizations: Restoring saved organization:', savedOrg.name);
-            setCurrentOrganization(savedOrg);
-          }
-        }
       }
     } catch (error) {
       console.error('Error loading organizations:', error);
