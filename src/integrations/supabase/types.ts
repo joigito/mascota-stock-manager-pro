@@ -483,6 +483,19 @@ export type Database = {
         | "vehiculos"
         | "servicios"
         | "otros"
+        | "informatica"
+        | "accesorios_tecnologia"
+        | "electrodomesticos"
+        | "ferreteria"
+        | "construccion"
+        | "textil"
+        | "calzado"
+        | "juguetes"
+        | "jardineria"
+        | "automotriz"
+        | "bebidas"
+        | "limpieza"
+        | "veterinarios"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -624,6 +637,19 @@ export const Constants = {
         "vehiculos",
         "servicios",
         "otros",
+        "informatica",
+        "accesorios_tecnologia",
+        "electrodomesticos",
+        "ferreteria",
+        "construccion",
+        "textil",
+        "calzado",
+        "juguetes",
+        "jardineria",
+        "automotriz",
+        "bebidas",
+        "limpieza",
+        "veterinarios",
       ],
     },
   },
