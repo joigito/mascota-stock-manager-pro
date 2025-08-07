@@ -24,7 +24,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   if (!user) {
     // Preserve the current path for redirect after login
     const currentPath = window.location.pathname;
-    const redirectUrl = currentPath.startsWith('/tienda/') ? currentPath : '/auth';
+    
+    // For store URLs, save the slug for association after signup
+    if (currentPath.startsWith('/tienda/')) {
+      const slug = currentPath.split('/tienda/')[1];
+      if (slug) {
+        localStorage.setItem('pendingStoreAssociation', slug);
+      }
+    }
+    
     return <Navigate to={`/auth?redirect=${encodeURIComponent(currentPath)}`} replace />;
   }
 

@@ -16,6 +16,7 @@ import { OrganizationManager } from "@/components/OrganizationManager";
 import { OrganizationDashboard } from "@/components/OrganizationDashboard";
 import { SuperAdminDashboard } from "@/components/SuperAdminDashboard";
 import { OrganizationUserManagement } from "@/components/OrganizationUserManagement";
+import { OrganizationUrlGenerator } from "@/components/OrganizationUrlGenerator";
 import { UserIndicator } from "@/components/UserIndicator";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/contexts/AuthContext";
@@ -237,7 +238,10 @@ const Index = () => {
           {/* Admin Tab - For super admins and org admins */}
           {isSuperAdmin && (
             <TabsContent value="admin">
-              <OrganizationManager />
+              <div className="space-y-6">
+                <OrganizationManager />
+                <OrganizationUrlGenerator />
+              </div>
             </TabsContent>
           )}
           {isOrgAdmin && !isSuperAdmin && (

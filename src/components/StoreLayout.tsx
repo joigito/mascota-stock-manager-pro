@@ -63,19 +63,8 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
               <Badge variant="outline" className="border-green-300 text-green-700">
                 <PawPrint className="h-3 w-3 mr-1" />
-                Tienda Independiente
+                {organization.name}
               </Badge>
-              <Link to="/">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-300 hover:bg-gray-50"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Volver al Sistema</span>
-                  <span className="sm:hidden">Volver</span>
-                </Button>
-              </Link>
               <Button
                 onClick={handleSignOut}
                 variant="outline"
