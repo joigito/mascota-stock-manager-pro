@@ -34,7 +34,7 @@ const PrintableSalesReport = ({ sales, startDate, endDate }: PrintableSalesRepor
   return (
     <div className="print-content p-8 bg-white">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">LA QUERENCIA</h1>
+        <h1 className="text-2xl font-bold mb-2">Sistemas de Gestión Comercial</h1>
         <h2 className="text-xl font-semibold mb-4">Reporte de Ventas</h2>
         <p className="text-sm text-gray-600">
           Período: {new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}

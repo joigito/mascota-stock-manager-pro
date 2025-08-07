@@ -11,7 +11,6 @@ import {
   TrendingUp,
   Database,
   Activity,
-  PawPrint,
   LogOut,
   UserCog
 } from 'lucide-react';
@@ -323,7 +322,7 @@ export const SuperAdminDashboard: React.FC = () => {
                       }, 200);
                     }}
                   >
-                    <PawPrint className="h-4 w-4 mr-2" />
+                    <Building2 className="h-4 w-4 mr-2" />
                     {userOrg.organization.name}
                   </Button>
                   <Button 

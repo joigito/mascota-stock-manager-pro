@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PawPrint, LogOut, ArrowLeft } from 'lucide-react';
+import { Building2, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -48,8 +48,8 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-orange-500 rounded-xl shadow-lg">
-                <PawPrint className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
+                <Building2 className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
                 <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
@@ -61,8 +61,8 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-              <Badge variant="outline" className="border-green-300 text-green-700">
-                <PawPrint className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="border-blue-300 text-blue-700">
+                <Building2 className="h-3 w-3 mr-1" />
                 {organization.name}
               </Badge>
               <Button

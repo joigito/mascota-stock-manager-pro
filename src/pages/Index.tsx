@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Package, PawPrint, LogOut, Settings, Building2 } from "lucide-react";
+import { Plus, Package, Building2, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
@@ -109,14 +109,14 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-orange-500 rounded-xl shadow-lg">
-                <PawPrint className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
+                <Building2 className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
                 <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
-                  {currentOrganization?.name || 'Sistema de Inventario'}
+                  {currentOrganization?.name || 'Sistemas de Gestión Comercial'}
                 </h1>
-                <p className="text-xs sm:text-base text-gray-600">Gestión de inventario para mascotas y forrajería</p>
+                <p className="text-xs sm:text-base text-gray-600">Plataforma de gestión comercial para múltiples tipos de negocio</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">

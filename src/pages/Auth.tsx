@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PawPrint, Mail, Lock, User } from 'lucide-react';
+import { Building2, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -96,17 +96,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-orange-500 rounded-xl shadow-lg mx-auto mb-4">
-            <PawPrint className="h-10 w-10 text-white" />
+          <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg mx-auto mb-4">
+            <Building2 className="h-10 w-10 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold">LA QUERENCIA</CardTitle>
+          <CardTitle className="text-2xl font-bold">Sistemas de Gestión Comercial</CardTitle>
           <CardDescription>
             {storeSlug 
               ? `Accede a tu tienda: ${storeSlug}` 
-              : "Accede a tu sistema de gestión de inventario"
+              : "Accede a tu plataforma de gestión comercial"
             }
           </CardDescription>
         </CardHeader>
@@ -151,7 +151,7 @@ const Auth = () => {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
                   disabled={isLoading}
                 >
                   {isLoading ? "Iniciando..." : "Iniciar Sesión"}
@@ -194,7 +194,7 @@ const Auth = () => {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                  className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
                   disabled={isLoading}
                 >
                   {isLoading ? "Registrando..." : "Crear Cuenta"}
