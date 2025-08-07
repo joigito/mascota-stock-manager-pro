@@ -231,21 +231,28 @@ export const useProducts = () => {
     }
 
     try {
+      const insertData = {
+        name: productData.name,
+        category: productData.category,
+        stock: productData.stock,
+        min_stock: productData.minStock,
+        price: productData.price,
+        cost_price: productData.costPrice,
+        description: productData.description,
+        user_id: user.id,
+        organization_id: currentOrganization.id
+      };
+      
+      console.log('addProduct: About to insert:', insertData);
+      
       const { data, error } = await supabase
         .from('products')
-        .insert({
-          name: productData.name,
-          category: productData.category,
-          stock: productData.stock,
-          min_stock: productData.minStock,
-          price: productData.price,
-          cost_price: productData.costPrice,
-          description: productData.description,
-          user_id: user.id,
-          organization_id: currentOrganization.id
-        })
+        .insert(insertData)
         .select()
         .single();
+
+      console.log('addProduct: Response from database - data:', data);
+      console.log('addProduct: Response from database - error:', error);
 
       if (error) {
         // Manejar error de duplicado de manera más amigable
@@ -292,10 +299,15 @@ export const useProducts = () => {
       if (updates.costPrice !== undefined) updateData.cost_price = updates.costPrice;
       if (updates.description !== undefined) updateData.description = updates.description;
 
+      console.log('updateProduct: About to update with data:', updateData);
+      console.log('updateProduct: Product ID:', id);
+
       const { error } = await supabase
         .from('products')
         .update(updateData)
         .eq('id', id);
+
+      console.log('updateProduct: Response error:', error);
 
       if (error) {
         if (error.message.includes('unique_product_per_user_org')) {
