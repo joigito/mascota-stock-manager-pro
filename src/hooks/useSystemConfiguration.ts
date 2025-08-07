@@ -173,9 +173,9 @@ export const useSystemConfiguration = () => {
 
   const getEnabledCategories = (): string[] => {
     const config = getConfiguration('category_settings', 'enabled_categories');
-    return config?.config_value || ['forrajeria', 'mascotas', 'veterinarios', 'limpieza', 'bebidas'];
+    // Fallback to recommended categories for the current store type when not configured yet
+    return config?.config_value || getRecommendedCategoriesByStoreType();
   };
-
   const getAvailableCategoriesForSelect = () => {
     const enabledKeys = getEnabledCategories();
     return AVAILABLE_CATEGORIES.filter(cat => enabledKeys.includes(cat.key));
