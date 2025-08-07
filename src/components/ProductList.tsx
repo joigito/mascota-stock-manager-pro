@@ -40,7 +40,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct }: ProductList
       'limpieza': { label: 'Limpieza', className: 'bg-teal-100 text-teal-800' },
       'veterinarios': { label: 'Veterinarios', className: 'bg-lime-100 text-lime-800' },
       'mascotas': { label: 'Mascotas', className: 'bg-blue-100 text-blue-800' },
-      'forrajeria': { label: 'Forrajería', className: 'bg-green-100 text-green-800' },
+      'forrajeria': { label: 'Alimentos', className: 'bg-green-100 text-green-800' },
       'alimentos': { label: 'Alimentos', className: 'bg-amber-100 text-amber-800' },
       'general': { label: 'General', className: 'bg-neutral-100 text-neutral-800' }
     };

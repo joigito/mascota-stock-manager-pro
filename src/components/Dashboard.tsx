@@ -11,7 +11,7 @@ const Dashboard = ({ products }: DashboardProps) => {
   const lowStockCount = products.filter(p => p.stock <= p.minStock).length;
   const totalValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
   const mascotasProducts = products.filter(p => p.category === "mascotas").length;
-  const forrajeriaProducts = products.filter(p => p.category === "forrajeria").length;
+  const alimentosProducts = products.filter(p => p.category === "forrajeria").length;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -33,7 +33,7 @@ const Dashboard = ({ products }: DashboardProps) => {
         <CardContent>
           <div className="text-2xl font-bold text-blue-900">{totalProducts}</div>
           <p className="text-xs text-blue-600 mt-1">
-            {mascotasProducts} mascotas • {forrajeriaProducts} forrajería
+            {mascotasProducts} mascotas • {alimentosProducts} alimentos
           </p>
         </CardContent>
       </Card>

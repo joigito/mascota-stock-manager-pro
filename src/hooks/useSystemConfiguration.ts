@@ -34,7 +34,7 @@ export const useSystemConfiguration = () => {
 
   // Available categories by industry type
   const AVAILABLE_CATEGORIES = [
-    { key: 'forrajeria', label: 'Forrajería', description: 'Alimentos para animales' },
+    { key: 'forrajeria', label: 'Alimentos', description: 'Alimentos y productos alimenticios' },
     { key: 'mascotas', label: 'Mascotas', description: 'Accesorios y productos para mascotas' },
     { key: 'veterinarios', label: 'Veterinarios', description: 'Productos veterinarios' },
     { key: 'limpieza', label: 'Limpieza', description: 'Productos de limpieza' },

@@ -56,7 +56,7 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
                   {organization.name}
                 </h1>
                 <p className="text-xs sm:text-base text-gray-600">
-                  {organization.description || 'Gestión de inventario para mascotas y forrajería'}
+                  {organization.description || 'Sistema de gestión comercial integral'}
                 </p>
               </div>
             </div>

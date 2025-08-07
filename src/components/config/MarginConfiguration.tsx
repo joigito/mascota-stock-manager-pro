@@ -9,7 +9,7 @@ import { useSystemConfiguration, CategoryMargins } from '@/hooks/useSystemConfig
 // Categorías con sus labels para mostrar
 const CATEGORY_LABELS: Record<string, string> = {
   mascotas: 'Mascotas',
-  forrajeria: 'Forrajería',
+  forrajeria: 'Alimentos',
   electronica: 'Electrónica',
   ropa: 'Ropa y Textiles',
   hogar: 'Hogar y Decoración',
@@ -146,7 +146,7 @@ export const MarginConfiguration: React.FC = () => {
               <h4 className="font-medium mb-2">Márgenes Bajos (10-25%)</h4>
               <div className="text-sm space-y-1 text-muted-foreground">
                 <div>• Alimentación y bebidas</div>
-                <div>• Forrajería y productos básicos</div>
+                <div>• Alimentos y productos básicos</div>
                 <div>• Vehículos y maquinaria</div>
                 <div>• Productos de alta rotación</div>
               </div>

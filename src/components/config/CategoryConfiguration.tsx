@@ -231,7 +231,7 @@ export const CategoryConfiguration: React.FC = () => {
             </h4>
             <p className="text-sm text-green-800 dark:text-green-200">
               Este sistema se adapta automáticamente a tu tipo de negocio. 
-              Habilita solo las categorías que necesites: Informática, Forrajería, 
+              Habilita solo las categorías que necesites: Informática, Alimentación, 
               Ferretería, Textil, etc. Mantén tu interfaz limpia y enfocada.
             </p>
           </div>

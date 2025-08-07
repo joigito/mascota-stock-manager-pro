@@ -9,7 +9,7 @@ import { useSystemConfiguration, CategoryMinStock } from '@/hooks/useSystemConfi
 // Categorías con sus labels para mostrar
 const CATEGORY_LABELS: Record<string, string> = {
   mascotas: 'Mascotas',
-  forrajeria: 'Forrajería',
+  forrajeria: 'Alimentos',
   electronica: 'Electrónica',
   ropa: 'Ropa y Textiles',
   hogar: 'Hogar y Decoración',

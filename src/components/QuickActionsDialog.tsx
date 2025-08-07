@@ -149,7 +149,7 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                     Abrir Configuración Avanzada
                   </Button>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Haz que tu sistema se adapte a cualquier rubro: forrajería, electrónica, ropa, servicios y más.
+                    Haz que tu sistema se adapte a cualquier rubro: alimentación, electrónica, ropa, servicios y más.
                   </p>
                 </CardContent>
               </Card>
