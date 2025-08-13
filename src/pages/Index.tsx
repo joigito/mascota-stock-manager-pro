@@ -161,25 +161,21 @@ const Index = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
+          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-5' : 'grid-cols-4'}`}>
             <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Inicio</span>
               <span className="sm:hidden">Inicio</span>
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
-              <span className="hidden sm:inline">Inventario</span>
-              <span className="sm:hidden">Stock</span>
-            </TabsTrigger>
             <TabsTrigger value="sales" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               Ventas
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Productos</span>
+              <span className="sm:hidden">Prod.</span>
             </TabsTrigger>
             <TabsTrigger value="customers" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Clientes</span>
               <span className="sm:hidden">Clientes</span>
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
-              <span className="hidden sm:inline">Reportes</span>
-              <span className="sm:hidden">Rep.</span>
             </TabsTrigger>
             {(isSuperAdmin || isOrgAdmin) && (
               <TabsTrigger value="admin" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
@@ -201,7 +197,7 @@ const Index = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                   <div className="flex items-center space-x-2">
                     <Package className="h-5 w-5 text-green-600" />
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Inventario de Productos</h2>
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Productos</h2>
                   </div>
                   <Button
                     onClick={() => setIsAddDialogOpen(true)}
