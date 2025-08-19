@@ -8,7 +8,7 @@ import type { Database } from '@/integrations/supabase/types';
 export interface Product {
   id: string;
   name: string;
-  category: Database['public']['Enums']['product_category'];
+  category: string; // Changed from enum to string for custom categories
   stock: number;
   minStock: number;
   price: number;

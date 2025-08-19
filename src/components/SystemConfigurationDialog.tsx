@@ -9,6 +9,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Package, Ruler, TrendingUp } from 'lucide-react';
 import { CategoryConfiguration } from './config/CategoryConfiguration';
+import CustomCategoryManager from './config/CustomCategoryManager';
 import { UnitConfiguration } from './config/UnitConfiguration';
 import { StockConfiguration } from './config/StockConfiguration';
 import { MarginConfiguration } from './config/MarginConfiguration';
@@ -22,7 +23,7 @@ export const SystemConfigurationDialog: React.FC<SystemConfigurationDialogProps>
   open,
   onOpenChange
 }) => {
-  const [activeTab, setActiveTab] = useState('categories');
+  const [activeTab, setActiveTab] = useState('custom-categories');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -38,10 +39,14 @@ export const SystemConfigurationDialog: React.FC<SystemConfigurationDialogProps>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="custom-categories" className="flex items-center space-x-2">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">Mis Categorías</span>
+            </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center space-x-2">
               <Package className="h-4 w-4" />
-              <span className="hidden sm:inline">Categorías</span>
+              <span className="hidden sm:inline">Sistema</span>
             </TabsTrigger>
             <TabsTrigger value="units" className="flex items-center space-x-2">
               <Ruler className="h-4 w-4" />
@@ -57,10 +62,14 @@ export const SystemConfigurationDialog: React.FC<SystemConfigurationDialogProps>
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="custom-categories" className="mt-6">
+            <CustomCategoryManager />
+          </TabsContent>
+
           <TabsContent value="categories" className="mt-6">
             <CategoryConfiguration />
           </TabsContent>
-
+          
           <TabsContent value="units" className="mt-6">
             <UnitConfiguration />
           </TabsContent>

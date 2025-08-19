@@ -7,13 +7,46 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
+      custom_categories: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           address: string | null
@@ -164,7 +197,7 @@ export type Database = {
       }
       products: {
         Row: {
-          category: Database["public"]["Enums"]["product_category"]
+          category: string
           cost_price: number | null
           created_at: string
           description: string | null
@@ -178,7 +211,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          category: Database["public"]["Enums"]["product_category"]
+          category: string
           cost_price?: number | null
           created_at?: string
           description?: string | null
@@ -192,7 +225,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          category?: Database["public"]["Enums"]["product_category"]
+          category?: string
           cost_price?: number | null
           created_at?: string
           description?: string | null
@@ -420,9 +453,9 @@ export type Database = {
       detect_duplicate_products: {
         Args: { user_uuid: string }
         Returns: {
-          product_name: string
           category: string
           duplicate_count: number
+          product_name: string
         }[]
       }
       generate_invitation_token: {
@@ -446,25 +479,29 @@ export type Database = {
       get_users_with_roles: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
-          email: string
           created_at: string
+          email: string
           last_sign_in_at: string
+          user_id: string
         }[]
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
       is_organization_admin: {
-        Args: { _user_id: string; _org_id: string }
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      migrate_organization_categories: {
+        Args: { _org_id: string }
+        Returns: undefined
+      }
       user_belongs_to_org: {
-        Args: { _user_id: string; _org_id: string }
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
     }

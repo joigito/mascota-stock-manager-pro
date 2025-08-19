@@ -22,7 +22,7 @@ import { Product } from "@/hooks/useProducts";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthPrompt } from "@/components/AuthPrompt";
-import { useSystemConfiguration } from "@/hooks/useSystemConfiguration";
+import { useCustomCategories } from "@/hooks/useCustomCategories";
 
 interface AddProductDialogProps {
   open: boolean;
@@ -34,7 +34,7 @@ interface AddProductDialogProps {
 const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddProductDialogProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { getAvailableCategoriesForSelect } = useSystemConfiguration();
+  const { categories } = useCustomCategories();
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -198,11 +198,19 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
-                {getAvailableCategoriesForSelect().map((category) => (
-                  <SelectItem key={category.key} value={category.key}>
-                    {category.label}
-                  </SelectItem>
-                ))}
+                {categories.length > 0 ? (
+                  categories.map((category) => (
+                    <SelectItem key={category.id} value={category.name}>
+                      {category.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    No hay categorías disponibles.
+                    <br />
+                    <span className="text-xs">Ve a Configuración → Mis Categorías para crear una.</span>
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
