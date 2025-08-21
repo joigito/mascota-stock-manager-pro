@@ -60,7 +60,11 @@ export const useCustomCategories = () => {
   };
 
   const createCategory = async (name: string, description?: string) => {
+    console.log('createCategory: Starting creation with:', { name, description, user: !!user, currentOrganization: !!currentOrganization });
+    console.log('createCategory: Current organization details:', currentOrganization);
+    
     if (!user || !currentOrganization) {
+      console.log('createCategory: Missing user or organization', { user: !!user, currentOrganization: !!currentOrganization });
       toast({
         title: "Error",
         description: "Usuario o organización no válidos",
