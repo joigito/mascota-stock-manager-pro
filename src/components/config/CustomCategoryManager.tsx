@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCustomCategories } from '@/hooks/useCustomCategories';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface CategoryFormData {
@@ -18,6 +19,7 @@ interface CategoryFormData {
 
 const CustomCategoryManager: React.FC = () => {
   const { categories, loading, createCategory, updateCategory, deleteCategory, migrateExistingCategories } = useCustomCategories();
+  const { currentOrganization } = useOrganization();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [formData, setFormData] = useState<CategoryFormData>({ name: '', description: '' });
@@ -74,6 +76,20 @@ const CustomCategoryManager: React.FC = () => {
           <Skeleton className="h-16 w-full" />
         </div>
       </div>
+    );
+  }
+
+  if (!currentOrganization) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+          <Package className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">Selecciona una organización</h3>
+          <p className="text-muted-foreground">
+            Para gestionar categorías personalizadas, primero debes seleccionar una organización específica.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
