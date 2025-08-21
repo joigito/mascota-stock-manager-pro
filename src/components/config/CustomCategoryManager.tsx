@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useCustomCategories } from '@/hooks/useCustomCategories';
 import { useOrganization } from '@/hooks/useOrganization';
+import { OrganizationSelector } from '@/components/OrganizationSelector';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface CategoryFormData {
@@ -82,12 +83,15 @@ const CustomCategoryManager: React.FC = () => {
   if (!currentOrganization) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center space-y-4">
           <Package className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">Selecciona una organización</h3>
-          <p className="text-muted-foreground">
-            Para gestionar categorías personalizadas, primero debes seleccionar una organización específica.
-          </p>
+          <div>
+            <h3 className="text-lg font-medium mb-2">Selecciona una organización</h3>
+            <p className="text-muted-foreground mb-4">
+              Para gestionar categorías personalizadas, primero debes seleccionar una organización específica.
+            </p>
+          </div>
+          <OrganizationSelector />
         </CardContent>
       </Card>
     );
