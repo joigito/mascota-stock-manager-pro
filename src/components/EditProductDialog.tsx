@@ -154,7 +154,9 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
                   <div className="p-4 text-center text-sm text-muted-foreground">
                     No hay categorías disponibles.
                     <br />
-                    <span className="text-xs">Ve a Configuración → Mis Categorías para crear una.</span>
+                    <span className="text-xs">
+                      Primero selecciona una organización, luego ve a Configuración → Mis Categorías para crear categorías.
+                    </span>
                   </div>
                 )}
               </SelectContent>

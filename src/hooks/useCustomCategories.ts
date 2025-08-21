@@ -24,7 +24,13 @@ export const useCustomCategories = () => {
   const { toast } = useToast();
 
   const loadCategories = async () => {
-    if (!user || !currentOrganization) {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
+    if (!currentOrganization) {
+      setCategories([]);
       setLoading(false);
       return;
     }
