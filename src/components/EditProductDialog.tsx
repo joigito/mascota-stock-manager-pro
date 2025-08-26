@@ -22,6 +22,10 @@ import {
 import { Product } from "@/hooks/useProducts";
 import { useToast } from "@/components/ui/use-toast";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
+import { usePriceHistory } from "@/hooks/usePriceHistory";
+import { Button as HistoryButton } from "@/components/ui/button";
+import { History } from "lucide-react";
+import PriceHistoryDialog from "@/components/PriceHistoryDialog";
 
 interface EditProductDialogProps {
   product: Product;
@@ -33,6 +37,8 @@ interface EditProductDialogProps {
 const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: EditProductDialogProps) => {
   const { toast } = useToast();
   const { categories } = useCustomCategories();
+  const { recordPriceChange } = usePriceHistory();
+  const [showPriceHistory, setShowPriceHistory] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -57,7 +63,7 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
     }
   }, [product]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.stock || !formData.minStock || !formData.price || !formData.costPrice) {
@@ -79,6 +85,21 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
         variant: "destructive",
       });
       return;
+    }
+
+    // Registrar cambios de precios si hay diferencias
+    const oldCostPrice = product.costPrice;
+    const oldSellingPrice = product.price;
+    
+    if (oldCostPrice !== costPrice || oldSellingPrice !== price) {
+      await recordPriceChange(
+        product.id,
+        oldCostPrice,
+        costPrice,
+        oldSellingPrice,
+        price,
+        "Actualización manual del producto"
+      );
     }
 
     onUpdateProduct({
@@ -120,10 +141,23 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar Producto</DialogTitle>
-          <DialogDescription>
-            Modifica la información del producto.
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle>Editar Producto</DialogTitle>
+              <DialogDescription>
+                Modifica la información del producto.
+              </DialogDescription>
+            </div>
+            <HistoryButton
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPriceHistory(true)}
+              className="flex items-center gap-2"
+            >
+              <History className="h-4 w-4" />
+              Historial
+            </HistoryButton>
+          </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -251,6 +285,12 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
           </DialogFooter>
         </form>
       </DialogContent>
+      
+      <PriceHistoryDialog 
+        product={product}
+        open={showPriceHistory}
+        onOpenChange={setShowPriceHistory}
+      />
     </Dialog>
   );
 };

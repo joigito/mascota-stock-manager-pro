@@ -165,6 +165,45 @@ export type Database = {
         }
         Relationships: []
       }
+      price_history: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          new_cost_price: number | null
+          new_selling_price: number | null
+          old_cost_price: number | null
+          old_selling_price: number | null
+          organization_id: string
+          product_id: string
+          reason: string | null
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          new_cost_price?: number | null
+          new_selling_price?: number | null
+          old_cost_price?: number | null
+          old_selling_price?: number | null
+          organization_id: string
+          product_id: string
+          reason?: string | null
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          new_cost_price?: number | null
+          new_selling_price?: number | null
+          old_cost_price?: number | null
+          old_selling_price?: number | null
+          organization_id?: string
+          product_id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       product_audit: {
         Row: {
           action: string
@@ -192,6 +231,51 @@ export type Database = {
           old_data?: Json | null
           product_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      product_batches: {
+        Row: {
+          batch_date: string
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          organization_id: string
+          product_id: string
+          purchase_price: number
+          quantity_purchased: number
+          quantity_remaining: number
+          supplier: string | null
+          updated_at: string
+        }
+        Insert: {
+          batch_date?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          product_id: string
+          purchase_price: number
+          quantity_purchased: number
+          quantity_remaining: number
+          supplier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          batch_date?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          product_id?: string
+          purchase_price?: number
+          quantity_purchased?: number
+          quantity_remaining?: number
+          supplier?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -444,6 +528,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_fifo_cost: {
+        Args: {
+          p_organization_id: string
+          p_product_id: string
+          p_quantity: number
+        }
+        Returns: number
+      }
       clean_duplicate_products: {
         Args: { user_uuid: string }
         Returns: {
@@ -498,6 +590,14 @@ export type Database = {
       }
       migrate_organization_categories: {
         Args: { _org_id: string }
+        Returns: undefined
+      }
+      update_batches_after_sale: {
+        Args: {
+          p_organization_id: string
+          p_product_id: string
+          p_quantity: number
+        }
         Returns: undefined
       }
       user_belongs_to_org: {

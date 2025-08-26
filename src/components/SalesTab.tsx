@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
+import { useBatches } from "@/hooks/useBatches";
 import ProductSelector from "./sales/ProductSelector";
 import SalesList from "./sales/SalesList";
 import CustomerSelector from "./sales/CustomerSelector";
@@ -32,6 +33,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { toast } = useToast();
   const { addSale } = useSales();
   const { customers, addCustomer } = useCustomers();
+  const { updateBatchesAfterSale } = useBatches();
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
@@ -168,10 +170,14 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     }
 
     try {
-      // Actualizar stock de productos
+      // Actualizar lotes FIFO y stock de productos
       for (const item of saleItems) {
         const product = products.find(p => p.id === item.productId);
         if (product) {
+          // Actualizar lotes usando FIFO
+          await updateBatchesAfterSale(item.productId, item.quantity);
+          
+          // Actualizar stock del producto
           await onUpdateProduct(item.productId, {
             stock: product.stock - item.quantity
           });
@@ -196,16 +202,17 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
       toast({
         title: "Venta completada",
-        description: `Venta por $${getTotalAmount().toLocaleString()} con ganancia de $${getTotalProfit().toLocaleString()} (${getAverageMargin().toFixed(1)}% margen)`,
+        description: `Venta por $${getTotalAmount().toLocaleString()} con ganancia de $${getTotalProfit().toLocaleString()} (${getAverageMargin().toFixed(1)}% margen) - Usando cálculo FIFO`,
       });
 
       // Limpiar formulario
       setSaleItems([]);
       setCustomerName("Cliente General");
     } catch (error) {
+      console.error('Error completing sale:', error);
       toast({
         title: "Error",
-        description: "No se pudo completar la venta",
+        description: "No se pudo completar la venta. Verifique que hay suficiente stock en lotes.",
         variant: "destructive",
       });
     }
