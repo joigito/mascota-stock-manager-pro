@@ -220,11 +220,43 @@ export const useSales = () => {
     }
   };
 
+  const deleteSale = async (saleId: string) => {
+    if (!user || !currentOrganization) {
+      return { error: new Error('Usuario no autenticado o organización no seleccionada') };
+    }
+
+    try {
+      // Primero eliminar los items de la venta
+      const { error: itemsError } = await supabase
+        .from('sale_items')
+        .delete()
+        .eq('sale_id', saleId);
+
+      if (itemsError) throw itemsError;
+
+      // Luego eliminar la venta
+      const { error: saleError } = await supabase
+        .from('sales')
+        .delete()
+        .eq('id', saleId);
+
+      if (saleError) throw saleError;
+
+      // Actualizar el estado local
+      setSales(prev => prev.filter(sale => sale.id !== saleId));
+      return { error: null };
+    } catch (error) {
+      console.error('Error eliminando venta:', error);
+      return { error };
+    }
+  };
+
   return {
     sales,
     loading,
     syncing,
     addSale,
+    deleteSale,
     syncSales
   };
 };

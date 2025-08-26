@@ -1,13 +1,41 @@
 
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { Sale } from "@/types/sales";
+import { useSales } from "@/hooks/useSales";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface RecentSalesCardProps {
   filteredSales: Sale[];
 }
 
 const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
+  const { toast } = useToast();
+  const { deleteSale } = useSales();
+  const { isAdmin, isSuperAdmin } = useOrganization();
+
+  const canDeleteSales = isAdmin() || isSuperAdmin();
+
+  const handleDeleteSale = async (saleId: string, saleTotal: number, customerName: string) => {
+    const { error } = await deleteSale(saleId);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la venta",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Venta eliminada",
+        description: `Venta de ${customerName} por $${saleTotal.toLocaleString()} eliminada exitosamente`,
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -32,12 +60,45 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
                     {new Date(sale.date).toLocaleDateString()} - {sale.items.length} productos
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-semibold">${sale.total.toLocaleString()}</div>
-                  <div className="text-sm text-green-600">
-                    +${(sale.totalProfit || 0).toLocaleString()} 
-                    ({(sale.averageMargin || 0).toFixed(1)}%)
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <div className="font-semibold">${sale.total.toLocaleString()}</div>
+                    <div className="text-sm text-green-600">
+                      +${(sale.totalProfit || 0).toLocaleString()} 
+                      ({(sale.averageMargin || 0).toFixed(1)}%)
+                    </div>
                   </div>
+                  {canDeleteSales && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Eliminar venta?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción eliminará permanentemente la venta de {sale.customer} por ${sale.total.toLocaleString()}.
+                            Esta acción no se puede deshacer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-red-600 hover:bg-red-700"
+                            onClick={() => handleDeleteSale(sale.id, sale.total, sale.customer)}
+                          >
+                            Eliminar venta
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
               </div>
             ))}
