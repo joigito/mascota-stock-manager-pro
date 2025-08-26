@@ -161,7 +161,7 @@ const Index = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-5' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Inicio</span>
               <span className="sm:hidden">Inicio</span>
@@ -176,6 +176,10 @@ const Index = () => {
             <TabsTrigger value="customers" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Clientes</span>
               <span className="sm:hidden">Clientes</span>
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Reportes</span>
+              <span className="sm:hidden">Rep.</span>
             </TabsTrigger>
             {(isSuperAdmin || isOrgAdmin) && (
               <TabsTrigger value="admin" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
