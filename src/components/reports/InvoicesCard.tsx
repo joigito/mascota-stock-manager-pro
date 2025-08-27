@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import InvoicePreview from "./InvoicePreview";
 
 const InvoicesCard = () => {
   const { invoices, loading } = useInvoices();
   const { toast } = useToast();
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const formatInvoiceNumber = (number: number, puntoVenta: number) => {
     return `${String(puntoVenta).padStart(4, '0')}-${String(number).padStart(8, '0')}`;
@@ -38,19 +42,14 @@ const InvoicesCard = () => {
     }
   };
 
-  const handlePrintInvoice = (invoiceId: string, invoiceNumber: number, puntoVenta: number) => {
-    // Por ahora mostrar un mensaje, más adelante implementaremos la impresión
-    toast({
-      title: "Función de impresión",
-      description: `Impresión de factura ${formatInvoiceNumber(invoiceNumber, puntoVenta)} estará disponible próximamente`,
-    });
+  const handlePrintInvoice = (invoice: any) => {
+    setSelectedInvoice(invoice);
+    setIsPreviewOpen(true);
   };
 
-  const handleViewInvoice = (invoiceId: string, invoiceNumber: number, puntoVenta: number) => {
-    toast({
-      title: "Vista previa",
-      description: `Vista previa de factura ${formatInvoiceNumber(invoiceNumber, puntoVenta)} estará disponible próximamente`,
-    });
+  const handleViewInvoice = (invoice: any) => {
+    setSelectedInvoice(invoice);
+    setIsPreviewOpen(true);
   };
 
   const handleDownloadInvoice = (invoiceId: string, invoiceNumber: number, puntoVenta: number) => {
@@ -58,6 +57,14 @@ const InvoicesCard = () => {
       title: "Descarga",
       description: `Descarga de factura ${formatInvoiceNumber(invoiceNumber, puntoVenta)} estará disponible próximamente`,
     });
+  };
+
+  const handlePrintComplete = () => {
+    toast({
+      title: "Impresión iniciada",
+      description: "La factura se ha enviado a la impresora",
+    });
+    setIsPreviewOpen(false);
   };
 
   if (loading) {
@@ -123,7 +130,7 @@ const InvoicesCard = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleViewInvoice(invoice.id, invoice.invoice_number, invoice.punto_venta)}
+                    onClick={() => handleViewInvoice(invoice)}
                     className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   >
                     <Eye className="h-4 w-4" />
@@ -131,7 +138,7 @@ const InvoicesCard = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePrintInvoice(invoice.id, invoice.invoice_number, invoice.punto_venta)}
+                    onClick={() => handlePrintInvoice(invoice)}
                     className="text-green-600 hover:text-green-700 hover:bg-green-50"
                   >
                     <Printer className="h-4 w-4" />
@@ -150,6 +157,13 @@ const InvoicesCard = () => {
           </div>
         )}
       </CardContent>
+      
+      <InvoicePreview
+        invoice={selectedInvoice}
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        onPrint={handlePrintComplete}
+      />
     </Card>
   );
 };
