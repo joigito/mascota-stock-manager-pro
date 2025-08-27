@@ -112,7 +112,7 @@ export const useInvoices = () => {
         .from('invoices')
         .insert([invoiceData])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
