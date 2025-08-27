@@ -782,6 +782,15 @@ export type Database = {
         Args: { input_text: string }
         Returns: string
       }
+      get_organization_by_slug: {
+        Args: { org_slug: string }
+        Returns: {
+          description: string
+          id: string
+          name: string
+          slug: string
+        }[]
+      }
       get_user_default_organization: {
         Args: { user_uuid: string }
         Returns: string
