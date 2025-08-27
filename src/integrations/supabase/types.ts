@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      afip_configurations: {
+        Row: {
+          ambiente: string
+          certificado_path: string | null
+          clave_privada_path: string | null
+          condicion_iva: string
+          created_at: string
+          created_by: string
+          cuit: string
+          domicilio_comercial: string | null
+          id: string
+          is_active: boolean
+          organization_id: string
+          punto_venta: number
+          razon_social: string
+          updated_at: string
+        }
+        Insert: {
+          ambiente?: string
+          certificado_path?: string | null
+          clave_privada_path?: string | null
+          condicion_iva?: string
+          created_at?: string
+          created_by: string
+          cuit: string
+          domicilio_comercial?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          punto_venta?: number
+          razon_social: string
+          updated_at?: string
+        }
+        Update: {
+          ambiente?: string
+          certificado_path?: string | null
+          clave_privada_path?: string | null
+          condicion_iva?: string
+          created_at?: string
+          created_by?: string
+          cuit?: string
+          domicilio_comercial?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          punto_venta?: number
+          razon_social?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afip_configurations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_categories: {
         Row: {
           created_at: string
@@ -51,33 +110,42 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          cuit_dni: string | null
           email: string | null
+          fiscal_address: string | null
           id: string
           name: string
           organization_id: string
           phone: string | null
+          tax_condition_code: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           address?: string | null
           created_at?: string
+          cuit_dni?: string | null
           email?: string | null
+          fiscal_address?: string | null
           id?: string
           name: string
           organization_id: string
           phone?: string | null
+          tax_condition_code?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           address?: string | null
           created_at?: string
+          cuit_dni?: string | null
           email?: string | null
+          fiscal_address?: string | null
           id?: string
           name?: string
           organization_id?: string
           phone?: string | null
+          tax_condition_code?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -87,6 +155,132 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_tax_condition_code_fkey"
+            columns: ["tax_condition_code"]
+            isOneToOne: false
+            referencedRelation: "tax_conditions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      invoice_tax_details: {
+        Row: {
+          alicuota_iva: number
+          base_imponible: number
+          created_at: string
+          id: string
+          importe_iva: number
+          invoice_id: string
+        }
+        Insert: {
+          alicuota_iva: number
+          base_imponible: number
+          created_at?: string
+          id?: string
+          importe_iva: number
+          invoice_id: string
+        }
+        Update: {
+          alicuota_iva?: number
+          base_imponible?: number
+          created_at?: string
+          id?: string
+          importe_iva?: number
+          invoice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_tax_details_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          cae: string | null
+          created_at: string
+          created_by: string
+          estado: string
+          fecha_emision: string
+          fecha_vto_cae: string | null
+          id: string
+          importe_exento: number
+          importe_iva: number
+          importe_neto: number
+          importe_total: number
+          invoice_number: number
+          observaciones: string | null
+          organization_id: string
+          pdf_path: string | null
+          punto_venta: number
+          qr_data: string | null
+          sale_id: string
+          tipo_comprobante: number
+          updated_at: string
+        }
+        Insert: {
+          cae?: string | null
+          created_at?: string
+          created_by: string
+          estado?: string
+          fecha_emision?: string
+          fecha_vto_cae?: string | null
+          id?: string
+          importe_exento?: number
+          importe_iva?: number
+          importe_neto: number
+          importe_total: number
+          invoice_number: number
+          observaciones?: string | null
+          organization_id: string
+          pdf_path?: string | null
+          punto_venta: number
+          qr_data?: string | null
+          sale_id: string
+          tipo_comprobante: number
+          updated_at?: string
+        }
+        Update: {
+          cae?: string | null
+          created_at?: string
+          created_by?: string
+          estado?: string
+          fecha_emision?: string
+          fecha_vto_cae?: string | null
+          id?: string
+          importe_exento?: number
+          importe_iva?: number
+          importe_neto?: number
+          importe_total?: number
+          invoice_number?: number
+          observaciones?: string | null
+          organization_id?: string
+          pdf_path?: string | null
+          punto_venta?: number
+          qr_data?: string | null
+          sale_id?: string
+          tipo_comprobante?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
             referencedColumns: ["id"]
           },
         ]
@@ -140,6 +334,7 @@ export type Database = {
           created_at: string
           created_by: string
           description: string | null
+          electronic_invoicing_enabled: boolean
           id: string
           name: string
           slug: string
@@ -149,6 +344,7 @@ export type Database = {
           created_at?: string
           created_by: string
           description?: string | null
+          electronic_invoicing_enabled?: boolean
           id?: string
           name: string
           slug: string
@@ -158,6 +354,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string | null
+          electronic_invoicing_enabled?: boolean
           id?: string
           name?: string
           slug?: string
@@ -469,6 +666,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tax_conditions: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          requires_cuit: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          requires_cuit?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          requires_cuit?: boolean
+        }
+        Relationships: []
       }
       user_organizations: {
         Row: {

@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Building2, Users, Trash2 } from 'lucide-react';
+import { Plus, Building2, Users, Trash2, Receipt } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { ElectronicInvoicingConfig } from './ElectronicInvoicingConfig';
 
 
 interface Organization {
@@ -31,6 +32,7 @@ export const OrganizationManager: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgDescription, setNewOrgDescription] = useState('');
+  const [selectedOrgForInvoicing, setSelectedOrgForInvoicing] = useState<string | null>(null);
 
   React.useEffect(() => {
     loadAllOrganizations();
@@ -236,6 +238,14 @@ export const OrganizationManager: React.FC = () => {
                 <Badge variant="secondary">
                   {organizations.find(userOrg => userOrg.organization.id === org.id) ? 'Miembro' : 'No miembro'}
                 </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedOrgForInvoicing(org.id)}
+                >
+                  <Receipt className="w-4 h-4 mr-1" />
+                  Facturación
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -257,6 +267,22 @@ export const OrganizationManager: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog para configuración de facturación electrónica */}
+      <Dialog open={!!selectedOrgForInvoicing} onOpenChange={() => setSelectedOrgForInvoicing(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Configuración de Facturación Electrónica
+            </DialogTitle>
+          </DialogHeader>
+          {selectedOrgForInvoicing && (
+            <div className="py-4">
+              <ElectronicInvoicingConfig organizationId={selectedOrgForInvoicing} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
