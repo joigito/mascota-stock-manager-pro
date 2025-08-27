@@ -8,6 +8,7 @@ import { Sale } from "@/types/sales";
 import { useSales } from "@/hooks/useSales";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useElectronicInvoicing } from "@/hooks/useElectronicInvoicing";
+import { useInvoices } from "@/hooks/useInvoices";
 
 interface RecentSalesCardProps {
   filteredSales: Sale[];
@@ -18,6 +19,7 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
   const { deleteSale } = useSales();
   const { isAdmin, isSuperAdmin, currentOrganization } = useOrganization();
   const { isEnabled: isElectronicInvoicingEnabled } = useElectronicInvoicing(currentOrganization?.id);
+  const { createInvoiceFromSale, loading: invoiceLoading } = useInvoices();
 
   const canDeleteSales = isAdmin() || isSuperAdmin();
   const canCreateInvoices = (isAdmin() || isSuperAdmin()) && isElectronicInvoicingEnabled;
@@ -41,17 +43,9 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
 
   const handleCreateInvoice = async (sale: Sale) => {
     try {
-      // Aquí implementaremos la lógica de facturación más adelante
-      toast({
-        title: "Próximamente",
-        description: `Función de facturación para la venta de ${sale.customer} estará disponible próximamente`,
-      });
+      await createInvoiceFromSale(sale);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo crear la factura",
-        variant: "destructive",
-      });
+      console.error('Error creating invoice:', error);
     }
   };
 
@@ -93,10 +87,11 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleCreateInvoice(sale)}
+                        disabled={invoiceLoading}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         <FileText className="h-4 w-4" />
-                        Facturar
+                        {invoiceLoading ? "Creando..." : "Facturar"}
                       </Button>
                     )}
                     {canDeleteSales && (
