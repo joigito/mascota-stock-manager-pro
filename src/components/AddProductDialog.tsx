@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Product } from "@/hooks/useProducts";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,7 +43,9 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
     minStock: "",
     price: "",
     costPrice: "",
-    description: ""
+    description: "",
+    hasVariants: false,
+    baseSku: ""
   });
   const [loading, setLoading] = useState(false);
 
@@ -97,11 +100,13 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
       const result = await onAddProduct({
         name: formData.name.trim(),
         category: formData.category as any,
-        stock,
+        stock: formData.hasVariants ? 0 : stock,
         minStock,
         price,
         costPrice,
-        description: formData.description.trim() || undefined
+        description: formData.description.trim() || undefined,
+        hasVariants: formData.hasVariants,
+        baseSku: formData.baseSku.trim() || undefined
       });
 
       if (result.error === null) {
@@ -119,7 +124,9 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
           minStock: "",
           price: "",
           costPrice: "",
-          description: ""
+          description: "",
+          hasVariants: false,
+          baseSku: ""
         });
         
         onOpenChange(false);
@@ -229,7 +236,13 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                 min="0"
                 max="1000000"
                 required
+                disabled={formData.hasVariants}
               />
+              {formData.hasVariants && (
+                <p className="text-xs text-muted-foreground">
+                  El stock se manejará por variantes
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="minStock">Stock Mínimo</Label>
@@ -243,6 +256,36 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                 max="1000000"
                 required
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="baseSku">SKU Base (opcional)</Label>
+              <Input
+                id="baseSku"
+                value={formData.baseSku}
+                onChange={(e) => handleInputChange("baseSku", e.target.value)}
+                placeholder="Ej: NIKE-AIR-MAX"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 pt-6">
+                <Switch
+                  id="hasVariants"
+                  checked={formData.hasVariants}
+                  onCheckedChange={(checked) => 
+                    setFormData(prev => ({ ...prev, hasVariants: checked }))
+                  }
+                />
+                <Label htmlFor="hasVariants">Producto con variantes</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {formData.hasVariants 
+                  ? "Podrás agregar colores, talles después"
+                  : "Producto simple sin variantes"
+                }
+              </p>
             </div>
           </div>
 
@@ -277,13 +320,24 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
             </div>
           </div>
 
-          {formData.price && formData.costPrice && (
+          {formData.price && formData.costPrice && !formData.hasVariants && (
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
               <div className="text-sm text-green-800">
                 <strong>Margen de ganancia: {calculateMargin()}%</strong>
               </div>
               <div className="text-xs text-green-600 mt-1">
                 Ganancia por unidad: ${(parseFloat(formData.price) - parseFloat(formData.costPrice)).toLocaleString()}
+              </div>
+            </div>
+          )}
+
+          {formData.hasVariants && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-sm text-blue-800">
+                <strong>Producto con variantes</strong>
+              </div>
+              <div className="text-xs text-blue-600 mt-1">
+                Después de crear el producto podrás agregar colores, talles y configurar stock específico para cada variante.
               </div>
             </div>
           )}

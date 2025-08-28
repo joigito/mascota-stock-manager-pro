@@ -15,6 +15,8 @@ export interface Product {
   costPrice: number;
   description?: string;
   organization_id: string;
+  hasVariants?: boolean;
+  baseSku?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -174,6 +176,8 @@ export const useProducts = () => {
         costPrice: Number(product.cost_price || 0),
         description: product.description,
         organization_id: product.organization_id,
+        hasVariants: product.has_variants || false,
+        baseSku: product.base_sku,
         created_at: product.created_at,
         updated_at: product.updated_at,
       }));
@@ -239,6 +243,8 @@ export const useProducts = () => {
         price: productData.price,
         cost_price: productData.costPrice,
         description: productData.description,
+        has_variants: productData.hasVariants || false,
+        base_sku: productData.baseSku,
         user_id: user.id,
         organization_id: currentOrganization.id
       };
@@ -272,6 +278,8 @@ export const useProducts = () => {
         costPrice: Number(data.cost_price),
         description: data.description,
         organization_id: data.organization_id,
+        hasVariants: data.has_variants || false,
+        baseSku: data.base_sku,
         created_at: data.created_at,
         updated_at: data.updated_at,
       };
@@ -298,6 +306,8 @@ export const useProducts = () => {
       if (updates.price !== undefined) updateData.price = updates.price;
       if (updates.costPrice !== undefined) updateData.cost_price = updates.costPrice;
       if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.hasVariants !== undefined) updateData.has_variants = updates.hasVariants;
+      if (updates.baseSku !== undefined) updateData.base_sku = updates.baseSku;
 
       console.log('updateProduct: About to update with data:', updateData);
       console.log('updateProduct: Product ID:', id);

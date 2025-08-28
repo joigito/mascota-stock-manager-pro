@@ -401,6 +401,33 @@ export type Database = {
         }
         Relationships: []
       }
+      product_attributes: {
+        Row: {
+          attribute_name: string
+          attribute_value: string
+          created_at: string
+          id: string
+          organization_id: string
+          product_id: string
+        }
+        Insert: {
+          attribute_name: string
+          attribute_value: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          product_id: string
+        }
+        Update: {
+          attribute_name?: string
+          attribute_value?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          product_id?: string
+        }
+        Relationships: []
+      }
       product_audit: {
         Row: {
           action: string
@@ -476,12 +503,65 @@ export type Database = {
         }
         Relationships: []
       }
+      product_variants: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          min_stock: number
+          organization_id: string
+          price_adjustment: number | null
+          product_id: string
+          size: string | null
+          sku: string | null
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          min_stock?: number
+          organization_id: string
+          price_adjustment?: number | null
+          product_id: string
+          size?: string | null
+          sku?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          min_stock?: number
+          organization_id?: string
+          price_adjustment?: number | null
+          product_id?: string
+          size?: string | null
+          sku?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
+          base_sku: string | null
           category: string
           cost_price: number | null
           created_at: string
           description: string | null
+          has_variants: boolean
           id: string
           min_stock: number
           name: string
@@ -492,10 +572,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          base_sku?: string | null
           category: string
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          has_variants?: boolean
           id?: string
           min_stock: number
           name: string
@@ -506,10 +588,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          base_sku?: string | null
           category?: string
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          has_variants?: boolean
           id?: string
           min_stock?: number
           name?: string
@@ -791,6 +875,10 @@ export type Database = {
           slug: string
         }[]
       }
+      get_product_total_stock: {
+        Args: { p_product_id: string }
+        Returns: number
+      }
       get_user_default_organization: {
         Args: { user_uuid: string }
         Returns: string
@@ -830,6 +918,15 @@ export type Database = {
           p_organization_id: string
           p_product_id: string
           p_quantity: number
+        }
+        Returns: undefined
+      }
+      update_variant_batches_after_sale: {
+        Args: {
+          p_organization_id: string
+          p_product_id: string
+          p_quantity: number
+          p_variant_id: string
         }
         Returns: undefined
       }

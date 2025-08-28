@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/hooks/useProducts";
 import EditProductDialog from "./EditProductDialog";
+import ProductVariantManager from "./variants/ProductVariantManager";
 
 interface ProductListProps {
   products: Product[];
   onUpdateProduct: (id: string, product: Partial<Product>) => void;
   onDeleteProduct: (id: string) => void;
+  onProductChange?: () => void;
 }
 
-const ProductList = ({ products, onUpdateProduct, onDeleteProduct }: ProductListProps) => {
+const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChange }: ProductListProps) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const formatCurrency = (amount: number) => {
@@ -111,12 +113,21 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct }: ProductList
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className="text-gray-500">Stock:</span>
-                  <div className="font-medium">{product.stock} unidades</div>
+                  <div className="font-medium">
+                    {product.hasVariants ? (
+                      <span className="text-blue-600">Ver variantes</span>
+                    ) : (
+                      `${product.stock} unidades`
+                    )}
+                  </div>
                   <div className="text-gray-400">Mín: {product.minStock}</div>
                 </div>
                 <div>
                   <span className="text-gray-500">Precio:</span>
                   <div className="font-medium">{formatCurrency(product.price)}</div>
+                  {product.hasVariants && (
+                    <div className="text-xs text-blue-600">Precio base</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -164,11 +175,20 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct }: ProductList
                   {getCategoryBadge(product.category)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{product.stock} unidades</div>
+                  <div className="text-sm text-gray-900">
+                    {product.hasVariants ? (
+                      <span className="text-blue-600">Ver variantes</span>
+                    ) : (
+                      `${product.stock} unidades`
+                    )}
+                  </div>
                   <div className="text-xs text-gray-500">Mín: {product.minStock}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatCurrency(product.price)}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{formatCurrency(product.price)}</div>
+                  {product.hasVariants && (
+                    <div className="text-xs text-blue-600">Precio base</div>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getStockStatus(product.stock, product.minStock)}
