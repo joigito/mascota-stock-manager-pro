@@ -892,8 +892,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_product_sku: {
+        Args: { category: string; org_id: string; product_name: string }
+        Returns: string
+      }
       generate_slug: {
         Args: { input_text: string }
+        Returns: string
+      }
+      generate_variant_sku: {
+        Args: {
+          base_sku: string
+          color?: string
+          org_id?: string
+          size?: string
+        }
         Returns: string
       }
       get_organization_by_slug: {
