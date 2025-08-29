@@ -178,14 +178,15 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Agregar Nuevo Producto</DialogTitle>
           <DialogDescription>
             Completa la información del producto para agregarlo al inventario.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="max-h-[calc(90vh-120px)] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="space-y-4 pr-2">
           <div className="space-y-2">
             <Label htmlFor="name">Nombre del Producto</Label>
             <Input
@@ -363,6 +364,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
             </Button>
           </DialogFooter>
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
