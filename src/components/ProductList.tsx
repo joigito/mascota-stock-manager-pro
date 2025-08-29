@@ -217,6 +217,18 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
         </table>
       </div>
 
+      {/* Product Variant Managers */}
+      {products.filter(product => product.hasVariants).map((product) => (
+        <div key={`variants-${product.id}`} className="mt-6">
+          <ProductVariantManager
+            productId={product.id}
+            productName={product.name}
+            hasVariants={product.hasVariants}
+            onVariantsChange={onProductChange}
+          />
+        </div>
+      ))}
+
       {editingProduct && (
         <EditProductDialog
           product={editingProduct}

@@ -52,7 +52,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.stock || !formData.minStock || !formData.price || !formData.costPrice) {
+    if (!formData.name.trim() || (!formData.hasVariants && !formData.stock) || !formData.minStock || !formData.price || !formData.costPrice) {
       toast({
         title: "Error",
         description: "Por favor completa todos los campos obligatorios",
@@ -62,12 +62,12 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
     }
 
     // Validation
-    const stock = parseInt(formData.stock);
+    const stock = formData.hasVariants ? 0 : parseInt(formData.stock);
     const minStock = parseInt(formData.minStock);
     const price = parseFloat(formData.price);
     const costPrice = parseFloat(formData.costPrice);
 
-    if (stock < 0 || minStock < 0 || price < 0 || costPrice < 0) {
+    if ((!formData.hasVariants && stock < 0) || minStock < 0 || price < 0 || costPrice < 0) {
       toast({
         title: "Error",
         description: "Los valores no pueden ser negativos",
@@ -235,7 +235,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                 placeholder="0"
                 min="0"
                 max="1000000"
-                required
+                required={!formData.hasVariants}
                 disabled={formData.hasVariants}
               />
               {formData.hasVariants && (
