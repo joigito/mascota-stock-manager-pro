@@ -4,6 +4,8 @@ import { Edit, Trash2, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/hooks/useProducts";
+import { useProductSearch } from "@/hooks/useProductSearch";
+import SearchInput from "@/components/ui/SearchInput";
 import EditProductDialog from "./EditProductDialog";
 import ProductVariantManager from "./variants/ProductVariantManager";
 
@@ -16,6 +18,7 @@ interface ProductListProps {
 
 const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChange }: ProductListProps) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const { searchTerm, setSearchTerm, filteredProducts, resultCount, hasSearchTerm } = useProductSearch(products);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -64,25 +67,63 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
   if (products.length === 0) {
     return (
       <div className="p-6 sm:p-8 text-center">
-        <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay productos</h3>
-        <p className="text-gray-500">Comienza agregando tu primer producto al inventario.</p>
+        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-lg font-medium mb-2">No hay productos</h3>
+        <p className="text-muted-foreground">Comienza agregando tu primer producto al inventario.</p>
+      </div>
+    );
+  }
+
+  if (hasSearchTerm && filteredProducts.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            className="w-full sm:max-w-sm"
+          />
+        </div>
+        <div className="p-6 sm:p-8 text-center">
+          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">No se encontraron productos</h3>
+          <p className="text-muted-foreground">
+            No hay productos que coincidan con "{searchTerm}"
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <>
+      {/* Search Bar */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          className="w-full sm:max-w-sm"
+        />
+        {hasSearchTerm && (
+          <div className="text-sm text-muted-foreground">
+            {resultCount} producto{resultCount !== 1 ? 's' : ''} encontrado{resultCount !== 1 ? 's' : ''}
+          </div>
+        )}
+      </div>
+
       {/* Mobile Card View */}
       <div className="block sm:hidden">
-        <div className="divide-y divide-gray-200">
-          {products.map((product) => (
+        <div className="divide-y divide-border">
+          {filteredProducts.map((product) => (
             <div key={product.id} className="p-4 space-y-3">
               <div className="flex justify-between items-start">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-900 truncate">{product.name}</h3>
+                  <h3 className="text-sm font-medium truncate">{product.name}</h3>
+                  {product.baseSku && (
+                    <p className="text-xs text-muted-foreground mt-1">SKU: {product.baseSku}</p>
+                  )}
                   {product.description && (
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
                   )}
                 </div>
                 <div className="flex space-x-1 ml-2">
@@ -160,14 +201,17 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {products.map((product) => (
+          <tbody className="bg-background divide-y divide-border">
+            {filteredProducts.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
-                    <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                    <div className="text-sm font-medium">{product.name}</div>
+                    {product.baseSku && (
+                      <div className="text-xs text-muted-foreground">SKU: {product.baseSku}</div>
+                    )}
                     {product.description && (
-                      <div className="text-sm text-gray-500">{product.description}</div>
+                      <div className="text-sm text-muted-foreground">{product.description}</div>
                     )}
                   </div>
                 </td>

@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Product } from "@/hooks/useProducts";
+import { useProductSearch } from "@/hooks/useProductSearch";
+import SearchInput from "@/components/ui/SearchInput";
 import VariantSelector from "@/components/variants/VariantSelector";
 
 interface ProductSelectorWithVariantsProps {
@@ -40,10 +42,21 @@ const ProductSelectorWithVariants = ({
     }
   });
 
+  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(availableProducts);
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
   return (
     <div className="space-y-4">
+      {/* Search Bar */}
+      <div className="space-y-2">
+        <Label>Buscar Producto</Label>
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar por nombre o código..."
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Producto</Label>
@@ -52,10 +65,15 @@ const ProductSelectorWithVariants = ({
               <SelectValue placeholder="Seleccionar producto" />
             </SelectTrigger>
             <SelectContent>
-              {availableProducts.map((product) => (
+              {filteredProducts.map((product) => (
                 <SelectItem key={product.id} value={product.id}>
                   <div className="flex items-center justify-between w-full">
-                    <span>{product.name}</span>
+                    <div className="flex flex-col items-start">
+                      <span>{product.name}</span>
+                      {product.baseSku && (
+                        <span className="text-xs text-muted-foreground">SKU: {product.baseSku}</span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       {product.hasVariants ? (
                         <span>Con variantes</span>
