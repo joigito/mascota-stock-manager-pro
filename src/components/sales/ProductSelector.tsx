@@ -47,23 +47,26 @@ const ProductSelector = ({
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar producto" />
           </SelectTrigger>
-            <SelectContent>
-              {filteredProducts.map((product) => (
-                <SelectItem key={product.id} value={product.id}>
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex flex-col items-start">
-                      <span>{product.name}</span>
-                      {product.baseSku && (
-                        <span className="text-xs text-muted-foreground">SKU: {product.baseSku}</span>
-                      )}
+          <SelectContent>
+              {(() => {
+                console.log("🔍 Rendering SelectContent with products:", filteredProducts.map(p => p.name));
+                return filteredProducts.map((product) => (
+                  <SelectItem key={product.id} value={product.id}>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex flex-col items-start">
+                        <span>{product.name}</span>
+                        {product.baseSku && (
+                          <span className="text-xs text-muted-foreground">SKU: {product.baseSku}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>Stock: {product.stock}</span>
+                        <span>${product.price}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>Stock: {product.stock}</span>
-                      <span>${product.price}</span>
-                    </div>
-                  </div>
-                </SelectItem>
-              ))}
+                  </SelectItem>
+                ));
+              })()}
           </SelectContent>
         </Select>
       </div>
