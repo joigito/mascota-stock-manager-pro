@@ -613,6 +613,36 @@ export type Database = {
           },
         ]
       }
+      role_change_audit: {
+        Row: {
+          action: string
+          changed_by_user_id: string
+          changed_user_id: string
+          created_at: string | null
+          id: string
+          new_role: Database["public"]["Enums"]["app_role"]
+          old_role: Database["public"]["Enums"]["app_role"] | null
+        }
+        Insert: {
+          action: string
+          changed_by_user_id: string
+          changed_user_id: string
+          created_at?: string | null
+          id?: string
+          new_role: Database["public"]["Enums"]["app_role"]
+          old_role?: Database["public"]["Enums"]["app_role"] | null
+        }
+        Update: {
+          action?: string
+          changed_by_user_id?: string
+          changed_user_id?: string
+          created_at?: string | null
+          id?: string
+          new_role?: Database["public"]["Enums"]["app_role"]
+          old_role?: Database["public"]["Enums"]["app_role"] | null
+        }
+        Relationships: []
+      }
       sale_items: {
         Row: {
           cost_price: number | null
