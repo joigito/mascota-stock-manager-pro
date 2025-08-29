@@ -43,7 +43,7 @@ const ProductSelector = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div className="space-y-2">
         <Label>Producto</Label>
-        <Select value={selectedProductId} onValueChange={onProductSelect}>
+        <Select key={`product-select-${searchTerm}`} value={selectedProductId} onValueChange={onProductSelect}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar producto" />
           </SelectTrigger>
