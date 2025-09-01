@@ -9,13 +9,15 @@ import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useBatches } from "@/hooks/useBatches";
-import ProductSelector from "./sales/ProductSelector";
+import ProductSelectorWithVariants from "./sales/ProductSelectorWithVariants";
 import SalesList from "./sales/SalesList";
 import CustomerSelector from "./sales/CustomerSelector";
 
 interface SaleItem {
   productId: string;
   productName: string;
+  variantId?: string;
+  variantInfo?: string;
   quantity: number;
   price: number;
   costPrice: number;
@@ -36,6 +38,8 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { updateBatchesAfterSale } = useBatches();
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
+  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
+  const [finalPrice, setFinalPrice] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
   const [customerName, setCustomerName] = useState<string>("Cliente General");
 
@@ -52,33 +56,57 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     const product = products.find(p => p.id === selectedProductId);
     if (!product) return;
 
-    if (quantity > product.stock) {
+    // For products with variants, check variant stock; for simple products, check product stock
+    let availableStock = 0;
+    let currentPrice = finalPrice || product.price;
+    let variantInfo = "";
+
+    if (product.hasVariants && selectedVariantId) {
+      // We'll need to get variant stock from the variant itself
+      // For now, assume the finalPrice and stock validation is handled by the selector
+      availableStock = 999; // Placeholder - should come from variant
+      variantInfo = `Variante: ${selectedVariantId}`;
+    } else if (!product.hasVariants) {
+      availableStock = product.stock;
+    } else {
       toast({
-        title: "Stock insuficiente",
-        description: `Solo hay ${product.stock} unidades disponibles`,
+        title: "Error",
+        description: "Por favor selecciona una variante para este producto",
         variant: "destructive",
       });
       return;
     }
 
-    const existingItemIndex = saleItems.findIndex(item => item.productId === selectedProductId);
+    if (quantity > availableStock && availableStock !== 999) {
+      toast({
+        title: "Stock insuficiente",
+        description: `Solo hay ${availableStock} unidades disponibles`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const itemKey = selectedVariantId ? `${selectedProductId}-${selectedVariantId}` : selectedProductId;
+    const existingItemIndex = saleItems.findIndex(item => 
+      item.productId === selectedProductId && item.variantId === selectedVariantId
+    );
     
     if (existingItemIndex >= 0) {
       const newItems = [...saleItems];
       const newQuantity = newItems[existingItemIndex].quantity + quantity;
       
-      if (newQuantity > product.stock) {
+      if (newQuantity > availableStock && availableStock !== 999) {
         toast({
           title: "Stock insuficiente",
-          description: `Solo hay ${product.stock} unidades disponibles`,
+          description: `Solo hay ${availableStock} unidades disponibles`,
           variant: "destructive",
         });
         return;
       }
       
-      const subtotal = newQuantity * product.price;
-      const profit = newQuantity * (product.price - (product.costPrice || 0));
-      const margin = product.price > 0 ? ((product.price - (product.costPrice || 0)) / product.price * 100) : 0;
+      const subtotal = newQuantity * currentPrice;
+      const profit = newQuantity * (currentPrice - (product.costPrice || 0));
+      const margin = currentPrice > 0 ? ((currentPrice - (product.costPrice || 0)) / currentPrice * 100) : 0;
       
       newItems[existingItemIndex].quantity = newQuantity;
       newItems[existingItemIndex].subtotal = subtotal;
@@ -86,15 +114,17 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       newItems[existingItemIndex].margin = margin;
       setSaleItems(newItems);
     } else {
-      const subtotal = quantity * product.price;
-      const profit = quantity * (product.price - (product.costPrice || 0));
-      const margin = product.price > 0 ? ((product.price - (product.costPrice || 0)) / product.price * 100) : 0;
+      const subtotal = quantity * currentPrice;
+      const profit = quantity * (currentPrice - (product.costPrice || 0));
+      const margin = currentPrice > 0 ? ((currentPrice - (product.costPrice || 0)) / currentPrice * 100) : 0;
       
       const newItem: SaleItem = {
         productId: selectedProductId,
         productName: product.name,
+        variantId: selectedVariantId,
+        variantInfo: variantInfo || undefined,
         quantity,
-        price: product.price,
+        price: currentPrice,
         costPrice: product.costPrice || 0,
         subtotal,
         profit,
@@ -104,23 +134,29 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     }
 
     setSelectedProductId("");
+    setSelectedVariantId(undefined);
+    setFinalPrice(0);
     setQuantity(1);
   };
 
-  const removeItemFromSale = (productId: string) => {
-    setSaleItems(saleItems.filter(item => item.productId !== productId));
+  const removeItemFromSale = (productId: string, variantId?: string) => {
+    setSaleItems(saleItems.filter(item => 
+      !(item.productId === productId && item.variantId === variantId)
+    ));
   };
 
-  const updateItemQuantity = (productId: string, newQuantity: number) => {
+  const updateItemQuantity = (productId: string, newQuantity: number, variantId?: string) => {
     if (newQuantity <= 0) {
-      removeItemFromSale(productId);
+      removeItemFromSale(productId, variantId);
       return;
     }
 
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    if (newQuantity > product.stock) {
+    // For variant products, we'll need proper stock validation
+    // For now, allow the update but this should be improved with actual variant stock
+    if (!product.hasVariants && newQuantity > product.stock) {
       toast({
         title: "Stock insuficiente",
         description: `Solo hay ${product.stock} unidades disponibles`,
@@ -130,7 +166,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     }
 
     setSaleItems(saleItems.map(item => {
-      if (item.productId === productId) {
+      if (item.productId === productId && item.variantId === variantId) {
         const subtotal = newQuantity * item.price;
         const profit = newQuantity * (item.price - item.costPrice);
         return { 
@@ -249,11 +285,17 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
           />
 
           {/* Product Selection */}
-          <ProductSelector
+          <ProductSelectorWithVariants
             products={products}
             selectedProductId={selectedProductId}
+            selectedVariantId={selectedVariantId}
             quantity={quantity}
+            finalPrice={finalPrice}
             onProductSelect={setSelectedProductId}
+            onVariantSelect={(variantId, price) => {
+              setSelectedVariantId(variantId || undefined);
+              setFinalPrice(price);
+            }}
             onQuantityChange={setQuantity}
             onAddItem={addItemToSale}
           />
@@ -262,8 +304,8 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
           <div className="space-y-4">
             <SalesList
               saleItems={saleItems}
-              onUpdateQuantity={updateItemQuantity}
-              onRemoveItem={removeItemFromSale}
+              onUpdateQuantity={(productId, newQuantity, variantId) => updateItemQuantity(productId, newQuantity, variantId)}
+              onRemoveItem={(productId, variantId) => removeItemFromSale(productId, variantId)}
               totalAmount={getTotalAmount()}
               totalProfit={getTotalProfit()}
               averageMargin={getAverageMargin()}

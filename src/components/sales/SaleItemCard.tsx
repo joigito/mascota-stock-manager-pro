@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 interface SaleItem {
   productId: string;
   productName: string;
+  variantId?: string;
+  variantInfo?: string;
   quantity: number;
   price: number;
   costPrice: number;
@@ -16,8 +18,8 @@ interface SaleItem {
 
 interface SaleItemCardProps {
   item: SaleItem;
-  onUpdateQuantity: (productId: string, newQuantity: number) => void;
-  onRemoveItem: (productId: string) => void;
+  onUpdateQuantity: (newQuantity: number) => void;
+  onRemoveItem: () => void;
 }
 
 const SaleItemCard = ({ item, onUpdateQuantity, onRemoveItem }: SaleItemCardProps) => {
@@ -26,6 +28,9 @@ const SaleItemCard = ({ item, onUpdateQuantity, onRemoveItem }: SaleItemCardProp
       <div className="flex items-center justify-between mb-2">
         <div className="flex-1">
           <span className="font-medium">{item.productName}</span>
+          {item.variantInfo && (
+            <div className="text-xs text-muted-foreground">{item.variantInfo}</div>
+          )}
           <div className="text-sm text-gray-600">
             ${item.price} x {item.quantity} = ${item.subtotal.toLocaleString()}
           </div>
@@ -34,7 +39,7 @@ const SaleItemCard = ({ item, onUpdateQuantity, onRemoveItem }: SaleItemCardProp
           <Button
             size="sm"
             variant="outline"
-            onClick={() => onUpdateQuantity(item.productId, item.quantity - 1)}
+            onClick={() => onUpdateQuantity(item.quantity - 1)}
           >
             <Minus className="h-3 w-3" />
           </Button>
@@ -42,14 +47,14 @@ const SaleItemCard = ({ item, onUpdateQuantity, onRemoveItem }: SaleItemCardProp
           <Button
             size="sm"
             variant="outline"
-            onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
+            onClick={() => onUpdateQuantity(item.quantity + 1)}
           >
             <Plus className="h-3 w-3" />
           </Button>
           <Button
             size="sm"
             variant="destructive"
-            onClick={() => onRemoveItem(item.productId)}
+            onClick={() => onRemoveItem()}
           >
             Eliminar
           </Button>

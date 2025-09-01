@@ -5,6 +5,8 @@ import SalesSummary from "./SalesSummary";
 interface SaleItem {
   productId: string;
   productName: string;
+  variantId?: string;
+  variantInfo?: string;
   quantity: number;
   price: number;
   costPrice: number;
@@ -15,8 +17,8 @@ interface SaleItem {
 
 interface SalesListProps {
   saleItems: SaleItem[];
-  onUpdateQuantity: (productId: string, newQuantity: number) => void;
-  onRemoveItem: (productId: string) => void;
+  onUpdateQuantity: (productId: string, newQuantity: number, variantId?: string) => void;
+  onRemoveItem: (productId: string, variantId?: string) => void;
   totalAmount: number;
   totalProfit: number;
   averageMargin: number;
@@ -40,10 +42,10 @@ const SalesList = ({
       <div className="space-y-3">
         {saleItems.map((item) => (
           <SaleItemCard
-            key={item.productId}
+            key={`${item.productId}-${item.variantId || 'default'}`}
             item={item}
-            onUpdateQuantity={onUpdateQuantity}
-            onRemoveItem={onRemoveItem}
+            onUpdateQuantity={(newQuantity) => onUpdateQuantity(item.productId, newQuantity, item.variantId)}
+            onRemoveItem={() => onRemoveItem(item.productId, item.variantId)}
           />
         ))}
       </div>
