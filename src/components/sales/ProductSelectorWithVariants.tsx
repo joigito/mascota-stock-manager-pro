@@ -60,7 +60,7 @@ const ProductSelectorWithVariants = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Producto</Label>
-          <Select value={selectedProductId} onValueChange={onProductSelect}>
+          <Select value={selectedProductId} onValueChange={onProductSelect} key={searchTerm}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar producto" />
             </SelectTrigger>
