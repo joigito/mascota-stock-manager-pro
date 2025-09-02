@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Product } from "@/hooks/useProducts";
 import { useProductSearch } from "@/hooks/useProductSearch";
 import SearchInput from "@/components/ui/SearchInput";
@@ -41,8 +41,16 @@ const ProductSelectorWithVariants = ({
       return p.stock > 0;
     }
   });
-  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(availableProducts);
+  const { searchTerm, setSearchTerm, filteredProducts, hasSearchTerm } = useProductSearch(availableProducts);
   const selectedProduct = products.find(p => p.id === selectedProductId);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
 
   return (
     <div className="space-y-4">
@@ -56,43 +64,56 @@ const ProductSelectorWithVariants = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Producto</Label>
-          <Select key={`product-select-${searchTerm}`} value={selectedProductId} onValueChange={onProductSelect}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar producto" />
-            </SelectTrigger>
-            <SelectContent>
-              {(() => {
-                console.log("🔍 Rendering SelectContent with products:", filteredProducts.map(p => p.name));
-                return filteredProducts.map((product) => (
-                <SelectItem key={product.id} value={product.id}>
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex flex-col items-start">
-                      <span>{product.name}</span>
+      {/* Product Grid */}
+      <div className="space-y-4">
+        <Label>Seleccionar Producto</Label>
+
+        {filteredProducts.length === 0 ? (
+          <div className="p-6 text-center border rounded-lg bg-muted/50">
+            <Package className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">
+              {hasSearchTerm ? `No se encontraron productos para "${searchTerm}"` : "No hay productos disponibles"}
+            </p>
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+            <div className="divide-y">
+              {filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  onClick={() => onProductSelect(product.id)}
+                  className={`p-3 cursor-pointer hover:bg-accent transition-colors ${
+                    selectedProductId === product.id ? 'bg-primary/10 border-l-4 border-l-primary' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-medium truncate">{product.name}</h4>
+                        {product.hasVariants && (
+                          <Badge variant="secondary" className="text-xs">Variantes</Badge>
+                        )}
+                      </div>
                       {product.baseSku && (
-                        <span className="text-xs text-muted-foreground">SKU: {product.baseSku}</span>
+                        <p className="text-xs text-muted-foreground">SKU: {product.baseSku}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      {product.hasVariants ? (
-                        <span>Con variantes</span>
-                      ) : (
-                        <>
-                          <span>Stock: {product.stock}</span>
-                          <span>${product.price}</span>
-                        </>
+                    <div className="text-right text-xs space-y-1">
+                      <div className="font-medium">{formatCurrency(product.price)}</div>
+                      {!product.hasVariants && (
+                        <div className="text-muted-foreground">Stock: {product.stock}</div>
                       )}
                     </div>
                   </div>
-                </SelectItem>
-                ));
-              })()}
-            </SelectContent>
-          </Select>
-        </div>
-        
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Quantity and Add Button */}
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Cantidad</Label>
           <Input
