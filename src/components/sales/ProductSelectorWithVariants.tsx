@@ -32,9 +32,7 @@ const ProductSelectorWithVariants = ({
   onQuantityChange,
   onAddItem
 }: ProductSelectorWithVariantsProps) => {
-  const { searchTerm, setSearchTerm, filteredProducts: searchedProducts } = useProductSearch(products);
-  
-  const filteredProducts = searchedProducts.filter(p => {
+  const availableProducts = products.filter(p => {
     if (p.hasVariants) {
       // For variant products, we'll check stock at variant level
       return true;
@@ -43,6 +41,7 @@ const ProductSelectorWithVariants = ({
       return p.stock > 0;
     }
   });
+  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(availableProducts);
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
   return (
@@ -60,12 +59,14 @@ const ProductSelectorWithVariants = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Producto</Label>
-          <Select value={selectedProductId} onValueChange={onProductSelect} key={searchTerm}>
+          <Select key={`product-select-${searchTerm}`} value={selectedProductId} onValueChange={onProductSelect}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar producto" />
             </SelectTrigger>
             <SelectContent>
-              {filteredProducts.map((product) => (
+              {(() => {
+                console.log("🔍 Rendering SelectContent with products:", filteredProducts.map(p => p.name));
+                return filteredProducts.map((product) => (
                 <SelectItem key={product.id} value={product.id}>
                   <div className="flex items-center justify-between w-full">
                     <div className="flex flex-col items-start">
@@ -86,7 +87,8 @@ const ProductSelectorWithVariants = ({
                     </div>
                   </div>
                 </SelectItem>
-              ))}
+                ));
+              })()}
             </SelectContent>
           </Select>
         </div>
