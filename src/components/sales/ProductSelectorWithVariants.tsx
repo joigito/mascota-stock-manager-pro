@@ -32,7 +32,9 @@ const ProductSelectorWithVariants = ({
   onQuantityChange,
   onAddItem
 }: ProductSelectorWithVariantsProps) => {
-  const availableProducts = products.filter(p => {
+  const { searchTerm, setSearchTerm, filteredProducts: searchedProducts } = useProductSearch(products);
+  
+  const filteredProducts = searchedProducts.filter(p => {
     if (p.hasVariants) {
       // For variant products, we'll check stock at variant level
       return true;
@@ -41,8 +43,6 @@ const ProductSelectorWithVariants = ({
       return p.stock > 0;
     }
   });
-
-  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(availableProducts);
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
   return (
