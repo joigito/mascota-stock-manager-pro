@@ -12,6 +12,7 @@ import { Settings, Users, Database, Activity, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { UserManagement } from '@/components/UserManagement';
 import { SystemConfigurationDialog } from '@/components/SystemConfigurationDialog';
+import { DatabaseBackupManager } from '@/components/DatabaseBackupManager';
 
 interface QuickActionsDialogProps {
   open: boolean;
@@ -195,6 +196,26 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
           onOpenChange={setSystemConfigOpen} 
         />
       </>
+    );
+  }
+
+  // Special handling for database backup
+  if (actionType === 'backup') {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Database className="h-5 w-5" />
+              <span>Gestión de Respaldos de Base de Datos</span>
+            </DialogTitle>
+            <DialogDescription>
+              Crea respaldos manuales y restaura la base de datos desde archivos de respaldo
+            </DialogDescription>
+          </DialogHeader>
+          <DatabaseBackupManager />
+        </DialogContent>
+      </Dialog>
     );
   }
 
