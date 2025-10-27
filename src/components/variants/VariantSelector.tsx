@@ -20,14 +20,14 @@ const VariantSelector = ({
   selectedVariantId 
 }: VariantSelectorProps) => {
   const { variants, loading } = useProductVariants(productId);
-  const [selectedColorSize, setSelectedColorSize] = useState<string>("");
+  const [selectedId, setSelectedId] = useState<string>(selectedVariantId || "");
 
   useEffect(() => {
+    // Keep local selected id in sync with prop
     if (selectedVariantId) {
       const variant = variants.find(v => v.id === selectedVariantId);
       if (variant) {
-        const key = `${variant.color || ''}-${variant.size || ''}`;
-        setSelectedColorSize(key);
+        setSelectedId(variant.id);
       }
     }
   }, [selectedVariantId, variants]);
@@ -35,17 +35,14 @@ const VariantSelector = ({
   const availableVariants = variants.filter(v => v.is_active && v.stock > 0);
 
   const handleVariantChange = (value: string) => {
-    setSelectedColorSize(value);
-    
+    setSelectedId(value);
+
     if (!value) {
       onVariantSelect(null, basePrice);
       return;
     }
 
-    const [color, size] = value.split('-');
-    const variant = variants.find(v => 
-      (v.color || '') === color && (v.size || '') === size
-    );
+    const variant = variants.find(v => v.id === value);
 
     if (variant) {
       const finalPrice = basePrice + variant.price_adjustment;
@@ -65,11 +62,7 @@ const VariantSelector = ({
     );
   }
 
-  const selectedVariant = variants.find(v => 
-    selectedColorSize && selectedColorSize.includes('-') &&
-    (v.color || '') === selectedColorSize.split('-')[0] && 
-    (v.size || '') === selectedColorSize.split('-')[1]
-  );
+  const selectedVariant = variants.find(v => v.id === selectedId);
 
   return (
     <div className="space-y-3">
@@ -80,17 +73,16 @@ const VariantSelector = ({
         </div>
       </div>
       
-      <Select value={selectedColorSize} onValueChange={handleVariantChange}>
+      <Select value={selectedId} onValueChange={handleVariantChange}>
         <SelectTrigger>
           <SelectValue placeholder="Seleccionar variante" />
         </SelectTrigger>
         <SelectContent>
           {availableVariants.map((variant) => {
-            const key = `${variant.color || ''}-${variant.size || ''}`;
             const finalPrice = basePrice + variant.price_adjustment;
             
             return (
-              <SelectItem key={variant.id} value={key}>
+              <SelectItem key={variant.id} value={variant.id}>
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2">
                     {variant.color && (

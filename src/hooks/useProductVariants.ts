@@ -46,9 +46,7 @@ export const useProductVariants = (productId?: string) => {
         .from("product_variants")
         .select("*")
         .eq("product_id", productId)
-        .eq("organization_id", currentOrganization.id)
-        .order("color", { ascending: true })
-        .order("size", { ascending: true });
+        .eq("organization_id", currentOrganization.id);
 
       if (variantsError) throw variantsError;
 
@@ -60,7 +58,21 @@ export const useProductVariants = (productId?: string) => {
 
       if (attributesError) throw attributesError;
 
-      setVariants(variantsData || []);
+      // Ordenar client-side por color y luego size para evitar problemas con la
+      // cláusula `order` en la petición REST (algunas configuraciones de PostgREST
+      // pueden rechazar la query). Esto mantiene la UX y es más robusto.
+      const loaded = variantsData || [];
+      const sorted = [...loaded].sort((a, b) => {
+        const colorA = (a.color || "").toString();
+        const colorB = (b.color || "").toString();
+        const cmpColor = colorA.localeCompare(colorB);
+        if (cmpColor !== 0) return cmpColor;
+        const sizeA = (a.size || "").toString();
+        const sizeB = (b.size || "").toString();
+        return sizeA.localeCompare(sizeB);
+      });
+
+      setVariants(sorted);
       setAttributes(attributesData || []);
     } catch (error) {
       console.error("Error loading variants:", error);
