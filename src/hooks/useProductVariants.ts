@@ -42,11 +42,14 @@ export const useProductVariants = (productId?: string) => {
 
     setLoading(true);
     try {
+      // Server-side ordered fetch (preferred now that DB schema is updated)
       const { data: variantsData, error: variantsError } = await supabase
         .from("product_variants")
         .select("*")
         .eq("product_id", productId)
-        .eq("organization_id", currentOrganization.id);
+        .eq("organization_id", currentOrganization.id)
+        .order('color', { ascending: true })
+        .order('size', { ascending: true });
 
       if (variantsError) throw variantsError;
 
@@ -61,18 +64,8 @@ export const useProductVariants = (productId?: string) => {
       // Ordenar client-side por color y luego size para evitar problemas con la
       // cláusula `order` en la petición REST (algunas configuraciones de PostgREST
       // pueden rechazar la query). Esto mantiene la UX y es más robusto.
-      const loaded = variantsData || [];
-      const sorted = [...loaded].sort((a, b) => {
-        const colorA = (a.color || "").toString();
-        const colorB = (b.color || "").toString();
-        const cmpColor = colorA.localeCompare(colorB);
-        if (cmpColor !== 0) return cmpColor;
-        const sizeA = (a.size || "").toString();
-        const sizeB = (b.size || "").toString();
-        return sizeA.localeCompare(sizeB);
-      });
-
-      setVariants(sorted);
+      // Use server-ordered data directly
+      setVariants(variantsData || []);
       setAttributes(attributesData || []);
     } catch (error) {
       console.error("Error loading variants:", error);
@@ -93,7 +86,8 @@ export const useProductVariants = (productId?: string) => {
     }
 
     try {
-      const { data, error } = await supabase
+      // Use server-returning insert for best UX now that schema is healthy
+      const { data: newVariant, error } = await supabase
         .from("product_variants")
         .insert({
           ...variantData,
@@ -105,9 +99,9 @@ export const useProductVariants = (productId?: string) => {
 
       if (error) throw error;
 
-      setVariants(prev => [...prev, data]);
+      await loadVariants();
       toast.success("Variante agregada exitosamente");
-      return data;
+      return newVariant;
     } catch (error) {
       console.error("Error adding variant:", error);
       toast.error("Error al agregar variante");
@@ -122,7 +116,7 @@ export const useProductVariants = (productId?: string) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: updated, error } = await supabase
         .from("product_variants")
         .update(updates)
         .eq("id", id)
@@ -132,11 +126,9 @@ export const useProductVariants = (productId?: string) => {
 
       if (error) throw error;
 
-      setVariants(prev => prev.map(variant => 
-        variant.id === id ? data : variant
-      ));
+      await loadVariants();
       toast.success("Variante actualizada");
-      return data;
+      return updated;
     } catch (error) {
       console.error("Error updating variant:", error);
       toast.error("Error al actualizar variante");
@@ -175,7 +167,7 @@ export const useProductVariants = (productId?: string) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: newAttr, error } = await supabase
         .from("product_attributes")
         .insert({
           ...attributeData,
@@ -185,9 +177,8 @@ export const useProductVariants = (productId?: string) => {
         .single();
 
       if (error) throw error;
-
-      setAttributes(prev => [...prev, data]);
-      return data;
+      await loadVariants();
+      return newAttr;
     } catch (error) {
       console.error("Error adding attribute:", error);
       toast.error("Error al agregar atributo");

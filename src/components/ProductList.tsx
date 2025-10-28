@@ -8,6 +8,7 @@ import { useProductSearch } from "@/hooks/useProductSearch";
 import SearchInput from "@/components/ui/SearchInput";
 import EditProductDialog from "./EditProductDialog";
 import ProductVariantManager from "./variants/ProductVariantManager";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProductListProps {
   products: Product[];
@@ -127,6 +128,31 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                   )}
                 </div>
                 <div className="flex space-x-1 ml-2">
+                  {product.hasVariants && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="p-1 h-8 w-8 text-indigo-600 hover:text-indigo-700"
+                          aria-label={`Gestionar variantes de ${product.name}`}
+                        >
+                          <Package className="h-3 w-3" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Variantes de {product.name}</DialogTitle>
+                        </DialogHeader>
+                        <ProductVariantManager
+                          productId={product.id}
+                          productName={product.name}
+                          hasVariants={product.hasVariants}
+                          onVariantsChange={onProductChange}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -238,22 +264,50 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                   {getStockStatus(product.stock, product.minStock)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingProduct(product)}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDeleteProduct(product.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    {product.hasVariants && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-indigo-600 hover:text-indigo-700"
+                            aria-label={`Gestionar variantes de ${product.name}`}
+                          >
+                            <Package className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Variantes de {product.name}</DialogTitle>
+                          </DialogHeader>
+                          <ProductVariantManager
+                            productId={product.id}
+                            productName={product.name}
+                            hasVariants={product.hasVariants}
+                            onVariantsChange={onProductChange}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingProduct(product)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDeleteProduct(product.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -261,17 +315,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
         </table>
       </div>
 
-      {/* Product Variant Managers */}
-      {products.filter(product => product.hasVariants).map((product) => (
-        <div key={`variants-${product.id}`} className="mt-6">
-          <ProductVariantManager
-            productId={product.id}
-            productName={product.name}
-            hasVariants={product.hasVariants}
-            onVariantsChange={onProductChange}
-          />
-        </div>
-      ))}
+      {/* Variant managers are now opened via icon next to each product */}
 
       {editingProduct && (
         <EditProductDialog
