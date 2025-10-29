@@ -5,9 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Building2, Users, ChevronRight } from 'lucide-react';
 import { OrganizationManager } from './OrganizationManager';
 import { OrganizationUserManagement } from './OrganizationUserManagement';
+import VariantAttributeManager from './VariantAttributeManager';
+import { useState } from 'react';
 
 export const OrganizationDashboard: React.FC = () => {
   const { organizations, switchOrganization, loading } = useOrganization();
+  const [openOrgId, setOpenOrgId] = useState<string | undefined>(undefined);
 
   if (loading) {
     return (
@@ -69,7 +72,12 @@ export const OrganizationDashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setOpenOrgId(userOrg.organization.id); }}>
+                      Atributos
+                    </Button>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
               </CardHeader>
               {userOrg.organization.description && (
@@ -84,6 +92,13 @@ export const OrganizationDashboard: React.FC = () => {
         <div className="mt-12">
           <OrganizationManager />
         </div>
+        {openOrgId && (
+          <VariantAttributeManager
+            organizationId={openOrgId}
+            open={Boolean(openOrgId)}
+            onClose={() => setOpenOrgId(undefined)}
+          />
+        )}
       </div>
     </div>
   );
