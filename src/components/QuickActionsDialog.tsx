@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Users, Database, Activity, AlertCircle } from 'lucide-react';
+import { Settings, Users, Database, Activity, AlertCircle, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { UserManagement } from '@/components/UserManagement';
 import { SystemConfigurationDialog } from '@/components/SystemConfigurationDialog';
@@ -30,8 +30,9 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                         const { toast } = useToast();
                         const [loading, setLoading] = useState(false);
                         const [systemConfigOpen, setSystemConfigOpen] = useState(false);
-                        const { currentOrganization } = useOrganization();
+                        const { currentOrganization, organizations } = useOrganization();
                         const [openAttr, setOpenAttr] = useState(false);
+                        const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(undefined);
 
                         const handleAction = async (action: string) => {
                           setLoading(true);
@@ -250,11 +251,81 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
         // Variants modal
         if (actionType === 'variants') {
           return (
-            <VariantAttributeManager
-              organizationId={currentOrganization?.id}
-              open={open}
-              onClose={() => onOpenChange(false)}
-            />
+            <>
+              <Dialog open={open} onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                  setSelectedOrgId(undefined);
+                }
+                onOpenChange(isOpen);
+              }}>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center space-x-2">
+                      {content.icon}
+                      <span>{content.title}</span>
+                    </DialogTitle>
+                    <DialogDescription>
+                      {content.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4 pt-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center space-x-2 text-base">
+                          <Building2 className="h-5 w-5 text-blue-500" />
+                          <span>Seleccionar Tienda</span>
+                        </CardTitle>
+                        <CardDescription>
+                          Elige la organización para gestionar sus atributos.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Organización
+                          </label>
+                          <select
+                            className="w-full border rounded p-2 bg-white"
+                            value={selectedOrgId || ''}
+                            onChange={(e) => setSelectedOrgId(e.target.value || undefined)}
+                          >
+                            <option value="">-- Seleccionar --</option>
+                            {organizations.map((uo) => (
+                              <option key={uo.organization.id} value={uo.organization.id}>{uo.organization.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            if (selectedOrgId) {
+                              setOpenAttr(true);
+                              onOpenChange(false); // Close the selection dialog
+                            }
+                          }}
+                          disabled={!selectedOrgId}
+                          className="w-full"
+                        >
+                          <Settings className="h-4 w-4 mr-2" />
+                          Gestionar Atributos
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {openAttr && selectedOrgId && (
+                <VariantAttributeManager
+                  organizationId={selectedOrgId}
+                  open={openAttr}
+                  onClose={() => {
+                    setOpenAttr(false);
+                    setSelectedOrgId(undefined);
+                  }}
+                />
+              )}
+            </>
           );
         }
 
@@ -305,18 +376,36 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                                         ))}
 
                                         {/* Quick access to Variant Attributes for the selected organization */}
-                                        <Button
-                                          variant="outline"
-                                          className="justify-start h-auto p-4"
-                                          onClick={() => setOpenAttr(true)}
-                                          disabled={!currentOrganization}
-                                        >
-                                          <Activity className="h-4 w-4 mr-3" />
-                                          <div className="text-left">
-                                            <div className="font-medium">Atributos</div>
-                                            <div className="text-sm text-muted-foreground">Gestionar atributos de variantes por tienda</div>
-                                          </div>
-                                        </Button>
+                                        <div className="col-span-1">
+                                          {!currentOrganization && organizations && organizations.length > 0 && (
+                                            <div className="mb-2">
+                                              <label className="block text-xs text-gray-500 mb-1">Seleccionar organización</label>
+                                              <select
+                                                className="w-full border rounded p-2"
+                                                value={selectedOrgId || ''}
+                                                onChange={(e) => setSelectedOrgId(e.target.value || undefined)}
+                                              >
+                                                <option value="">-- Seleccionar --</option>
+                                                {organizations.map((uo) => (
+                                                  <option key={uo.organization.id} value={uo.organization.id}>{uo.organization.name}</option>
+                                                ))}
+                                              </select>
+                                            </div>
+                                          )}
+
+                                          <Button
+                                            variant="outline"
+                                            className="justify-start h-auto p-4"
+                                            onClick={() => setOpenAttr(true)}
+                                            disabled={!currentOrganization && !selectedOrgId}
+                                          >
+                                            <Activity className="h-4 w-4 mr-3" />
+                                            <div className="text-left">
+                                              <div className="font-medium">Atributos</div>
+                                              <div className="text-sm text-muted-foreground">Gestionar atributos de variantes por tienda</div>
+                                            </div>
+                                          </Button>
+                                        </div>
                                       </div>
                                     </CardContent>
                                   </Card>
@@ -325,7 +414,7 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                             </Dialog>
 
                             <VariantAttributeManager
-                              organizationId={currentOrganization?.id}
+                              organizationId={currentOrganization?.id || selectedOrgId}
                               open={openAttr}
                               onClose={() => setOpenAttr(false)}
                             />

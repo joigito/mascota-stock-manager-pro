@@ -8,7 +8,7 @@ type Props = {
 };
 
 export default function VariantAttributeManager({ organizationId, open, onClose }: Props) {
-  const { attributes, loading, add, update, remove } = useVariantAttributes(organizationId);
+  const { attributes, loading, load, add, update, remove } = useVariantAttributes(organizationId);
   const [editing, setEditing] = useState<VariantAttributeDef | null>(null);
   const [form, setForm] = useState({ name: '', key: '', data_type: 'string', options: '', position: 0 });
 
@@ -18,6 +18,10 @@ export default function VariantAttributeManager({ organizationId, open, onClose 
       setForm({ name: '', key: '', data_type: 'string', options: '', position: 0 });
     }
   }, [open]);
+
+  React.useEffect(() => {
+    console.debug('VariantAttributeManager: open=', open, 'organizationId=', organizationId);
+  }, [open, organizationId]);
 
   const startEdit = (a: VariantAttributeDef) => {
     setEditing(a);
@@ -95,6 +99,10 @@ export default function VariantAttributeManager({ organizationId, open, onClose 
               {attributes.length === 0 && <li className="text-sm text-gray-600">No attributes defined for this organization.</li>}
             </ul>
           )}
+          <div className="mt-2">
+            <button className="px-3 py-1 bg-gray-100 rounded mr-2" onClick={() => { console.debug('Reload attributes'); void load(); }}>Reload</button>
+            <button className="px-3 py-1 bg-gray-100 rounded" onClick={() => { console.debug('Attributes:', attributes); alert(`Loaded ${attributes.length} attributes (check console)`); }}>Debug</button>
+          </div>
         </div>
 
         <div className="border-t pt-4">
