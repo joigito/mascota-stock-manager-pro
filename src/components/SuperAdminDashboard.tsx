@@ -42,7 +42,7 @@ export const SuperAdminDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'system' | 'users' | 'backup' | null>(null);
+  const [dialogType, setDialogType] = useState<'system' | 'users' | 'backup' | 'variants' | null>(null);
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState<any>(null);
 
@@ -262,6 +262,17 @@ export const SuperAdminDashboard: React.FC = () => {
               >
                 <Database className="h-4 w-4 mr-2" />
                 Respaldos de Base de Datos
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => {
+                  setDialogType('variants');
+                  setDialogOpen(true);
+                }}
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                Gestionar Variantes
               </Button>
             </CardContent>
           </Card>

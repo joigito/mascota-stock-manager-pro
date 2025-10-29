@@ -19,7 +19,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 interface QuickActionsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  actionType: 'system' | 'users' | 'backup' | null;
+  actionType: 'system' | 'users' | 'backup' | 'variants' | null;
 }
 
 export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
@@ -71,20 +71,27 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                                   { label: 'Auditoría de actividades', action: 'Auditoría de actividades' }
                                 ]
                               };
-                            case 'backup':
-                              return {
-                                title: 'Respaldos de Base de Datos',
-                                description: 'Gestiona los respaldos y restauraciones',
-                                icon: <Database className="h-6 w-6" />,
-                                actions: [
-                                  { label: 'Crear respaldo manual', action: 'Creación de respaldo manual' },
-                                  { label: 'Programar respaldos automáticos', action: 'Programación de respaldos automáticos' },
-                                  { label: 'Restaurar desde respaldo', action: 'Restauración desde respaldo' },
-                                  { label: 'Verificar integridad de datos', action: 'Verificación de integridad de datos' }
-                                ]
-                              };
-                            default:
-                              return null;
+            case 'backup':
+              return {
+                title: 'Respaldos de Base de Datos',
+                description: 'Gestiona los respaldos y restauraciones',
+                icon: <Database className="h-6 w-6" />,
+                actions: [
+                  { label: 'Crear respaldo manual', action: 'Creación de respaldo manual' },
+                  { label: 'Programar respaldos automáticos', action: 'Programación de respaldos automáticos' },
+                  { label: 'Restaurar desde respaldo', action: 'Restauración desde respaldo' },
+                  { label: 'Verificar integridad de datos', action: 'Verificación de integridad de datos' }
+                ]
+              };
+            case 'variants':
+              return {
+                title: 'Gestión de Variantes',
+                description: 'Administra los atributos de variantes por organización',
+                icon: <Activity className="h-6 w-6" />,
+                actions: []
+              };
+            default:
+              return null;
                           }
                         };
 
@@ -212,33 +219,44 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                           );
                         }
 
-                        // Backup modal
-                        if (actionType === 'backup') {
-                          return (
-                            <>
-                              <Dialog open={open} onOpenChange={onOpenChange}>
-                                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                                  <DialogHeader>
-                                    <DialogTitle className="flex items-center space-x-2">
-                                      <Database className="h-5 w-5" />
-                                      <span>Gestión de Respaldos de Base de Datos</span>
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                      Crea respaldos manuales y restaura la base de datos desde archivos de respaldo
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <DatabaseBackupManager />
-                                </DialogContent>
-                              </Dialog>
+        // Backup modal
+        if (actionType === 'backup') {
+          return (
+            <>
+              <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center space-x-2">
+                      <Database className="h-5 w-5" />
+                      <span>Gestión de Respaldos de Base de Datos</span>
+                    </DialogTitle>
+                    <DialogDescription>
+                      Crea respaldos manuales y restaura la base de datos desde archivos de respaldo
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DatabaseBackupManager />
+                </DialogContent>
+              </Dialog>
 
-                              <VariantAttributeManager
-                                organizationId={currentOrganization?.id}
-                                open={openAttr}
-                                onClose={() => setOpenAttr(false)}
-                              />
-                            </>
-                          );
-                        }
+              <VariantAttributeManager
+                organizationId={currentOrganization?.id}
+                open={openAttr}
+                onClose={() => setOpenAttr(false)}
+              />
+            </>
+          );
+        }
+
+        // Variants modal
+        if (actionType === 'variants') {
+          return (
+            <VariantAttributeManager
+              organizationId={currentOrganization?.id}
+              open={open}
+              onClose={() => onOpenChange(false)}
+            />
+          );
+        }
 
                         // Default content
                         return (
