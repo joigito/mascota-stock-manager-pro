@@ -150,8 +150,9 @@ serve(async (req) => {
 
               if (error) {
                 console.error(`Error restoring table ${table}:`, error)
-                errors.push({ table, error: error.message })
-                restoreResults[table] = { success: false, error: error.message }
+                const errorMessage = error.message || 'Unknown error'
+                errors.push({ table, error: errorMessage })
+                restoreResults[table] = { success: false, error: errorMessage }
               } else {
                 console.log(`Restored ${records.length} records to ${table}`)
                 restoreResults[table] = { success: true, recordsRestored: records.length }
@@ -161,8 +162,9 @@ serve(async (req) => {
             }
           } catch (error) {
             console.error(`Failed to restore table ${table}:`, error)
-            errors.push({ table, error: error.message })
-            restoreResults[table] = { success: false, error: error.message }
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+            errors.push({ table, error: errorMessage })
+            restoreResults[table] = { success: false, error: errorMessage }
           }
         } else {
           restoreResults[table] = { success: true, recordsRestored: 0, note: 'No data in backup' }
@@ -207,10 +209,11 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Database backup/restore error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
-        details: error.message 
+        details: errorMessage
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

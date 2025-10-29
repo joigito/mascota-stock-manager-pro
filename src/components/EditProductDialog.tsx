@@ -26,6 +26,9 @@ import { usePriceHistory } from "@/hooks/usePriceHistory";
 import { Button as HistoryButton } from "@/components/ui/button";
 import { History } from "lucide-react";
 import PriceHistoryDialog from "@/components/PriceHistoryDialog";
+import { useVariantAttributes } from "@/hooks/useVariantAttributes";
+import { useOrganization } from "@/hooks/useOrganization";
+import { Badge } from "@/components/ui/badge";
 
 interface EditProductDialogProps {
   product: Product;
@@ -38,6 +41,8 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
   const { toast } = useToast();
   const { categories } = useCustomCategories();
   const { recordPriceChange } = usePriceHistory();
+  const { currentOrganization } = useOrganization();
+  const { attributes } = useVariantAttributes(currentOrganization?.id);
   const [showPriceHistory, setShowPriceHistory] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -208,7 +213,13 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
                 placeholder="0"
                 min="0"
                 required
+                disabled={product.hasVariants}
               />
+              {product.hasVariants && (
+                <p className="text-xs text-muted-foreground">
+                  El stock se maneja por variantes
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-minStock">Stock Mínimo</Label>
@@ -261,6 +272,29 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
               <div className="text-xs text-green-600 mt-1">
                 Ganancia por unidad: ${(parseFloat(formData.price) - parseFloat(formData.costPrice)).toLocaleString()}
               </div>
+            </div>
+          )}
+
+          {product.hasVariants && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-sm text-blue-800">
+                <strong>Producto con variantes</strong>
+              </div>
+              <div className="text-xs text-blue-600 mt-1">
+                Este producto tiene variantes. Usa el gestor de variantes en la lista de productos para administrarlas.
+              </div>
+              {attributes.length > 0 && (
+                <div className="mt-2">
+                  <div className="text-xs text-blue-700 font-medium mb-1">Atributos disponibles:</div>
+                  <div className="flex flex-wrap gap-1">
+                    {attributes.map(attr => (
+                      <Badge key={attr.id} variant="secondary" className="text-xs">
+                        {attr.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

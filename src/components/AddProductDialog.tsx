@@ -24,6 +24,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthPrompt } from "@/components/AuthPrompt";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
+import { useVariantAttributes } from "@/hooks/useVariantAttributes";
+import { useOrganization } from "@/hooks/useOrganization";
+import { Badge } from "@/components/ui/badge";
 
 interface AddProductDialogProps {
   open: boolean;
@@ -36,6 +39,8 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
   const { toast } = useToast();
   const { user } = useAuth();
   const { categories } = useCustomCategories();
+  const { currentOrganization } = useOrganization();
+  const { attributes } = useVariantAttributes(currentOrganization?.id);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -338,8 +343,25 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                 <strong>Producto con variantes</strong>
               </div>
               <div className="text-xs text-blue-600 mt-1">
-                Después de crear el producto podrás agregar colores, talles y configurar stock específico para cada variante.
+                Después de crear el producto podrás agregar variantes específicas y configurar stock para cada una.
               </div>
+              {attributes.length > 0 && (
+                <div className="mt-2">
+                  <div className="text-xs text-blue-700 font-medium mb-1">Atributos disponibles:</div>
+                  <div className="flex flex-wrap gap-1">
+                    {attributes.map(attr => (
+                      <Badge key={attr.id} variant="secondary" className="text-xs">
+                        {attr.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {attributes.length === 0 && (
+                <div className="mt-2 text-xs text-blue-600">
+                  <strong>Nota:</strong> No hay atributos de variante configurados. Ve a Panel de Administrador → Accesos Rápidos → Gestionar Variantes para crear atributos como Color, Talle, etc.
+                </div>
+              )}
             </div>
           )}
 

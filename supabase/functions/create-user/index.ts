@@ -163,9 +163,10 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred while creating the user'
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred while creating the user' 
+        error: errorMessage
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
