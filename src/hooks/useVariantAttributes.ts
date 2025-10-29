@@ -24,7 +24,7 @@ export function useVariantAttributes(organizationId?: string) {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('variant_attribute_definitions')
         .select('*')
         .eq('organization_id', organizationId)
@@ -55,7 +55,7 @@ export function useVariantAttributes(organizationId?: string) {
         options: payload.options || null,
         position: payload.position || 0,
       };
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('variant_attribute_definitions')
         .insert(row)
         .select()
@@ -70,7 +70,7 @@ export function useVariantAttributes(organizationId?: string) {
 
   const update = useCallback(
     async (id: string, payload: Partial<VariantAttributeDef>) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('variant_attribute_definitions')
         .update(payload)
         .eq('id', id)
@@ -85,7 +85,7 @@ export function useVariantAttributes(organizationId?: string) {
 
   const remove = useCallback(
     async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('variant_attribute_definitions')
         .delete()
         .eq('id', id);

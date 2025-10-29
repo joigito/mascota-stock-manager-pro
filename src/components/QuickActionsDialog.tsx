@@ -1,46 +1,28 @@
 import React, { useState } from 'react';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Settings, Users, Database, Activity, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { UserManagement } from '@/components/UserManagement';
+import { SystemConfigurationDialog } from '@/components/SystemConfigurationDialog';
+import { DatabaseBackupManager } from '@/components/DatabaseBackupManager';
+import VariantAttributeManager from './VariantAttributeManager';
+import { useOrganization } from '@/hooks/useOrganization';
 
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
+interface QuickActionsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  actionType: 'system' | 'users' | 'backup' | null;
+}
 
-                  {/* Quick access to Variant Attributes for the selected organization */}
-                  <Button
-                    variant="outline"
-                    className="justify-start h-auto p-4"
-                    onClick={() => setOpenAttr(true)}
-                    disabled={!currentOrganization}
-                  >
-                    <Activity className="h-4 w-4 mr-3" />
-                    <div className="text-left">
-                      <div className="font-medium">Atributos</div>
-                      import React, { useState } from 'react';
-                      import {
-                        Dialog,
-                        DialogContent,
-                        DialogDescription,
-                        DialogHeader,
-                        DialogTitle,
-                      } from '@/components/ui/dialog';
-                      import { Button } from '@/components/ui/button';
-                      import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-                      import { Settings, Users, Database, Activity, AlertCircle } from 'lucide-react';
-                      import { useToast } from '@/hooks/use-toast';
-                      import { UserManagement } from '@/components/UserManagement';
-                      import { SystemConfigurationDialog } from '@/components/SystemConfigurationDialog';
-                      import { DatabaseBackupManager } from '@/components/DatabaseBackupManager';
-                      import VariantAttributeManager from './VariantAttributeManager';
-                      import { useOrganization } from '@/hooks/useOrganization';
-
-                      interface QuickActionsDialogProps {
-                        open: boolean;
-                        onOpenChange: (open: boolean) => void;
-                        actionType: 'system' | 'users' | 'backup' | null;
-                      }
-
-                      export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
+export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                         open,
                         onOpenChange,
                         actionType
@@ -331,6 +313,6 @@ import {
                             />
                           </>
                         );
-                      };
+};
 
-                      export default QuickActionsDialog;
+export default QuickActionsDialog;
