@@ -18,6 +18,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { OrganizationManager } from '@/components/OrganizationManager';
 import { OrganizationUserManagement } from '@/components/OrganizationUserManagement';
 import { OrganizationUrlGenerator } from '@/components/OrganizationUrlGenerator';
+import { CategoryManager } from '@/components/CategoryManager';
 
 const Store: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -121,27 +122,30 @@ const Store: React.FC = () => {
 
         {/* Inventory Tab */}
         <TabsContent value="inventory">
-          <div className="bg-card rounded-xl shadow-sm border border-border">
-            <div className="p-4 sm:p-6 border-b border-border">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-                <div className="flex items-center space-x-2">
-                  <Package className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">Inventario de Productos</h2>
+          <div className="space-y-6">
+            <CategoryManager />
+            <div className="bg-card rounded-xl shadow-sm border border-border">
+              <div className="p-4 sm:p-6 border-b border-border">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Package className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg sm:text-xl font-semibold text-foreground">Inventario de Productos</h2>
+                  </div>
+                  <Button
+                    onClick={() => setIsAddDialogOpen(true)}
+                    className="shadow-md w-full sm:w-auto"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Producto
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => setIsAddDialogOpen(true)}
-                  className="shadow-md w-full sm:w-auto"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Agregar Producto
-                </Button>
               </div>
+              <ProductList 
+                products={products}
+                onUpdateProduct={updateProduct}
+                onDeleteProduct={deleteProduct}
+              />
             </div>
-            <ProductList 
-              products={products}
-              onUpdateProduct={updateProduct}
-              onDeleteProduct={deleteProduct}
-            />
           </div>
         </TabsContent>
 

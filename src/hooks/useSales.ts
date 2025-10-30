@@ -122,7 +122,25 @@ export const useSales = () => {
   };
 
   const deleteSale = async (saleId: string) => {
-    // ... (existing implementation)
+    if (!user || !currentOrganization) {
+      return { error: new Error('Usuario no autenticado o organización no seleccionada') };
+    }
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('sales')
+        .delete()
+        .eq('id', saleId)
+        .eq('organization_id', currentOrganization.id);
+
+      if (deleteError) throw deleteError;
+
+      setSales(prev => prev.filter(sale => sale.id !== saleId));
+      return { error: null };
+    } catch (error) {
+      console.error('Error eliminando venta:', error);
+      return { error };
+    }
   };
   
   const syncSales = async () => {
