@@ -11,19 +11,19 @@ const StockAlert = ({ products }: StockAlertProps) => {
   if (products.length === 0) return null;
 
   return (
-    <Alert className="border-red-200 bg-red-50">
-      <AlertTriangle className="h-4 w-4 text-red-600" />
-      <AlertTitle className="text-red-800">¡Atención! Stock Bajo Detectado</AlertTitle>
-      <AlertDescription className="text-red-700">
+    <Alert className="border-destructive/50 bg-destructive/10">
+      <AlertTriangle className="h-4 w-4 text-destructive" />
+      <AlertTitle className="text-destructive dark:text-white">¡Atención! Stock Bajo Detectado</AlertTitle>
+      <AlertDescription className="text-destructive/80 dark:text-white">
         <p className="mb-3">Los siguientes productos tienen stock bajo y necesitan reabastecimiento:</p>
         <div className="space-y-2">
           {products.map((product) => (
-            <div key={product.id} className="flex items-center justify-between bg-white rounded-lg p-3 border border-red-100">
+            <div key={product.id} className="flex items-center justify-between bg-card rounded-lg p-3 border border-destructive/20">
               <div className="flex items-center space-x-3">
-                <Package className="h-4 w-4 text-red-500" />
+                <AlertTriangle className="h-5 w-5 text-destructive" />
                 <div>
-                  <span className="font-medium text-gray-900">{product.name}</span>
-                  <div className="text-sm text-gray-600">
+                  <span className="font-medium text-foreground">{product.name}</span>
+                  <div className="text-sm text-muted-foreground">
                     Stock actual: {product.stock} | Mínimo: {product.minStock}
                   </div>
                 </div>

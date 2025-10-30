@@ -105,7 +105,7 @@ export const MarginConfiguration: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Calculator className="h-5 w-5 text-green-500" />
+            <Calculator className="h-5 w-5 text-primary" />
             <span>Calculadora de Precios</span>
           </CardTitle>
           <CardDescription>
@@ -113,17 +113,17 @@ export const MarginConfiguration: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-green-50 dark:bg-green-950/50 p-4 rounded-lg border border-green-200 dark:border-green-800">
-            <h4 className="font-medium text-green-900 dark:text-green-100 mb-3">
+          <div className="bg-muted/50 p-4 rounded-lg border border-border">
+            <h4 className="font-medium text-foreground mb-3">
               Ejemplo con costo de $100:
             </h4>
             <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 text-sm">
               {Object.entries(marginValues).slice(0, 6).map(([category, margin]) => (
-                <div key={category} className="flex justify-between p-2 bg-white dark:bg-green-900/20 rounded">
-                  <span className="text-green-800 dark:text-green-200">
+                <div key={category} className="flex justify-between p-2 bg-card rounded">
+                  <span className="text-muted-foreground">
                     {CATEGORY_LABELS[category]}:
                   </span>
-                  <span className="font-medium text-green-900 dark:text-green-100">
+                  <span className="font-medium text-foreground">
                     ${calculatePrice(100, margin).toFixed(2)}
                   </span>
                 </div>
@@ -136,7 +136,7 @@ export const MarginConfiguration: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <DollarSign className="h-5 w-5 text-blue-500" />
+            <DollarSign className="h-5 w-5 text-primary" />
             <span>Guía de Márgenes por Industria</span>
           </CardTitle>
         </CardHeader>

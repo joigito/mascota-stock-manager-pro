@@ -14,10 +14,10 @@ export const OrganizationDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando organizaciones...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando organizaciones...</p>
         </div>
       </div>
     );
@@ -25,12 +25,12 @@ export const OrganizationDashboard: React.FC = () => {
 
   if (organizations.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto px-6 py-12">
           <div className="text-center mb-8">
-            <Building2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Bienvenido al Sistema</h1>
-            <p className="text-gray-600">No tienes acceso a ninguna organización aún</p>
+            <Building2 className="w-16 h-16 text-primary mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-foreground mb-2">Bienvenido al Sistema</h1>
+            <p className="text-muted-foreground">No tienes acceso a ninguna organización aún</p>
           </div>
           <OrganizationManager />
         </div>
@@ -39,19 +39,19 @@ export const OrganizationDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <Building2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Selecciona una Organización</h1>
-          <p className="text-gray-600">Elige la organización con la que deseas trabajar</p>
+          <Building2 className="w-16 h-16 text-primary mx-auto mb-4" />
+          <h1 className="text-4xl font-bold text-foreground mb-2">Selecciona una Organización</h1>
+          <p className="text-muted-foreground">Elige la organización con la que deseas trabajar</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {organizations.map((userOrg) => (
             <Card 
               key={userOrg.organization.id} 
-              className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-green-200"
+              className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/20"
               onClick={() => {
                 switchOrganization(userOrg.organization);
                 // Force a page refresh to load the main app
@@ -67,8 +67,8 @@ export const OrganizationDashboard: React.FC = () => {
                     <div>
                       <CardTitle className="text-lg">{userOrg.organization.name}</CardTitle>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Users className="w-3 h-3 text-gray-500" />
-                        <span className="text-xs text-gray-500 capitalize">{userOrg.role}</span>
+                        <Users className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground capitalize">{userOrg.role}</span>
                       </div>
                     </div>
                   </div>
@@ -76,7 +76,7 @@ export const OrganizationDashboard: React.FC = () => {
                     <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setOpenOrgId(userOrg.organization.id); }}>
                       Atributos
                     </Button>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>
                 </div>
               </CardHeader>

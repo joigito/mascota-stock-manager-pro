@@ -243,13 +243,13 @@ const saveChanges = async () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Info className="h-5 w-5 text-blue-500" />
+            <Info className="h-5 w-5 text-primary" />
             <span>Información Importante</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="bg-blue-50 dark:bg-blue-950/50 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+          <div className="bg-accent/50 p-4 rounded-lg border border-border">
+            <h4 className="font-medium text-foreground mb-2">
               ¿Cómo usar las categorías?
             </h4>
             <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
@@ -260,7 +260,7 @@ const saveChanges = async () => {
             </ul>
           </div>
           
-          <div className="bg-green-50 dark:bg-green-950/50 p-4 rounded-lg border border-green-200 dark:border-green-800">
+          <div className="bg-muted/50 p-4 rounded-lg border border-border">
             <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">
               Sistema Multi-Rubro
             </h4>

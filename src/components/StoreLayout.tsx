@@ -5,6 +5,7 @@ import { Building2, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import { ModeToggle } from '@/components/ui/ModeToggle';
 
 interface Organization {
   id: string;
@@ -42,9 +43,9 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-green-100">
+      <header className="bg-card border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-3 sm:space-x-4">
@@ -52,24 +53,25 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
                 <Building2 className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-3xl font-bold text-foreground">
                   {organization.name}
                 </h1>
-                <p className="text-xs sm:text-base text-gray-600">
+                <p className="text-xs sm:text-base text-muted-foreground">
                   {organization.description || 'Sistema de gestión comercial integral'}
                 </p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-              <Badge variant="outline" className="border-blue-300 text-blue-700">
+              <Badge variant="outline" className="border-primary/20 text-primary">
                 <Building2 className="h-3 w-3 mr-1" />
                 {organization.name}
               </Badge>
+              <ModeToggle />
               <Button
                 onClick={handleSignOut}
                 variant="outline"
                 size="sm"
-                className="border-gray-300 hover:bg-gray-50 flex-1 sm:flex-none"
+                className="flex-1 sm:flex-none"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Cerrar Sesión</span>

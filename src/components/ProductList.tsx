@@ -134,7 +134,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                         <Button
                           variant="outline"
                           size="sm"
-                          className="p-1 h-8 w-8 text-indigo-600 hover:text-indigo-700"
+                          className="p-1 h-8 w-8 text-primary hover:text-primary/80"
                           aria-label={`Gestionar variantes de ${product.name}`}
                         >
                           <Package className="h-3 w-3" />
@@ -157,7 +157,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                     variant="outline"
                     size="sm"
                     onClick={() => setEditingProduct(product)}
-                    className="text-blue-600 hover:text-blue-700 p-1 h-8 w-8"
+                    className="text-primary hover:text-primary/80 p-1 h-8 w-8"
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -165,7 +165,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                     variant="outline"
                     size="sm"
                     onClick={() => onDeleteProduct(product.id)}
-                    className="text-red-600 hover:text-red-700 p-1 h-8 w-8"
+                    className="text-destructive hover:text-destructive/80 p-1 h-8 w-8"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -179,21 +179,21 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
               
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="text-gray-500">Stock:</span>
+                  <span className="text-muted-foreground">Stock:</span>
                   <div className="font-medium">
                     {product.hasVariants ? (
-                      <span className="text-blue-600">Ver variantes</span>
+                      <span className="text-primary">Ver variantes</span>
                     ) : (
                       `${product.stock} unidades`
                     )}
                   </div>
-                  <div className="text-gray-400">Mín: {product.minStock}</div>
+                  <div className="text-muted-foreground">Mín: {product.minStock}</div>
                 </div>
                 <div>
-                  <span className="text-gray-500">Precio:</span>
+                  <span className="text-muted-foreground">Precio:</span>
                   <div className="font-medium">{formatCurrency(product.price)}</div>
                   {product.hasVariants && (
-                    <div className="text-xs text-blue-600">Precio base</div>
+                    <div className="text-xs text-primary">Precio base</div>
                   )}
                 </div>
               </div>
@@ -205,31 +205,31 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
       {/* Desktop Table View */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-muted/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Producto
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Categoría
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Stock
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Precio
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Estado
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
           </thead>
           <tbody className="bg-background divide-y divide-border">
             {filteredProducts.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={product.id} className="hover:bg-accent/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="text-sm font-medium">{product.name}</div>
@@ -245,19 +245,19 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                   {getCategoryBadge(product.category)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
+                  <div className="text-sm text-foreground">
                     {product.hasVariants ? (
-                      <span className="text-blue-600">Ver variantes</span>
+                      <span className="text-primary">Ver variantes</span>
                     ) : (
                       `${product.stock} unidades`
                     )}
                   </div>
-                  <div className="text-xs text-gray-500">Mín: {product.minStock}</div>
+                  <div className="text-xs text-muted-foreground">Mín: {product.minStock}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{formatCurrency(product.price)}</div>
+                  <div className="text-sm text-foreground">{formatCurrency(product.price)}</div>
                   {product.hasVariants && (
-                    <div className="text-xs text-blue-600">Precio base</div>
+                    <div className="text-xs text-primary">Precio base</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -271,7 +271,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-indigo-600 hover:text-indigo-700"
+                            className="text-primary hover:text-primary/80"
                             aria-label={`Gestionar variantes de ${product.name}`}
                           >
                             <Package className="h-4 w-4" />
@@ -295,7 +295,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingProduct(product)}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-primary hover:text-primary/80"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -303,7 +303,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                       variant="outline"
                       size="sm"
                       onClick={() => onDeleteProduct(product.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-destructive hover:text-destructive/80"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

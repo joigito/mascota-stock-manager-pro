@@ -327,7 +327,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
           </div>
 
           {formData.price && formData.costPrice && !formData.hasVariants && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="p-3 bg-muted/50 border border-border rounded-lg">
               <div className="text-sm text-green-800">
                 <strong>Margen de ganancia: {calculateMargin()}%</strong>
               </div>
@@ -338,7 +338,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
           )}
 
           {formData.hasVariants && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 bg-accent/50 border border-border rounded-lg">
               <div className="text-sm text-blue-800">
                 <strong>Producto con variantes</strong>
               </div>
@@ -381,7 +381,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={loading}>
+            <Button type="submit" disabled={loading}>
               {loading ? 'Agregando...' : 'Agregar Producto'}
             </Button>
           </DialogFooter>

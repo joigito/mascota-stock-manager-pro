@@ -35,7 +35,7 @@ const SaleItemCard = ({ item, onUpdateQuantity, onUpdatePrice, onRemoveItem }: S
   };
 
   return (
-    <div className="bg-gray-50 p-3 rounded-lg border">
+    <div className="bg-muted/50 p-3 rounded-lg border">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex-1">
           <span className="font-medium">{item.productName}</span>
@@ -70,13 +70,13 @@ const SaleItemCard = ({ item, onUpdateQuantity, onUpdatePrice, onRemoveItem }: S
           Subtotal: ${item.subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
         </div>
 
-        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:bg-red-50" onClick={onRemoveItem}>
+        <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={onRemoveItem}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
 
       <div className="flex justify-end items-center text-xs text-muted-foreground mt-2 pr-12">
-        <span className="text-green-600 font-medium">
+        <span className="text-primary font-medium">
           Ganancia: ${item.profit.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
         </span>
         <Badge variant="secondary" className="ml-4">

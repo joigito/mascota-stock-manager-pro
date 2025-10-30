@@ -99,11 +99,11 @@ export const StockConfiguration: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="bg-blue-50 dark:bg-blue-950/50 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+          <div className="bg-accent/50 p-4 rounded-lg border border-border">
+            <h4 className="font-medium text-foreground mb-2">
               Sistema de Alertas Inteligente
             </h4>
-            <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+            <ul className="text-sm text-muted-foreground space-y-1">
               <li>• <strong>Stock por debajo del mínimo:</strong> Se muestra una alerta roja en el producto</li>
               <li>• <strong>Stock cerca del mínimo:</strong> Se muestra una advertencia amarilla (10% por encima)</li>
               <li>• <strong>Reportes automáticos:</strong> Los productos con stock bajo aparecen en el dashboard</li>

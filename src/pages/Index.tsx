@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
 import AddProductDialog from "@/components/AddProductDialog";
-import StockAlert from "@/components/StockAlert";
 import Dashboard from "@/components/Dashboard";
 import SalesTab from "@/components/SalesTab";
 import ReportsTab from "@/components/ReportsTab";
@@ -18,13 +17,16 @@ import { SuperAdminDashboard } from "@/components/SuperAdminDashboard";
 import { OrganizationUserManagement } from "@/components/OrganizationUserManagement";
 import { OrganizationUrlGenerator } from "@/components/OrganizationUrlGenerator";
 import { UserIndicator } from "@/components/UserIndicator";
+import { ModeToggle } from "@/components/ui/ModeToggle";
 import { useProducts } from "@/hooks/useProducts";
+import { useSales } from "@/hooks/useSales";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { sales } = useSales();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isOrgAdmin, setIsOrgAdmin] = useState(false);
@@ -56,8 +58,6 @@ const Index = () => {
     console.log('Index: Will show OrganizationDashboard?', !orgLoading && !currentOrganization && !isSuperAdmin);
     setForceUpdate(prev => prev + 1);
   }, [currentOrganization, orgLoading, isSuperAdmin]);
-
-  const lowStockProducts = products.filter(product => product.stock <= product.minStock);
 
   const handleSignOut = async () => {
     try {
@@ -103,9 +103,9 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-green-100">
+      <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-3 sm:space-x-4">
@@ -113,10 +113,10 @@ const Index = () => {
                 <Building2 className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-3xl font-bold text-foreground">
                   {currentOrganization?.name || 'Sistemas de Gestión Comercial'}
                 </h1>
-                <p className="text-xs sm:text-base text-gray-600">Plataforma de gestión comercial para múltiples tipos de negocio</p>
+                <p className="text-xs sm:text-base text-muted-foreground">Plataforma de gestión comercial para múltiples tipos de negocio</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
@@ -126,7 +126,6 @@ const Index = () => {
                   onClick={clearOrganization}
                   variant="outline"
                   size="sm"
-                  className="border-gray-300 hover:bg-gray-50"
                 >
                   <Building2 className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Panel Central</span>
@@ -135,11 +134,12 @@ const Index = () => {
               )}
               <SyncButton />
               <UserIndicator />
+              <ModeToggle />
               <Button
                 onClick={handleSignOut}
                 variant="outline"
                 size="sm"
-                className="border-gray-300 hover:bg-gray-50 flex-1 sm:flex-none"
+                className="flex-1 sm:flex-none"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Cerrar Sesión</span>
@@ -152,13 +152,6 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Stock Alerts */}
-        {lowStockProducts.length > 0 && (
-          <div className="mb-6 sm:mb-8">
-            <StockAlert products={lowStockProducts} />
-          </div>
-        )}
-
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
           <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
@@ -191,21 +184,21 @@ const Index = () => {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6 sm:space-y-8">
-            <Dashboard products={products} />
+            <Dashboard products={products} sales={sales} />
           </TabsContent>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="p-4 sm:p-6 border-b border-gray-200">
+            <div className="bg-card rounded-xl shadow-sm border border-border">
+              <div className="p-4 sm:p-6 border-b border-border">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                   <div className="flex items-center space-x-2">
-                    <Package className="h-5 w-5 text-green-600" />
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Productos</h2>
+                    <Package className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg sm:text-xl font-semibold text-foreground">Productos</h2>
                   </div>
                   <Button
                     onClick={() => setIsAddDialogOpen(true)}
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md w-full sm:w-auto"
+                    className="shadow-md w-full sm:w-auto"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Agregar Producto

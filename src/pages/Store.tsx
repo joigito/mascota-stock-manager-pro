@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProductList from '@/components/ProductList';
 import AddProductDialog from '@/components/AddProductDialog';
-import StockAlert from '@/components/StockAlert';
 import Dashboard from '@/components/Dashboard';
 import SalesTab from '@/components/SalesTab';
 import ReportsTab from '@/components/ReportsTab';
@@ -13,6 +12,7 @@ import CustomersTab from '@/components/CustomersTab';
 import { StoreLayout } from '@/components/StoreLayout';
 import { useStoreSlug } from '@/hooks/useStoreSlug';
 import { useProducts } from '@/hooks/useProducts';
+import { useSales } from '@/hooks/useSales';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization } from '@/hooks/useOrganization';
 import { OrganizationManager } from '@/components/OrganizationManager';
@@ -23,6 +23,7 @@ const Store: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { organization, loading: storeLoading, error } = useStoreSlug(slug);
   const { products, loading: productsLoading, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { sales } = useSales();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { user } = useAuth();
   const { switchOrganization, isSuperAdmin, hasRole } = useOrganization();
@@ -81,17 +82,8 @@ const Store: React.FC = () => {
     );
   }
 
-  const lowStockProducts = products.filter(product => product.stock <= product.minStock);
-
   return (
     <StoreLayout organization={organization}>
-      {/* Stock Alerts */}
-      {lowStockProducts.length > 0 && (
-        <div className="mb-6 sm:mb-8">
-          <StockAlert products={lowStockProducts} />
-        </div>
-      )}
-
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${(isSuperAdminUser || isOrgAdmin) ? 'grid-cols-6' : 'grid-cols-5'}`}>
@@ -124,21 +116,21 @@ const Store: React.FC = () => {
 
         {/* Dashboard Tab */}
         <TabsContent value="dashboard" className="space-y-6 sm:space-y-8">
-          <Dashboard products={products} />
+          <Dashboard products={products} sales={sales} />
         </TabsContent>
 
         {/* Inventory Tab */}
         <TabsContent value="inventory">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="bg-card rounded-xl shadow-sm border border-border">
+            <div className="p-4 sm:p-6 border-b border-border">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                 <div className="flex items-center space-x-2">
-                  <Package className="h-5 w-5 text-green-600" />
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Inventario de Productos</h2>
+                  <Package className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">Inventario de Productos</h2>
                 </div>
                 <Button
                   onClick={() => setIsAddDialogOpen(true)}
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md w-full sm:w-auto"
+                  className="shadow-md w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Agregar Producto

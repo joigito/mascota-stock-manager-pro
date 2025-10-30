@@ -265,7 +265,7 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
           </div>
 
           {formData.price && formData.costPrice && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="p-3 bg-muted/50 border border-border rounded-lg">
               <div className="text-sm text-green-800">
                 <strong>Margen de ganancia: {calculateMargin()}%</strong>
               </div>

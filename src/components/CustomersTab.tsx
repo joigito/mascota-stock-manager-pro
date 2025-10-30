@@ -154,7 +154,7 @@ const CustomersTab = () => {
         </CardHeader>
         <CardContent>
           {customers.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No hay clientes registrados</p>
               <p className="text-sm">Los clientes son opcionales para registrar ventas</p>
@@ -162,11 +162,11 @@ const CustomersTab = () => {
           ) : (
             <div className="grid gap-4">
               {customers.map((customer) => (
-                <div key={customer.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                <div key={customer.id} className="border rounded-lg p-4 hover:bg-accent/50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{customer.name}</h3>
-                      <div className="space-y-1 text-sm text-gray-600 mt-2">
+                      <div className="space-y-1 text-sm text-muted-foreground mt-2">
                         {customer.email && (
                           <div className="flex items-center space-x-2">
                             <Mail className="h-4 w-4" />
@@ -273,7 +273,7 @@ const CustomersTab = () => {
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-green-600 hover:bg-green-700">
+              <Button type="submit">
                 {editingCustomer ? 'Actualizar' : 'Agregar'} Cliente
               </Button>
             </DialogFooter>
