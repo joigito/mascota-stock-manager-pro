@@ -25,9 +25,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardStats {
   totalOrganizations: number;
-  totalUsers: number;
-  totalProducts: number;
-  totalSales: number;
 }
 
 export const SuperAdminDashboard: React.FC = () => {
@@ -36,9 +33,6 @@ export const SuperAdminDashboard: React.FC = () => {
   const { toast } = useToast();
   const [stats, setStats] = useState<DashboardStats>({
     totalOrganizations: 0,
-    totalUsers: 0,
-    totalProducts: 0,
-    totalSales: 0
   });
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -47,42 +41,17 @@ export const SuperAdminDashboard: React.FC = () => {
   const [selectedOrganization, setSelectedOrganization] = useState<any>(null);
 
   useEffect(() => {
-    console.log('SuperAdminDashboard: Loading dashboard stats...');
-    console.log('SuperAdminDashboard: Organizations:', organizations);
     loadDashboardStats();
   }, []);
 
-  useEffect(() => {
-    console.log('SuperAdminDashboard: Organizations updated:', organizations);
-  }, [organizations]);
-
   const loadDashboardStats = async () => {
     try {
-      // Get organizations count
       const { count: orgCount } = await supabase
         .from('organizations')
         .select('*', { count: 'exact', head: true });
 
-      // Get users count from user_organizations
-      const { count: userCount } = await supabase
-        .from('user_organizations')
-        .select('user_id', { count: 'exact', head: true });
-
-      // Get products count
-      const { count: productsCount } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true });
-
-      // Get sales count
-      const { count: salesCount } = await supabase
-        .from('sales')
-        .select('*', { count: 'exact', head: true });
-
       setStats({
         totalOrganizations: orgCount || 0,
-        totalUsers: userCount || 0,
-        totalProducts: productsCount || 0,
-        totalSales: salesCount || 0
       });
     } catch (error) {
       console.error('Error loading dashboard stats:', error);
@@ -163,7 +132,7 @@ export const SuperAdminDashboard: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Organizaciones</CardTitle>
@@ -173,45 +142,6 @@ export const SuperAdminDashboard: React.FC = () => {
               <div className="text-2xl font-bold">{stats.totalOrganizations}</div>
               <p className="text-xs text-muted-foreground">
                 Tiendas registradas
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Usuarios</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalUsers}</div>
-              <p className="text-xs text-muted-foreground">
-                Usuarios activos
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Productos</CardTitle>
-              <Database className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalProducts}</div>
-              <p className="text-xs text-muted-foreground">
-                En todas las tiendas
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ventas</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalSales}</div>
-              <p className="text-xs text-muted-foreground">
-                Transacciones totales
               </p>
             </CardContent>
           </Card>

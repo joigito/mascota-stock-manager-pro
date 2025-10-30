@@ -1,23 +1,11 @@
-
+import { SaleItem } from "@/types/sales";
 import SaleItemCard from "./SaleItemCard";
 import SalesSummary from "./SalesSummary";
-
-interface SaleItem {
-  productId: string;
-  productName: string;
-  variantId?: string;
-  variantInfo?: string;
-  quantity: number;
-  price: number;
-  costPrice: number;
-  subtotal: number;
-  profit: number;
-  margin: number;
-}
 
 interface SalesListProps {
   saleItems: SaleItem[];
   onUpdateQuantity: (productId: string, newQuantity: number, variantId?: string) => void;
+  onUpdatePrice: (productId: string, variantId: string | undefined, newPrice: number) => void;
   onRemoveItem: (productId: string, variantId?: string) => void;
   totalAmount: number;
   totalProfit: number;
@@ -27,6 +15,7 @@ interface SalesListProps {
 const SalesList = ({
   saleItems,
   onUpdateQuantity,
+  onUpdatePrice,
   onRemoveItem,
   totalAmount,
   totalProfit,
@@ -45,6 +34,7 @@ const SalesList = ({
             key={`${item.productId}-${item.variantId || 'default'}`}
             item={item}
             onUpdateQuantity={(newQuantity) => onUpdateQuantity(item.productId, newQuantity, item.variantId)}
+            onUpdatePrice={(newPrice) => onUpdatePrice(item.productId, item.variantId, newPrice)}
             onRemoveItem={() => onRemoveItem(item.productId, item.variantId)}
           />
         ))}

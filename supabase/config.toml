@@ -19,13 +19,7 @@ max_client_conn = 100
 
 [realtime]
 enabled = true
-ip_version = "ipv4"
-port = 54323
-max_connections = 100
-max_channels_per_client = 100
-max_joins_per_second = 100
-max_events_per_second = 100
-postgres_changes_listen_interval = 100
+ip_version = "IPv4"
 
 [studio]
 enabled = true
@@ -50,10 +44,6 @@ site_url = "http://127.0.0.1:5173"
 additional_redirect_urls = ["https://lovable.dev", "http://127.0.0.1:5173/tienda/*"]
 jwt_expiry = 3600
 enable_signup = true
-enable_email_confirmations = true
-enable_email_change_confirmations = true
-enable_phone_confirmations = false
-enable_phone_change_confirmations = true
 
 [auth.email]
 enable_signup = true

@@ -1,18 +1,22 @@
+export interface SaleItem {
+  productId: string;
+  productName: string;
+  variantId?: string;
+  variantInfo?: string;
+  quantity: number;
+  price: number; // Original list price at time of sale
+  finalUnitPrice: number; // The actual price per unit sold (editable)
+  costPrice: number;
+  subtotal: number;
+  profit: number;
+  margin: number;
+}
 
 export interface Sale {
   id: string;
   date: string;
   customer: string;
-  items: Array<{
-    productId: string;
-    productName: string;
-    quantity: number;
-    price: number;
-    costPrice?: number;
-    subtotal: number;
-    profit?: number;
-    margin?: number;
-  }>;
+  items: SaleItem[];
   total: number;
   totalProfit?: number;
   averageMargin?: number;

@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "test": "vitest --environment jsdom",
+    "dev": "vite",
+    "test": "vitest --environment jsdom",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
@@ -81,6 +81,7 @@
     "jsdom": "^27.0.1",
     "lovable-tagger": "^1.1.7",
     "postcss": "^8.4.47",
+    "supabase": "^2.54.11",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",

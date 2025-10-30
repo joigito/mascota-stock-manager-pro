@@ -2,8 +2,6 @@ import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
@@ -12,19 +10,7 @@ import { useBatches } from "@/hooks/useBatches";
 import ProductSelectorWithVariants from "./sales/ProductSelectorWithVariants";
 import SalesList from "./sales/SalesList";
 import CustomerSelector from "./sales/CustomerSelector";
-
-interface SaleItem {
-  productId: string;
-  productName: string;
-  variantId?: string;
-  variantInfo?: string;
-  quantity: number;
-  price: number;
-  costPrice: number;
-  subtotal: number;
-  profit: number;
-  margin: number;
-}
+import { SaleItem } from "@/types/sales";
 
 interface SalesTabProps {
   products: Product[];
@@ -45,48 +31,32 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
   const addItemToSale = () => {
     if (!selectedProductId) {
-      toast({
-        title: "Error",
-        description: "Por favor selecciona un producto",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Por favor selecciona un producto", variant: "destructive" });
       return;
     }
 
     const product = products.find(p => p.id === selectedProductId);
     if (!product) return;
 
-    // For products with variants, check variant stock; for simple products, check product stock
     let availableStock = 0;
     let currentPrice = finalPrice || product.price;
     let variantInfo = "";
 
     if (product.hasVariants && selectedVariantId) {
-      // We'll need to get variant stock from the variant itself
-      // For now, assume the finalPrice and stock validation is handled by the selector
-      availableStock = 999; // Placeholder - should come from variant
+      availableStock = 999; // Placeholder
       variantInfo = `Variante: ${selectedVariantId}`;
     } else if (!product.hasVariants) {
       availableStock = product.stock;
     } else {
-      toast({
-        title: "Error",
-        description: "Por favor selecciona una variante para este producto",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Por favor selecciona una variante para este producto", variant: "destructive" });
       return;
     }
 
     if (quantity > availableStock && availableStock !== 999) {
-      toast({
-        title: "Stock insuficiente",
-        description: `Solo hay ${availableStock} unidades disponibles`,
-        variant: "destructive",
-      });
+      toast({ title: "Stock insuficiente", description: `Solo hay ${availableStock} unidades disponibles`, variant: "destructive" });
       return;
     }
 
-    const itemKey = selectedVariantId ? `${selectedProductId}-${selectedVariantId}` : selectedProductId;
     const existingItemIndex = saleItems.findIndex(item => 
       item.productId === selectedProductId && item.variantId === selectedVariantId
     );
@@ -96,22 +66,22 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       const newQuantity = newItems[existingItemIndex].quantity + quantity;
       
       if (newQuantity > availableStock && availableStock !== 999) {
-        toast({
-          title: "Stock insuficiente",
-          description: `Solo hay ${availableStock} unidades disponibles`,
-          variant: "destructive",
-        });
+        toast({ title: "Stock insuficiente", description: `Solo hay ${availableStock} unidades disponibles`, variant: "destructive" });
         return;
       }
       
-      const subtotal = newQuantity * currentPrice;
-      const profit = newQuantity * (currentPrice - (product.costPrice || 0));
-      const margin = currentPrice > 0 ? ((currentPrice - (product.costPrice || 0)) / currentPrice * 100) : 0;
+      const item = newItems[existingItemIndex];
+      const subtotal = newQuantity * item.finalUnitPrice;
+      const profit = newQuantity * (item.finalUnitPrice - (item.costPrice || 0));
+      const margin = item.finalUnitPrice > 0 ? ((item.finalUnitPrice - (item.costPrice || 0)) / item.finalUnitPrice * 100) : 0;
       
-      newItems[existingItemIndex].quantity = newQuantity;
-      newItems[existingItemIndex].subtotal = subtotal;
-      newItems[existingItemIndex].profit = profit;
-      newItems[existingItemIndex].margin = margin;
+      newItems[existingItemIndex] = {
+        ...item,
+        quantity: newQuantity,
+        subtotal,
+        profit,
+        margin
+      };
       setSaleItems(newItems);
     } else {
       const subtotal = quantity * currentPrice;
@@ -124,7 +94,8 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         variantId: selectedVariantId,
         variantInfo: variantInfo || undefined,
         quantity,
-        price: currentPrice,
+        price: product.price, // Store original price
+        finalUnitPrice: currentPrice, // Editable price
         costPrice: product.costPrice || 0,
         subtotal,
         profit,
@@ -154,21 +125,15 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    // For variant products, we'll need proper stock validation
-    // For now, allow the update but this should be improved with actual variant stock
     if (!product.hasVariants && newQuantity > product.stock) {
-      toast({
-        title: "Stock insuficiente",
-        description: `Solo hay ${product.stock} unidades disponibles`,
-        variant: "destructive",
-      });
+      toast({ title: "Stock insuficiente", description: `Solo hay ${product.stock} unidades disponibles`, variant: "destructive" });
       return;
     }
 
     setSaleItems(saleItems.map(item => {
       if (item.productId === productId && item.variantId === variantId) {
-        const subtotal = newQuantity * item.price;
-        const profit = newQuantity * (item.price - item.costPrice);
+        const subtotal = newQuantity * item.finalUnitPrice;
+        const profit = newQuantity * (item.finalUnitPrice - item.costPrice);
         return { 
           ...item, 
           quantity: newQuantity, 
@@ -180,13 +145,26 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     }));
   };
 
-  const getTotalAmount = () => {
-    return saleItems.reduce((total, item) => total + item.subtotal, 0);
+  const updateItemPrice = (productId: string, variantId: string | undefined, newPrice: number) => {
+    setSaleItems(saleItems.map(item => {
+      if (item.productId === productId && item.variantId === variantId) {
+        const subtotal = item.quantity * newPrice;
+        const profit = item.quantity * (newPrice - item.costPrice);
+        const margin = newPrice > 0 ? ((newPrice - item.costPrice) / newPrice * 100) : 0;
+        return {
+          ...item,
+          finalUnitPrice: newPrice,
+          subtotal,
+          profit,
+          margin,
+        };
+      }
+      return item;
+    }));
   };
 
-  const getTotalProfit = () => {
-    return saleItems.reduce((total, item) => total + item.profit, 0);
-  };
+  const getTotalAmount = () => saleItems.reduce((total, item) => total + item.subtotal, 0);
+  const getTotalProfit = () => saleItems.reduce((total, item) => total + item.profit, 0);
 
   const getAverageMargin = () => {
     if (saleItems.length === 0) return 0;
@@ -197,30 +175,19 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
   const completeSale = async () => {
     if (saleItems.length === 0) {
-      toast({
-        title: "Error",
-        description: "Agrega al menos un producto a la venta",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Agrega al menos un producto a la venta", variant: "destructive" });
       return;
     }
 
     try {
-      // Actualizar lotes FIFO y stock de productos
       for (const item of saleItems) {
         const product = products.find(p => p.id === item.productId);
         if (product) {
-          // Actualizar lotes usando FIFO
           await updateBatchesAfterSale(item.productId, item.quantity);
-          
-          // Actualizar stock del producto
-          await onUpdateProduct(item.productId, {
-            stock: product.stock - item.quantity
-          });
+          await onUpdateProduct(item.productId, { stock: product.stock - item.quantity });
         }
       }
 
-      // Crear nueva venta usando el hook
       const newSale = {
         date: new Date().toISOString(),
         customer: customerName || 'Cliente General',
@@ -236,21 +203,12 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         throw error;
       }
 
-      toast({
-        title: "Venta completada",
-        description: `Venta por $${getTotalAmount().toLocaleString()} con ganancia de $${getTotalProfit().toLocaleString()} (${getAverageMargin().toFixed(1)}% margen) - Usando cálculo FIFO`,
-      });
-
-      // Limpiar formulario
+      toast({ title: "Venta completada", description: `Venta por $${getTotalAmount().toLocaleString()}` });
       setSaleItems([]);
       setCustomerName("Cliente General");
     } catch (error) {
       console.error('Error completing sale:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo completar la venta. Verifique que hay suficiente stock en lotes.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "No se pudo completar la venta.", variant: "destructive" });
     }
   };
 
@@ -258,16 +216,10 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <ShoppingCart className="h-5 w-5" />
-            <span>Nueva Venta</span>
-          </CardTitle>
-          <CardDescription>
-            Registra una nueva venta seleccionando productos y cantidades
-          </CardDescription>
+          <CardTitle className="flex items-center space-x-2"><ShoppingCart className="h-5 w-5" /><span>Nueva Venta</span></CardTitle>
+          <CardDescription>Registra una nueva venta</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Customer Selection */}
           <CustomerSelector
             customers={customers}
             selectedCustomer={customerName}
@@ -276,15 +228,10 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
               const result = await addCustomer({ name });
               if (!result.error) {
                 setCustomerName(name);
-                toast({
-                  title: "Cliente agregado",
-                  description: `Se agregó el cliente ${name} exitosamente.`,
-                });
+                toast({ title: "Cliente agregado", description: `Se agregó ${name}.` });
               }
             }}
           />
-
-          {/* Product Selection */}
           <ProductSelectorWithVariants
             products={products}
             selectedProductId={selectedProductId}
@@ -299,18 +246,16 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
             onQuantityChange={setQuantity}
             onAddItem={addItemToSale}
           />
-
-          {/* Sale Items */}
           <div className="space-y-4">
             <SalesList
               saleItems={saleItems}
-              onUpdateQuantity={(productId, newQuantity, variantId) => updateItemQuantity(productId, newQuantity, variantId)}
-              onRemoveItem={(productId, variantId) => removeItemFromSale(productId, variantId)}
+              onUpdateQuantity={updateItemQuantity}
+              onUpdatePrice={updateItemPrice}
+              onRemoveItem={removeItemFromSale}
               totalAmount={getTotalAmount()}
               totalProfit={getTotalProfit()}
               averageMargin={getAverageMargin()}
             />
-
             {saleItems.length > 0 && (
               <Button onClick={completeSale} className="w-full bg-green-600 hover:bg-green-700">
                 <ShoppingCart className="h-4 w-4 mr-2" />
