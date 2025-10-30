@@ -39,7 +39,7 @@ interface EditProductDialogProps {
 
 const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: EditProductDialogProps) => {
   const { toast } = useToast();
-  const { categories } = useCustomCategories();
+  const { categories, reloadCategories } = useCustomCategories();
   const { recordPriceChange } = usePriceHistory();
   const { currentOrganization } = useOrganization();
   const { attributes } = useVariantAttributes(currentOrganization?.id);
@@ -53,6 +53,13 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
     costPrice: "",
     description: ""
   });
+
+  // Reload categories when dialog opens
+  useEffect(() => {
+    if (open) {
+      reloadCategories();
+    }
+  }, [open, reloadCategories]);
 
   useEffect(() => {
     if (product) {

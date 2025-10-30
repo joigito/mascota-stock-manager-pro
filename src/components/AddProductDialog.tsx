@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,7 +38,7 @@ interface AddProductDialogProps {
 const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddProductDialogProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { categories } = useCustomCategories();
+  const { categories, reloadCategories } = useCustomCategories();
   const { currentOrganization } = useOrganization();
   const { attributes } = useVariantAttributes(currentOrganization?.id);
   const [formData, setFormData] = useState({
@@ -53,6 +53,13 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
     baseSku: ""
   });
   const [loading, setLoading] = useState(false);
+
+  // Reload categories when dialog opens
+  useEffect(() => {
+    if (open) {
+      reloadCategories();
+    }
+  }, [open, reloadCategories]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
