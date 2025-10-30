@@ -21,7 +21,7 @@ const DateRangeSelector = ({
   onGenerateReport
 }: DateRangeSelectorProps) => {
   return (
-    <div className="border rounded-lg p-4 bg-white">
+    <div className="border border-border rounded-lg p-4 bg-card">
       <div className="flex items-center space-x-2 mb-4">
         <Calendar className="h-5 w-5" />
         <h3 className="font-semibold">Seleccionar Rango de Fechas</h3>

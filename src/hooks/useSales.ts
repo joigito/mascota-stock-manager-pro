@@ -31,7 +31,7 @@ export const useSales = () => {
       const formattedSales: Sale[] = salesData.map(sale => ({
         id: sale.id,
         date: sale.date,
-        customer: sale.customer || 'Cliente General',
+        customer: sale.customer || 'Consumidor final',
         total: Number(sale.total),
         totalProfit: Number(sale.total_profit || 0),
         averageMargin: Number(sale.average_margin || 0),

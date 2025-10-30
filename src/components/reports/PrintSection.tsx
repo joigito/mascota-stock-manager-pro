@@ -42,11 +42,11 @@ const PrintSection = ({
             <Package className="h-8 w-8" />
             <div className="text-center">
               <div className="font-semibold">Reporte de Stock</div>
-              <div className="text-sm text-gray-600">Inventario completo con valores</div>
+              <div className="text-sm text-muted-foreground">Inventario completo con valores</div>
             </div>
           </Button>
 
-          <div className="border rounded-lg p-4">
+          <div className="border border-border rounded-lg p-4 bg-card">
             <div className="flex items-center space-x-2 mb-3">
               <ShoppingBag className="h-5 w-5" />
               <span className="font-semibold">Reporte de Ventas</span>

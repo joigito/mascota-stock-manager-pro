@@ -27,7 +27,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
-  const [customerName, setCustomerName] = useState<string>("Cliente General");
+  const [customerName, setCustomerName] = useState<string>("Consumidor final");
 
   const addItemToSale = () => {
     if (!selectedProductId) {
@@ -190,7 +190,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
       const newSale = {
         date: new Date().toISOString(),
-        customer: customerName || 'Cliente General',
+        customer: customerName || 'Consumidor final',
         items: saleItems,
         total: getTotalAmount(),
         totalProfit: getTotalProfit(),
@@ -205,7 +205,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
       toast({ title: "Venta completada", description: `Venta por $${getTotalAmount().toLocaleString()}` });
       setSaleItems([]);
-      setCustomerName("Cliente General");
+      setCustomerName("Consumidor final");
     } catch (error) {
       console.error('Error completing sale:', error);
       toast({ title: "Error", description: "No se pudo completar la venta.", variant: "destructive" });

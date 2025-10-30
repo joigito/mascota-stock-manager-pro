@@ -34,10 +34,10 @@ const CustomerSelector = ({
             <SelectValue placeholder="Seleccionar cliente" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Cliente General">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Cliente General
+            <SelectItem value="Consumidor final">
+              <div className="flex items-center">  
+                <User className="mr-2 h-4 w-4" />
+                Consumidor final
               </div>
             </SelectItem>
             {customers.map((customer) => (
@@ -71,7 +71,7 @@ const CustomerSelector = ({
         )}
       </div>
       
-      {selectedCustomer !== "Cliente General" && customers.find(c => c.name === selectedCustomer) && (
+      {selectedCustomer !== "Consumidor final" && customers.find(c => c.name === selectedCustomer) && (
         <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
           {(() => {
             const customer = customers.find(c => c.name === selectedCustomer);

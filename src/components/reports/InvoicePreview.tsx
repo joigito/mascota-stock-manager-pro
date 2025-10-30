@@ -135,7 +135,7 @@ const InvoicePreview = ({ invoice, isOpen, onClose, onPrint }: InvoicePreviewPro
           {/* Client Info */}
           <div className="invoice-details border-t pt-4">
             <h3 className="font-semibold mb-2">Cliente:</h3>
-            <p>Cliente General</p>
+            <p>Consumidor final</p>
             <p className="text-sm text-gray-600">Condición IVA: Consumidor Final</p>
           </div>
 
