@@ -220,6 +220,160 @@ export const useCurrentAccount = () => {
     }
   };
 
+  const deleteTransaction = async (transactionId: string) => {
+    try {
+      // 1. Get the transaction to be deleted
+      const { data: transaction, error: txError } = await supabase
+        .from('account_transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .single();
+
+      if (txError || !transaction) throw txError || new Error('Transaction not found');
+
+      // 2. Get the customer account
+      const { data: account, error: accError } = await supabase
+        .from('customer_accounts')
+        .select('*')
+        .eq('id', transaction.customer_account_id)
+        .single();
+
+      if (accError || !account) throw accError || new Error('Account not found');
+
+      // 3. Get all transactions for that account created after the one to be deleted
+      const { data: subsequentTransactions, error: subsError } = await supabase
+        .from('account_transactions')
+        .select('*')
+        .eq('customer_account_id', account.id)
+        .gt('created_at', transaction.created_at)
+        .order('created_at', { ascending: true });
+
+      if (subsError) throw subsError;
+
+      // 4. Calculate the new balance for the customer account
+      let newBalance = account.balance;
+      if (transaction.transaction_type === 'sale') {
+        newBalance -= transaction.amount; // Reverse the sale
+      } else if (transaction.transaction_type === 'payment') {
+        newBalance += transaction.amount; // Reverse the payment
+      }
+
+      // 5. Update the customer account balance
+      const { error: updateAccError } = await supabase
+        .from('customer_accounts')
+        .update({ balance: newBalance })
+        .eq('id', account.id);
+
+      if (updateAccError) throw updateAccError;
+
+      // 6. Update the balance_after for all subsequent transactions
+      let currentBalance = newBalance;
+      for (const tx of subsequentTransactions) {
+        if (tx.transaction_type === 'sale') {
+          currentBalance += tx.amount;
+        } else if (tx.transaction_type === 'payment') {
+          currentBalance -= tx.amount;
+        }
+        const { error: updateTxError } = await supabase
+          .from('account_transactions')
+          .update({ balance_after: currentBalance })
+          .eq('id', tx.id);
+
+        if (updateTxError) throw updateTxError;
+      }
+
+      // 7. Delete the transaction
+      const { error: deleteError } = await supabase
+        .from('account_transactions')
+        .delete()
+        .eq('id', transactionId);
+
+      if (deleteError) throw deleteError;
+
+      toast.success('Transacción eliminada correctamente');
+      await loadAccounts();
+      return true;
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
+  };
+
+  const updateTransaction = async (transactionId: string, updates: Partial<AccountTransaction>) => {
+    try {
+      // 1. Get the original transaction
+      const { data: originalTransaction, error: txError } = await supabase
+        .from('account_transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .single();
+
+      if (txError || !originalTransaction) throw txError || new Error('Transaction not found');
+
+      // 2. Get the customer account
+      const { data: account, error: accError } = await supabase
+        .from('customer_accounts')
+        .select('*')
+        .eq('id', originalTransaction.customer_account_id)
+        .single();
+
+      if (accError || !account) throw accError || new Error('Account not found');
+
+      // 3. Get all transactions for that account created after the one to be updated
+      const { data: subsequentTransactions, error: subsError } = await supabase
+        .from('account_transactions')
+        .select('*')
+        .eq('customer_account_id', account.id)
+        .gt('created_at', originalTransaction.created_at)
+        .order('created_at', { ascending: true });
+
+      if (subsError) throw subsError;
+
+      // 4. Calculate the difference in the amount
+      const amountDifference = (updates.amount || originalTransaction.amount) - originalTransaction.amount;
+
+      // 5. Update the customer account balance
+      const newBalance = account.balance + amountDifference;
+      const { error: updateAccError } = await supabase
+        .from('customer_accounts')
+        .update({ balance: newBalance })
+        .eq('id', account.id);
+
+      if (updateAccError) throw updateAccError;
+
+      // 6. Update the balance_after for all subsequent transactions
+      let currentBalance = newBalance;
+      for (const tx of subsequentTransactions) {
+        if (tx.transaction_type === 'sale') {
+          currentBalance += tx.amount;
+        } else if (tx.transaction_type === 'payment') {
+          currentBalance -= tx.amount;
+        }
+        const { error: updateTxError } = await supabase
+          .from('account_transactions')
+          .update({ balance_after: currentBalance })
+          .eq('id', tx.id);
+
+        if (updateTxError) throw updateTxError;
+      }
+
+      // 7. Update the transaction
+      const { error: updateError } = await supabase
+        .from('account_transactions')
+        .update(updates)
+        .eq('id', transactionId);
+
+      if (updateError) throw updateError;
+
+      toast.success('Transacción actualizada correctamente');
+      await loadAccounts();
+      return true;
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      toast.error('Error al actualizar transacción');
+      return false;
+    }
+  };
+
   return {
     accounts,
     loading,
@@ -228,6 +382,8 @@ export const useCurrentAccount = () => {
     addTransaction,
     getTransactions,
     updateCreditLimit,
-    getOrCreateAccount
+    getOrCreateAccount,
+    deleteTransaction,
+    updateTransaction
   };
 };

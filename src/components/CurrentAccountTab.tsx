@@ -34,16 +34,24 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export const CurrentAccountTab = () => {
-  const { accounts, loading, isEnabled, addTransaction, getTransactions, updateCreditLimit } = useCurrentAccount();
+  const { accounts, loading, isEnabled, addTransaction, getTransactions, updateCreditLimit, deleteTransaction, updateTransaction } = useCurrentAccount();
   const { customers, loading: loadingCustomers } = useCustomers();
   const [showTransactionDialog, setShowTransactionDialog] = useState(false);
   const [showMovementsDialog, setShowMovementsDialog] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<any | null>(null);
 
   const [transactionForm, setTransactionForm] = useState({
     customerId: '',
+    type: 'payment' as 'sale' | 'payment' | 'adjustment',
+    amount: '',
+    notes: ''
+  });
+
+  const [editTransactionForm, setEditTransactionForm] = useState({
+    id: '',
     type: 'payment' as 'sale' | 'payment' | 'adjustment',
     amount: '',
     notes: ''
@@ -82,6 +90,28 @@ export const CurrentAccountTab = () => {
         amount: '',
         notes: ''
       });
+    }
+  };
+
+  const handleUpdateTransaction = async () => {
+    if (!editingTransaction) return;
+
+    const success = await updateTransaction(editingTransaction.id, {
+      transaction_type: editTransactionForm.type,
+      amount: parseFloat(editTransactionForm.amount),
+      notes: editTransactionForm.notes || undefined
+    });
+
+    if (success) {
+      setEditingTransaction(null);
+      handleViewMovements(selectedAccountId);
+    }
+  };
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    const success = await deleteTransaction(transactionId);
+    if (success) {
+      handleViewMovements(selectedAccountId);
     }
   };
 
@@ -308,6 +338,7 @@ export const CurrentAccountTab = () => {
                   <TableHead className="text-right">Monto</TableHead>
                   <TableHead className="text-right">Saldo</TableHead>
                   <TableHead>Notas</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -326,11 +357,92 @@ export const CurrentAccountTab = () => {
                     <TableCell className="text-sm text-muted-foreground">
                       {tx.notes || '-'}
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingTransaction(tx);
+                          setEditTransactionForm({
+                            id: tx.id,
+                            type: tx.transaction_type,
+                            amount: tx.amount.toString(),
+                            notes: tx.notes || ''
+                          });
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteTransaction(tx.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Transaction Dialog */}
+      <Dialog open={!!editingTransaction} onOpenChange={() => setEditingTransaction(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Transacción</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-type">Tipo de Transacción</Label>
+              <Select
+                value={editTransactionForm.type}
+                onValueChange={(value: any) => setEditTransactionForm({ ...editTransactionForm, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="payment">Pago</SelectItem>
+                  <SelectItem value="sale">Venta a Crédito</SelectItem>
+                  <SelectItem value="adjustment">Ajuste</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-amount">Monto</Label>
+              <Input
+                id="edit-amount"
+                type="number"
+                step="0.01"
+                value={editTransactionForm.amount}
+                onChange={(e) => setEditTransactionForm({ ...editTransactionForm, amount: e.target.value })}
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-notes">Notas (opcional)</Label>
+              <Textarea
+                id="edit-notes"
+                value={editTransactionForm.notes}
+                onChange={(e) => setEditTransactionForm({ ...editTransactionForm, notes: e.target.value })}
+                placeholder="Descripción de la transacción..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingTransaction(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => handleUpdateTransaction()}>
+              Actualizar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
