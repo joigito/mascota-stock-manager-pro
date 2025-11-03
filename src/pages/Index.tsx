@@ -17,7 +17,7 @@ import { SuperAdminDashboard } from "@/components/SuperAdminDashboard";
 import { OrganizationUserManagement } from "@/components/OrganizationUserManagement";
 import { OrganizationUrlGenerator } from "@/components/OrganizationUrlGenerator";
 import { UserIndicator } from "@/components/UserIndicator";
-import { ModeToggle } from "@/components/ui/ModeToggle";
+import { StoreLayout } from "@/components/StoreLayout";
 import { useProducts } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useAuth } from "@/contexts/AuthContext";
@@ -103,53 +103,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card shadow-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
-                <Building2 className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-foreground">
-                  {currentOrganization?.name || 'Sistemas de Gestión Comercial'}
-                </h1>
-                <p className="text-xs sm:text-base text-muted-foreground">Plataforma de gestión comercial para múltiples tipos de negocio</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-              {isSuperAdmin && <OrganizationSelector />}
-              {isSuperAdmin && (
-                <Button
-                  onClick={clearOrganization}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Building2 className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Panel Central</span>
-                  <span className="sm:hidden">Panel</span>
-                </Button>
-              )}
-              <SyncButton />
-              <UserIndicator />
-              <ModeToggle />
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Cerrar Sesión</span>
-                <span className="sm:hidden">Salir</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <StoreLayout organization={currentOrganization!}>
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Tabs Navigation */}
@@ -247,8 +201,9 @@ const Index = () => {
         onOpenChange={setIsAddDialogOpen}
         onAddProduct={addProduct}
       />
-    </div>
+    </StoreLayout>
   );
+
 };
 
 export default Index;

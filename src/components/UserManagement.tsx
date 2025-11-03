@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { UserRoleDialog } from './UserRoleDialog';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,37 +72,8 @@ export const UserManagement: React.FC = () => {
 
   const { toast } = useToast();
   const { user } = useAuth();
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
-  
-  // Create User Dialog State
-  const [createUserOpen, setCreateUserOpen] = useState(false);
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserPassword, setNewUserPassword] = useState('');
-  const [newUserRole, setNewUserRole] = useState('user');
-  const [newUserOrganization, setNewUserOrganization] = useState('');
-  
-  
-  // Organizations for dropdowns
-  const [organizations, setOrganizations] = useState<Array<{id: string, name: string}>>([]);
-  
-  // Load organizations for dropdowns
-  useEffect(() => {
-    const loadOrganizations = async () => {
-      try {
-        const { data } = await supabase
-          .from('organizations')
-          .select('id, name')
-          .order('name');
-        setOrganizations(data || []);
-      } catch (error) {
-        console.error('Error loading organizations:', error);
-      }
-    };
-    loadOrganizations();
-  }, []);
+  const { organizations: userOrganizations } = useOrganization();
+  const organizations = userOrganizations.map(userOrg => userOrg.organization);
 
   const filteredUsers = users.filter(userWithRoles =>
     userWithRoles.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||

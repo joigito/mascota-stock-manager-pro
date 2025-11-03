@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Building2, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Link } from 'react-router-dom';
 import { ModeToggle } from '@/components/ui/ModeToggle';
 
@@ -25,6 +26,16 @@ interface StoreLayoutProps {
 export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children }) => {
   const { signOut } = useAuth();
   const { toast } = useToast();
+  const { isSuperAdmin, clearOrganization } = useOrganization();
+  const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const superAdmin = await isSuperAdmin();
+      setIsSuperAdminUser(superAdmin);
+    };
+    checkAdminStatus();
+  }, [isSuperAdmin]);
 
   const handleSignOut = async () => {
     try {
@@ -66,6 +77,28 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
                 <Building2 className="h-3 w-3 mr-1" />
                 {organization.name}
               </Badge>
+              {isSuperAdminUser && (
+                <Button
+                  onClick={clearOrganization}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Organizaciones</span>
+                  <span className="sm:hidden">Orgs.</span>
+                </Button>
+              )}
+              {isSuperAdminUser && (
+                <Link to="/superadmin">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                  >
+                    <span className="hidden sm:inline">Panel de control</span>
+                    <span className="sm:hidden">Control</span>
+                  </Button>
+                </Link>
+              )}
               <ModeToggle />
               <Button
                 onClick={handleSignOut}

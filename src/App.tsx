@@ -10,6 +10,8 @@ import Store from "./pages/Store";
 import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import SuperAdminPage from "./pages/SuperAdminPage";
+import UserManagementPage from "./pages/UserManagementPage";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,16 @@ const App = () => (
             <Route path="/" element={
               <ProtectedRoute>
                 <Index />
+              </ProtectedRoute>
+            } />
+            <Route path='/superadmin' element={
+              <ProtectedRoute>
+                <SuperAdminPage />
+              </ProtectedRoute>
+            } />
+            <Route path='/users' element={
+              <ProtectedRoute>
+                <UserManagementPage />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

@@ -20,6 +20,7 @@ import { QuickActionsDialog } from '@/components/QuickActionsDialog';
 import { TransferOwnershipDialog } from '@/components/TransferOwnershipDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization } from '@/hooks/useOrganization';
+import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -83,19 +84,19 @@ export const SuperAdminDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando panel de administración...</p>
+          <p className="text-muted-foreground">Cargando panel de administración...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-blue-100">
+      <header className="bg-card shadow-md border-b border-border">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-3 sm:space-x-4">
@@ -103,14 +104,14 @@ export const SuperAdminDashboard: React.FC = () => {
                 <Shield className="h-6 w-6 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-3xl font-bold text-foreground">
                   Panel de Super Administrador
                 </h1>
-                <p className="text-xs sm:text-base text-gray-600">Gestión central del sistema</p>
+                <p className="text-xs sm:text-base text-muted-foreground">Gestión central del sistema</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Badge variant="outline" className="border-blue-300 text-blue-700">
+              <Badge variant="outline">
                 <Shield className="h-3 w-3 mr-1" />
                 Super Admin
               </Badge>
@@ -118,7 +119,6 @@ export const SuperAdminDashboard: React.FC = () => {
                 onClick={handleSignOut}
                 variant="outline"
                 size="sm"
-                className="border-gray-300 hover:bg-gray-50"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Cerrar Sesión</span>
@@ -175,17 +175,6 @@ export const SuperAdminDashboard: React.FC = () => {
                 className="w-full justify-start" 
                 variant="outline"
                 onClick={() => {
-                  setDialogType('users');
-                  setDialogOpen(true);
-                }}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                Gestionar Roles de Usuario
-              </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => {
                   setDialogType('backup');
                   setDialogOpen(true);
                 }}
@@ -193,6 +182,15 @@ export const SuperAdminDashboard: React.FC = () => {
                 <Database className="h-4 w-4 mr-2" />
                 Respaldos de Base de Datos
               </Button>
+              <Link to="/users" className="w-full">
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Gestionar Roles de Usuario
+                </Button>
+              </Link>
               <Button 
                 className="w-full justify-start" 
                 variant="outline"
@@ -220,13 +218,13 @@ export const SuperAdminDashboard: React.FC = () => {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Estado del servidor</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Badge variant="default">
                   Activo
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Base de datos</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Badge variant="default">
                   Conectada
                 </Badge>
               </div>
@@ -273,7 +271,6 @@ export const SuperAdminDashboard: React.FC = () => {
                       setSelectedOrganization(userOrg.organization);
                       setTransferDialogOpen(true);
                     }}
-                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
                   >
                     Vender
                   </Button>
@@ -287,7 +284,7 @@ export const SuperAdminDashboard: React.FC = () => {
               <div className="pt-2 border-t">
                 <p className="text-xs text-muted-foreground mb-2">URLs dedicadas por tienda:</p>
                 {organizations.slice(0, 2).map((userOrg) => (
-                  <div key={userOrg.organization.id} className="text-xs bg-gray-50 p-2 rounded mb-1">
+                  <div key={userOrg.organization.id} className="text-xs bg-muted p-2 rounded mb-1">
                     <code>{window.location.origin}/tienda/{userOrg.organization.slug || userOrg.organization.name.toLowerCase().replace(/\s+/g, '-')}</code>
                   </div>
                 ))}
@@ -298,23 +295,15 @@ export const SuperAdminDashboard: React.FC = () => {
 
         {/* Unified Management Tabs */}
         <Tabs defaultValue="organizations" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="organizations" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               Organizaciones
-            </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <UserCog className="h-4 w-4" />
-              Usuarios y Roles
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="organizations" className="mt-6">
             <OrganizationManager />
-          </TabsContent>
-          
-          <TabsContent value="users" className="mt-6">
-            <UserManagement />
           </TabsContent>
         </Tabs>
       </main>

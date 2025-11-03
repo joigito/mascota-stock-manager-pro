@@ -41,12 +41,16 @@ export const useUserRoles = () => {
   const { toast } = useToast();
 
   const loadUsers = async () => {
+    console.log('loadUsers: Starting...');
     try {
       setLoading(true);
 
       // Get real user data using secure function
       const { data: realUsersData, error: usersError } = await supabase
         .rpc('get_users_with_roles');
+      
+      console.log('loadUsers: realUsersData:', realUsersData);
+      console.log('loadUsers: usersError:', usersError);
 
       if (usersError) throw usersError;
 
@@ -62,12 +66,18 @@ export const useUserRoles = () => {
           organization:organizations(id, name, slug)
         `);
 
+      console.log('loadUsers: userOrgData:', userOrgData);
+      console.log('loadUsers: userOrgError:', userOrgError);
+
       if (userOrgError) throw userOrgError;
 
       // Get all global user roles
       const { data: userRolesData, error: userRolesError } = await supabase
         .from('user_roles')
         .select('*');
+
+      console.log('loadUsers: userRolesData:', userRolesData);
+      console.log('loadUsers: userRolesError:', userRolesError);
 
       if (userRolesError) throw userRolesError;
 
@@ -94,6 +104,7 @@ export const useUserRoles = () => {
         }
       }
 
+      console.log('loadUsers: final usersWithRoles:', usersWithRoles);
       setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error loading users:', error);
@@ -103,6 +114,7 @@ export const useUserRoles = () => {
         variant: "destructive",
       });
     } finally {
+      console.log('loadUsers: Finished.');
       setLoading(false);
     }
   };

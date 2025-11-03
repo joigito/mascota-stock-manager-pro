@@ -167,6 +167,7 @@ export const useOrganization = () => {
   const clearOrganization = () => {
     setCurrentOrganization(null);
     localStorage.removeItem('selectedOrganizationId');
+    window.location.href = '/';
   };
 
   const hasRole = (role: 'admin' | 'user') => {
