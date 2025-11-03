@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Building2, Users, Trash2, Receipt } from 'lucide-react';
+import { Plus, Building2, Users, Trash2, Receipt, CreditCard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ElectronicInvoicingConfig } from './ElectronicInvoicingConfig';
+import { CurrentAccountConfig } from './CurrentAccountConfig';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 interface Organization {
@@ -32,7 +34,7 @@ export const OrganizationManager: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgDescription, setNewOrgDescription] = useState('');
-  const [selectedOrgForInvoicing, setSelectedOrgForInvoicing] = useState<string | null>(null);
+  const [selectedOrgForConfig, setSelectedOrgForConfig] = useState<string | null>(null);
 
   React.useEffect(() => {
     loadAllOrganizations();
@@ -234,17 +236,15 @@ export const OrganizationManager: React.FC = () => {
                 <span>Creada: {new Date(org.created_at).toLocaleDateString()}</span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary">
-                  {organizations.find(userOrg => userOrg.organization.id === org.id) ? 'Miembro' : 'No miembro'}
-                </Badge>
+              <div className="flex flex-col gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSelectedOrgForInvoicing(org.id)}
+                  onClick={() => setSelectedOrgForConfig(org.id)}
+                  className="w-full"
                 >
                   <Receipt className="w-4 h-4 mr-1" />
-                  Facturación
+                  Configurar
                 </Button>
               </div>
             </CardContent>
@@ -268,18 +268,33 @@ export const OrganizationManager: React.FC = () => {
         </Card>
       )}
 
-      {/* Dialog para configuración de facturación electrónica */}
-      <Dialog open={!!selectedOrgForInvoicing} onOpenChange={() => setSelectedOrgForInvoicing(null)}>
+      {/* Dialog para configuración de módulos */}
+      <Dialog open={!!selectedOrgForConfig} onOpenChange={() => setSelectedOrgForConfig(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Configuración de Facturación Electrónica
+              Configuración de Módulos
             </DialogTitle>
           </DialogHeader>
-          {selectedOrgForInvoicing && (
-            <div className="py-4">
-              <ElectronicInvoicingConfig organizationId={selectedOrgForInvoicing} />
-            </div>
+          {selectedOrgForConfig && (
+            <Tabs defaultValue="invoicing" className="py-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="invoicing">
+                  <Receipt className="h-4 w-4 mr-2" />
+                  Facturación
+                </TabsTrigger>
+                <TabsTrigger value="current-account">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Cuenta Corriente
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="invoicing">
+                <ElectronicInvoicingConfig organizationId={selectedOrgForConfig} />
+              </TabsContent>
+              <TabsContent value="current-account">
+                <CurrentAccountConfig organizationId={selectedOrgForConfig} />
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>

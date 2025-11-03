@@ -11,6 +11,7 @@ interface Organization {
   created_at: string;
   updated_at: string;
   created_by: string;
+  current_account_enabled?: boolean;
 }
 
 interface UserOrganization {

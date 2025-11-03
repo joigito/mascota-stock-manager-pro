@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Package, Building2, LogOut, Settings } from "lucide-react";
+import { Plus, Package, Building2, LogOut, Settings, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
@@ -9,6 +9,7 @@ import Dashboard from "@/components/Dashboard";
 import SalesTab from "@/components/SalesTab";
 import ReportsTab from "@/components/ReportsTab";
 import CustomersTab from "@/components/CustomersTab";
+import { CurrentAccountTab } from "@/components/CurrentAccountTab";
 import SyncButton from "@/components/SyncButton";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { OrganizationManager } from "@/components/OrganizationManager";
@@ -155,7 +156,7 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
+          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-7' : 'grid-cols-6'}`}>
             <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Inicio</span>
               <span className="sm:hidden">Inicio</span>
@@ -170,6 +171,10 @@ const Index = () => {
             <TabsTrigger value="customers" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Clientes</span>
               <span className="sm:hidden">Clientes</span>
+            </TabsTrigger>
+            <TabsTrigger value="current-account" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Cta. Cte.</span>
+              <span className="sm:hidden">Cta.</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Reportes</span>
@@ -225,6 +230,11 @@ const Index = () => {
           {/* Customers Tab */}
           <TabsContent value="customers">
             <CustomersTab />
+          </TabsContent>
+
+          {/* Current Account Tab */}
+          <TabsContent value="current-account">
+            <CurrentAccountTab />
           </TabsContent>
 
           {/* Reports Tab */}

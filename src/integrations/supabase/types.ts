@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          created_by: string
+          customer_account_id: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reference_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          created_by: string
+          customer_account_id: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          reference_id?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          created_by?: string
+          customer_account_id?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          reference_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_transactions_customer_account_id_fkey"
+            columns: ["customer_account_id"]
+            isOneToOne: false
+            referencedRelation: "customer_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       afip_configurations: {
         Row: {
           ambiente: string
@@ -105,6 +159,51 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      customer_accounts: {
+        Row: {
+          balance: number
+          created_at: string
+          credit_limit: number | null
+          customer_id: string
+          id: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          credit_limit?: number | null
+          customer_id: string
+          id?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          credit_limit?: number | null
+          customer_id?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_accounts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customers: {
         Row: {
@@ -333,32 +432,38 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          current_account_enabled: boolean
           description: string | null
           electronic_invoicing_enabled: boolean
           id: string
           name: string
           slug: string
           updated_at: string
+          use_variants: boolean
         }
         Insert: {
           created_at?: string
           created_by: string
+          current_account_enabled?: boolean
           description?: string | null
           electronic_invoicing_enabled?: boolean
           id?: string
           name: string
           slug: string
           updated_at?: string
+          use_variants?: boolean
         }
         Update: {
           created_at?: string
           created_by?: string
+          current_account_enabled?: boolean
           description?: string | null
           electronic_invoicing_enabled?: boolean
           id?: string
           name?: string
           slug?: string
           updated_at?: string
+          use_variants?: boolean
         }
         Relationships: []
       }
@@ -400,6 +505,77 @@ export type Database = {
           reason?: string | null
         }
         Relationships: []
+      }
+      product_attribute_definitions: {
+        Row: {
+          attribute_name: string
+          attribute_type: string
+          created_at: string
+          display_order: number
+          id: string
+          is_required: boolean
+          organization_id: string
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          attribute_name: string
+          attribute_type?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_required?: boolean
+          organization_id: string
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          attribute_name?: string
+          attribute_type?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_required?: boolean
+          organization_id?: string
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_attribute_values: {
+        Row: {
+          attribute_definition_id: string
+          color_hex: string | null
+          created_at: string
+          display_order: number
+          id: string
+          value: string
+        }
+        Insert: {
+          attribute_definition_id: string
+          color_hex?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          value: string
+        }
+        Update: {
+          attribute_definition_id?: string
+          color_hex?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_attribute_values_attribute_definition_id_fkey"
+            columns: ["attribute_definition_id"]
+            isOneToOne: false
+            referencedRelation: "product_attribute_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_attributes: {
         Row: {
@@ -503,8 +679,93 @@ export type Database = {
         }
         Relationships: []
       }
+      product_variant_attributes: {
+        Row: {
+          attribute_definition_id: string
+          attribute_value: string
+          created_at: string
+          id: string
+          variant_combination_id: string
+        }
+        Insert: {
+          attribute_definition_id: string
+          attribute_value: string
+          created_at?: string
+          id?: string
+          variant_combination_id: string
+        }
+        Update: {
+          attribute_definition_id?: string
+          attribute_value?: string
+          created_at?: string
+          id?: string
+          variant_combination_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variant_attributes_attribute_definition_id_fkey"
+            columns: ["attribute_definition_id"]
+            isOneToOne: false
+            referencedRelation: "product_attribute_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variant_attributes_variant_combination_id_fkey"
+            columns: ["variant_combination_id"]
+            isOneToOne: false
+            referencedRelation: "product_variant_combinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variant_combinations: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          min_stock: number
+          organization_id: string
+          price_adjustment: number | null
+          product_id: string
+          sku: string | null
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          min_stock?: number
+          organization_id: string
+          price_adjustment?: number | null
+          product_id: string
+          sku?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          min_stock?: number
+          organization_id?: string
+          price_adjustment?: number | null
+          product_id?: string
+          sku?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_variants: {
         Row: {
+          attributes: Json | null
           color: string | null
           created_at: string
           created_by: string
@@ -521,6 +782,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attributes?: Json | null
           color?: string | null
           created_at?: string
           created_by: string
@@ -537,6 +799,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attributes?: Json | null
           color?: string | null
           created_at?: string
           created_by?: string
@@ -647,6 +910,7 @@ export type Database = {
         Row: {
           cost_price: number | null
           created_at: string
+          final_unit_price: number
           id: string
           margin: number | null
           price: number
@@ -656,10 +920,12 @@ export type Database = {
           quantity: number
           sale_id: string
           subtotal: number
+          variant_id: string | null
         }
         Insert: {
           cost_price?: number | null
           created_at?: string
+          final_unit_price?: number
           id?: string
           margin?: number | null
           price: number
@@ -669,10 +935,12 @@ export type Database = {
           quantity: number
           sale_id: string
           subtotal: number
+          variant_id?: string | null
         }
         Update: {
           cost_price?: number | null
           created_at?: string
+          final_unit_price?: number
           id?: string
           margin?: number | null
           price?: number
@@ -682,6 +950,7 @@ export type Database = {
           quantity?: number
           sale_id?: string
           subtotal?: number
+          variant_id?: string | null
         }
         Relationships: [
           {
@@ -689,6 +958,13 @@ export type Database = {
             columns: ["sale_id"]
             isOneToOne: false
             referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
         ]
@@ -861,6 +1137,50 @@ export type Database = {
         }
         Relationships: []
       }
+      variant_attribute_definitions: {
+        Row: {
+          created_at: string | null
+          data_type: string
+          id: string
+          key: string
+          name: string
+          options: Json | null
+          organization_id: string
+          position: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_type?: string
+          id?: string
+          key: string
+          name: string
+          options?: Json | null
+          organization_id: string
+          position?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_type?: string
+          id?: string
+          key?: string
+          name?: string
+          options?: Json | null
+          organization_id?: string
+          position?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variant_attribute_definitions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -888,18 +1208,12 @@ export type Database = {
           product_name: string
         }[]
       }
-      generate_invitation_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_invitation_token: { Args: never; Returns: string }
       generate_product_sku: {
         Args: { category: string; org_id: string; product_name: string }
         Returns: string
       }
-      generate_slug: {
-        Args: { input_text: string }
-        Returns: string
-      }
+      generate_slug: { Args: { input_text: string }; Returns: string }
       generate_variant_sku: {
         Args: {
           base_sku: string
@@ -933,7 +1247,7 @@ export type Database = {
         }[]
       }
       get_users_with_roles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           email: string
