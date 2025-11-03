@@ -247,52 +247,48 @@ export const SuperAdminDashboard: React.FC = () => {
                 Entra a administrar tiendas específicas
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {organizations.slice(0, 3).map((userOrg) => (
-                <div key={userOrg.organization.id} className="flex items-center justify-between">
-                  <Button 
-                    className="flex-1 justify-start mr-2" 
-                    variant="outline"
-                    onClick={() => {
-                      console.log('SuperAdminDashboard: Switching to organization:', userOrg.organization);
-                      switchOrganization(userOrg.organization);
-                      // Force a page refresh after a short delay to ensure state is updated
-                      setTimeout(() => {
-                        console.log('SuperAdminDashboard: Triggering page refresh/re-render');
-                        window.location.reload();
-                      }, 200);
-                    }}
-                  >
-                    <Building2 className="h-4 w-4 mr-2" />
-                    {userOrg.organization.name}
-                  </Button>
-                  <Button 
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      setSelectedOrganization(userOrg.organization);
-                      setTransferDialogOpen(true);
-                    }}
-                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                  >
-                    Vender
-                  </Button>
-                </div>
-              ))}
-              {organizations.length > 3 && (
-                <p className="text-xs text-muted-foreground">
-                  +{organizations.length - 3} tiendas más...
-                </p>
-              )}
-              <div className="pt-2 border-t">
-                <p className="text-xs text-muted-foreground mb-2">URLs dedicadas por tienda:</p>
-                {organizations.slice(0, 2).map((userOrg) => (
-                  <div key={userOrg.organization.id} className="text-xs bg-gray-50 p-2 rounded mb-1">
-                    <code>{window.location.origin}/tienda/{userOrg.organization.slug || userOrg.organization.name.toLowerCase().replace(/\s+/g, '-')}</code>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
+                        <CardContent className="space-y-3 max-h-64 overflow-y-auto">
+                          {organizations.map((userOrg) => (
+                            <div key={userOrg.organization.id} className="flex items-center justify-between">
+                              <Button 
+                                className="flex-1 justify-start mr-2" 
+                                variant="outline"
+                                onClick={() => {
+                                  console.log('SuperAdminDashboard: Switching to organization:', userOrg.organization);
+                                  switchOrganization(userOrg.organization);
+                                  // Force a page refresh after a short delay to ensure state is updated
+                                  setTimeout(() => {
+                                    console.log('SuperAdminDashboard: Triggering page refresh/re-render');
+                                    window.location.reload();
+                                  }, 200);
+                                }}
+                              >
+                                <Building2 className="h-4 w-4 mr-2" />
+                                {userOrg.organization.name}
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setSelectedOrganization(userOrg.organization);
+                                  setTransferDialogOpen(true);
+                                }}
+                                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                              >
+                                Vender
+                              </Button>
+                            </div>
+                          ))}
+                          <div className="pt-2 border-t">
+                            <p className="text-xs text-muted-foreground mb-2">URLs dedicadas por tienda:</p>
+                            {organizations.map((userOrg) => (
+                              <div key={userOrg.organization.id} className="text-xs bg-gray-50 p-2 rounded mb-1">
+                                <code>{window.location.origin}/tienda/{userOrg.organization.slug || userOrg.organization.name.toLowerCase().replace(/\s+/g, '-')}<
+            /code>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
           </Card>
         </div>
 
