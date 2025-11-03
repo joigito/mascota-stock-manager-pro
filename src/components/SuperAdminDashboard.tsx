@@ -283,8 +283,7 @@ export const SuperAdminDashboard: React.FC = () => {
                             <p className="text-xs text-muted-foreground mb-2">URLs dedicadas por tienda:</p>
                             {organizations.map((userOrg) => (
                               <div key={userOrg.organization.id} className="text-xs bg-gray-50 p-2 rounded mb-1">
-                                <code>{window.location.origin}/tienda/{userOrg.organization.slug || userOrg.organization.name.toLowerCase().replace(/\s+/g, '-')}<
-            /code>
+                                <code>{window.location.origin}/tienda/{userOrg.organization.slug || userOrg.organization.name.toLowerCase().replace(/\s+/g, '-')}</code>
                               </div>
                             ))}
                           </div>
