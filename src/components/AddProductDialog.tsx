@@ -335,10 +335,10 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
 
           {formData.price && formData.costPrice && !formData.hasVariants && (
             <div className="p-3 bg-muted/50 border border-border rounded-lg">
-              <div className="text-sm text-green-800">
+              <div className="text-sm text-foreground">
                 <strong>Margen de ganancia: {calculateMargin()}%</strong>
               </div>
-              <div className="text-xs text-green-600 mt-1">
+              <div className="text-xs text-muted-foreground mt-1">
                 Ganancia por unidad: ${(parseFloat(formData.price) - parseFloat(formData.costPrice)).toLocaleString()}
               </div>
             </div>
@@ -346,15 +346,15 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
 
           {formData.hasVariants && (
             <div className="p-3 bg-accent/50 border border-border rounded-lg">
-              <div className="text-sm text-blue-800">
+              <div className="text-sm text-foreground">
                 <strong>Producto con variantes</strong>
               </div>
-              <div className="text-xs text-blue-600 mt-1">
+              <div className="text-xs text-muted-foreground mt-1">
                 Después de crear el producto podrás agregar variantes específicas y configurar stock para cada una.
               </div>
               {attributes.length > 0 && (
                 <div className="mt-2">
-                  <div className="text-xs text-blue-700 font-medium mb-1">Atributos disponibles:</div>
+                  <div className="text-xs font-medium text-foreground mb-1">Atributos disponibles:</div>
                   <div className="flex flex-wrap gap-1">
                     {attributes.map(attr => (
                       <Badge key={attr.id} variant="secondary" className="text-xs">
@@ -365,7 +365,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                 </div>
               )}
               {attributes.length === 0 && (
-                <div className="mt-2 text-xs text-blue-600">
+                <div className="mt-2 text-xs text-muted-foreground">
                   <strong>Nota:</strong> No hay atributos de variante configurados. Ve a Panel de Administrador → Accesos Rápidos → Gestionar Variantes para crear atributos como Color, Talle, etc.
                 </div>
               )}

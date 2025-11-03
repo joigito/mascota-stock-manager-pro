@@ -180,11 +180,11 @@ const CustomersTab = () => {
                           </div>
                         )}
                         {customer.address && (
-                          <div className="text-gray-600">
+                          <div className="text-sm text-muted-foreground">
                             <strong>Dirección:</strong> {customer.address}
                           </div>
                         )}
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-muted-foreground">
                           Registrado: {new Date(customer.created_at).toLocaleDateString()}
                         </div>
                       </div>

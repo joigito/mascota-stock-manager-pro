@@ -257,7 +257,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
               averageMargin={getAverageMargin()}
             />
             {saleItems.length > 0 && (
-              <Button onClick={completeSale} className="w-full bg-green-600 hover:bg-green-700">
+              <Button onClick={completeSale} className="w-full" variant="default">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Completar Venta
               </Button>

@@ -19,10 +19,10 @@ const TopProductsCard = ({ topProducts }: TopProductsCardProps) => {
       </CardHeader>
       <CardContent>
         {topProducts.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No hay ventas registradas en este período</p>
-          </div>
+            <div className="text-center py-8 text-muted-foreground">
+              <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No hay ventas registradas en este período</p>
+            </div>
         ) : (
           <div className="space-y-4">
             {topProducts.map(([productId, data], index) => (
@@ -33,14 +33,14 @@ const TopProductsCard = ({ topProducts }: TopProductsCardProps) => {
                   </Badge>
                   <div>
                     <h4 className="font-medium">{data.name}</h4>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {data.quantity} unidades vendidas
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-semibold">${data.revenue.toLocaleString()}</div>
-                  <div className="text-sm text-green-600">+${data.profit.toLocaleString()}</div>
+                  <div className="text-sm text-foreground">+${data.profit.toLocaleString()}</div>
                 </div>
               </div>
             ))}

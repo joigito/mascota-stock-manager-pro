@@ -28,10 +28,10 @@ const SalesSummaryCards = ({ salesSummary, getPeriodLabel, selectedPeriod }: Sal
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Ganancia Total</CardTitle>
-          <TrendingUp className="h-4 w-4 text-green-600" />
+          <TrendingUp className="h-4 w-4 text-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">${salesSummary.totalProfit.toLocaleString()}</div>
+          <div className="text-2xl font-bold text-foreground">${salesSummary.totalProfit.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
             Margen: {salesSummary.averageMargin.toFixed(1)}%
           </p>

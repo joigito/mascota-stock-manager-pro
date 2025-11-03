@@ -102,7 +102,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
           <button
             onClick={syncSales}
             disabled={syncing}
-            className="flex items-center space-x-2 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors disabled:opacity-50"
+            className="flex items-center space-x-2 px-3 py-2 text-sm bg-muted/50 text-foreground rounded-md hover:bg-muted/60 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
             <span>{syncing ? 'Sincronizando...' : 'Actualizar Datos'}</span>

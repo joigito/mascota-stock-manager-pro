@@ -19,14 +19,14 @@ const SalesSummary = ({ totalAmount, totalProfit, averageMargin }: SalesSummaryP
         </Badge>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-lg font-semibold text-green-700">Total Ganancia:</span>
-        <Badge variant="default" className="text-lg px-3 py-1 bg-green-600">
-          <TrendingUp className="h-4 w-4 mr-1" />
+        <span className="text-lg font-semibold text-foreground">Total Ganancia:</span>
+        <Badge variant="default" className="text-lg px-3 py-1">
+          <TrendingUp className="h-4 w-4 mr-1 text-foreground" />
           ${totalProfit.toLocaleString()}
         </Badge>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-sm text-gray-600">Margen promedio:</span>
+        <span className="text-sm text-muted-foreground">Margen promedio:</span>
         <span className="text-sm font-medium">{averageMargin.toFixed(1)}%</span>
       </div>
     </div>

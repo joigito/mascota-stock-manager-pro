@@ -191,7 +191,7 @@ export const TransferOwnershipDialog: React.FC<TransferOwnershipDialogProps> = (
                 <div className="flex items-center justify-between">
                   <span className="font-medium">URL:</span>
                   <div className="flex items-center space-x-2">
-                    <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                    <code className="text-sm bg-muted/50 px-2 py-1 rounded border border-border">
                       /tienda/{organization.slug}
                     </code>
                     <Button
@@ -234,14 +234,14 @@ export const TransferOwnershipDialog: React.FC<TransferOwnershipDialogProps> = (
               </CardContent>
             </Card>
 
-            <Card className="border-amber-200 bg-amber-50">
+            <Card className="border-border bg-muted/50">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-amber-800">
+                <CardTitle className="flex items-center space-x-2 text-foreground">
                   <AlertTriangle className="h-5 w-5" />
                   <span>Importante</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-amber-700">
+              <CardContent className="text-foreground">
                 <ul className="list-disc list-inside space-y-1 text-sm">
                   <li>Esta acción no se puede deshacer</li>
                   <li>El nuevo propietario tendrá acceso completo a la tienda</li>
@@ -256,13 +256,13 @@ export const TransferOwnershipDialog: React.FC<TransferOwnershipDialogProps> = (
         {step === 'confirmation' && (
           <div className="space-y-6">
             <div className="text-center">
-              <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <ArrowRight className="h-6 w-6 text-green-600" />
+              <div className="mx-auto w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mb-4">
+                <ArrowRight className="h-6 w-6 text-foreground" />
               </div>
-              <h3 className="text-lg font-semibold text-green-800 mb-2">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
                 ¡Transferencia Completada!
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 La tienda ha sido transferida exitosamente
               </p>
             </div>
@@ -274,10 +274,10 @@ export const TransferOwnershipDialog: React.FC<TransferOwnershipDialogProps> = (
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">Email:</span>
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-foreground">Email:</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="text-sm">{newOwnerEmail}</span>
@@ -291,13 +291,13 @@ export const TransferOwnershipDialog: React.FC<TransferOwnershipDialogProps> = (
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center space-x-2">
-                      <Key className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">Contraseña temporal:</span>
+                      <Key className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">Contraseña temporal:</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <code className="text-sm bg-white px-2 py-1 rounded border">{transferCode}</code>
+                      <code className="text-sm bg-card px-2 py-1 rounded border border-border">{transferCode}</code>
                       <Button
                         size="sm"
                         variant="outline"
@@ -308,13 +308,13 @@ export const TransferOwnershipDialog: React.FC<TransferOwnershipDialogProps> = (
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center space-x-2">
-                      <ExternalLink className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">URL de la tienda:</span>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">URL de la tienda:</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <code className="text-sm bg-white px-2 py-1 rounded border">{storeUrl}</code>
+                      <code className="text-sm bg-card px-2 py-1 rounded border border-border">{storeUrl}</code>
                       <Button
                         size="sm"
                         variant="outline"

@@ -101,15 +101,15 @@ const InvoicePreview = ({ invoice, isOpen, onClose, onPrint }: InvoicePreviewPro
           </DialogTitle>
         </DialogHeader>
 
-        <div id="invoice-print-content" className="space-y-6 p-6 bg-white">
+  <div id="invoice-print-content" className="space-y-6 p-6 bg-card">
           {/* Header */}
           <div className="invoice-header text-center border-b pb-6">
             <h1 className="text-2xl font-bold">{currentOrganization?.name || "Empresa"}</h1>
-            <p className="text-gray-600 mt-2">Factura Electrónica</p>
+            <p className="text-muted-foreground mt-2">Factura Electrónica</p>
             <div className="mt-4 text-lg font-semibold">
               {getInvoiceType(invoice.tipo_comprobante)}
             </div>
-            <div className="text-xl font-bold text-blue-600 mt-2">
+            <div className="text-xl font-bold text-foreground mt-2">
               N° {formatInvoiceNumber(invoice.invoice_number, invoice.punto_venta)}
             </div>
           </div>
@@ -119,8 +119,8 @@ const InvoicePreview = ({ invoice, isOpen, onClose, onPrint }: InvoicePreviewPro
             <div>
               <h3 className="font-semibold mb-2">Datos del Emisor:</h3>
               <p>{currentOrganization?.name || "Empresa"}</p>
-              <p className="text-sm text-gray-600">CUIT: Pendiente configuración</p>
-              <p className="text-sm text-gray-600">Punto de Venta: {invoice.punto_venta}</p>
+              <p className="text-sm text-muted-foreground">CUIT: Pendiente configuración</p>
+              <p className="text-sm text-muted-foreground">Punto de Venta: {invoice.punto_venta}</p>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Datos de la Factura:</h3>
@@ -136,7 +136,7 @@ const InvoicePreview = ({ invoice, isOpen, onClose, onPrint }: InvoicePreviewPro
           <div className="invoice-details border-t pt-4">
             <h3 className="font-semibold mb-2">Cliente:</h3>
             <p>Consumidor final</p>
-            <p className="text-sm text-gray-600">Condición IVA: Consumidor Final</p>
+            <p className="text-sm text-muted-foreground">Condición IVA: Consumidor Final</p>
           </div>
 
           {/* Items Table */}
@@ -144,7 +144,7 @@ const InvoicePreview = ({ invoice, isOpen, onClose, onPrint }: InvoicePreviewPro
             <h3 className="font-semibold mb-4">Detalle de Productos/Servicios:</h3>
             <table className="w-full border-collapse border">
               <thead>
-                <tr className="bg-gray-50">
+                <tr className="bg-muted/50">
                   <th className="border p-2 text-left">Descripción</th>
                   <th className="border p-2 text-right">Cantidad</th>
                   <th className="border p-2 text-right">Precio Unit.</th>
@@ -193,7 +193,7 @@ const InvoicePreview = ({ invoice, isOpen, onClose, onPrint }: InvoicePreviewPro
 
           {/* CAE Info */}
           {invoice.cae && (
-            <div className="cae-info border rounded p-4 bg-gray-50">
+            <div className="cae-info border rounded p-4 bg-muted/50">
               <h3 className="font-semibold mb-2">Información de Autorización AFIP:</h3>
               <p><strong>CAE:</strong> {invoice.cae}</p>
               {invoice.fecha_vto_cae && (

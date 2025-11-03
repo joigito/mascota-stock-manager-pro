@@ -282,11 +282,11 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                       </CardHeader>
                       <CardContent>
                         <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-muted-foreground mb-2">
                             Organización
                           </label>
                           <select
-                            className="w-full border rounded p-2 bg-white"
+                            className="w-full border rounded p-2 bg-card text-foreground"
                             value={selectedOrgId || ''}
                             onChange={(e) => setSelectedOrgId(e.target.value || undefined)}
                           >
@@ -379,9 +379,9 @@ export const QuickActionsDialog: React.FC<QuickActionsDialogProps> = ({
                                         <div className="col-span-1">
                                           {!currentOrganization && organizations && organizations.length > 0 && (
                                             <div className="mb-2">
-                                              <label className="block text-xs text-gray-500 mb-1">Seleccionar organización</label>
-                                              <select
-                                                className="w-full border rounded p-2"
+                                              <label className="block text-xs text-muted-foreground mb-1">Seleccionar organización</label>
+                                                <select
+                                                  className="w-full border rounded p-2 bg-card text-foreground"
                                                 value={selectedOrgId || ''}
                                                 onChange={(e) => setSelectedOrgId(e.target.value || undefined)}
                                               >

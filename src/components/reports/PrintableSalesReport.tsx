@@ -36,27 +36,27 @@ const PrintableSalesReport = ({ sales, startDate, endDate }: PrintableSalesRepor
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold mb-2">Sistemas de Gestión Comercial</h1>
         <h2 className="text-xl font-semibold mb-4">Reporte de Ventas</h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Período: {new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}
         </p>
-        <p className="text-sm text-gray-600">Generado el: {new Date().toLocaleDateString()}</p>
+        <p className="text-sm text-muted-foreground">Generado el: {new Date().toLocaleDateString()}</p>
       </div>
 
       <div className="mb-6 grid grid-cols-4 gap-4 border rounded-lg p-4">
         <div className="text-center">
-          <p className="text-sm text-gray-600">Total Ventas</p>
+          <p className="text-sm text-muted-foreground">Total Ventas</p>
           <p className="text-xl font-bold">${totalSales.toLocaleString()}</p>
         </div>
         <div className="text-center">
-          <p className="text-sm text-gray-600">Total Ganancias</p>
-          <p className="text-xl font-bold text-green-600">${totalProfit.toLocaleString()}</p>
+          <p className="text-sm text-muted-foreground">Total Ganancias</p>
+          <p className="text-xl font-bold text-foreground">${totalProfit.toLocaleString()}</p>
         </div>
         <div className="text-center">
-          <p className="text-sm text-gray-600">Margen Promedio</p>
+          <p className="text-sm text-muted-foreground">Margen Promedio</p>
           <p className="text-xl font-bold">{averageMargin.toFixed(1)}%</p>
         </div>
         <div className="text-center">
-          <p className="text-sm text-gray-600">Transacciones</p>
+          <p className="text-sm text-muted-foreground">Transacciones</p>
           <p className="text-xl font-bold">{sales.length}</p>
         </div>
       </div>
@@ -79,7 +79,7 @@ const PrintableSalesReport = ({ sales, startDate, endDate }: PrintableSalesRepor
               <TableCell>{sale.customer}</TableCell>
               <TableCell>{sale.items.length} productos</TableCell>
               <TableCell className="text-right font-semibold">${sale.total.toLocaleString()}</TableCell>
-              <TableCell className="text-right font-semibold text-green-600">
+              <TableCell className="text-right font-semibold text-foreground">
                 ${(sale.totalProfit || 0).toLocaleString()}
               </TableCell>
               <TableCell className="text-right">{(sale.averageMargin || 0).toFixed(1)}%</TableCell>

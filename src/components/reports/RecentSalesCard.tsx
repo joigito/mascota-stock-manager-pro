@@ -59,7 +59,7 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
       </CardHeader>
       <CardContent>
         {filteredSales.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No hay ventas registradas en este período</p>
           </div>
@@ -69,14 +69,14 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
               <div key={sale.id} className="flex justify-between items-center p-4 border rounded-lg">
                 <div>
                   <div className="font-medium">{sale.customer}</div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     {new Date(sale.date).toLocaleDateString()} - {sale.items.length} productos
                   </div>
                 </div>
                   <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <div className="font-semibold">${sale.total.toLocaleString()}</div>
-                    <div className="text-sm text-green-600">
+                    <div className="text-sm text-foreground">
                       +${(sale.totalProfit || 0).toLocaleString()} 
                       ({(sale.averageMargin || 0).toFixed(1)}%)
                     </div>
@@ -88,7 +88,7 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
                         size="sm"
                         onClick={() => handleCreateInvoice(sale)}
                         disabled={invoiceLoading}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="text-primary hover:text-primary/90 hover:bg-muted/50"
                       >
                         <FileText className="h-4 w-4" />
                         {invoiceLoading ? "Creando..." : "Facturar"}
@@ -100,7 +100,7 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-destructive hover:text-destructive/90 hover:bg-muted/50"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -116,7 +116,7 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
                           <AlertDialogAction
-                            className="bg-red-600 hover:bg-red-700"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             onClick={() => handleDeleteSale(sale.id, sale.total, sale.customer)}
                           >
                             Eliminar venta
