@@ -93,15 +93,15 @@ export const useCurrentAccount = () => {
     if (!currentOrganization?.id) return null;
 
     try {
-      // Check if account exists
-      const { data: existing, error: fetchError } = await supabase
-        .from('customer_accounts')
-        .select('*')
-        .eq('customer_id', customerId)
-        .eq('organization_id', currentOrganization.id)
-        .single();
+    // Check if account exists
+    const { data: existing } = await supabase
+      .from('customer_accounts')
+      .select('*')
+      .eq('customer_id', customerId)
+      .eq('organization_id', currentOrganization.id)
+      .maybeSingle();
 
-      if (existing) return existing;
+    if (existing) return existing;
 
       // Create new account
       const { data, error } = await supabase
