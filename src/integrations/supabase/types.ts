@@ -1200,6 +1200,10 @@ export type Database = {
           deleted_count: number
         }[]
       }
+      delete_transaction: {
+        Args: { transaction_id: string }
+        Returns: undefined
+      }
       detect_duplicate_products: {
         Args: { user_uuid: string }
         Returns: {
@@ -1276,6 +1280,10 @@ export type Database = {
           p_product_id: string
           p_quantity: number
         }
+        Returns: undefined
+      }
+      update_transaction: {
+        Args: { transaction_id: string; updates: Json }
         Returns: undefined
       }
       update_variant_batches_after_sale: {
