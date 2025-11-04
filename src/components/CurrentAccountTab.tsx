@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select';
 import { useCurrentAccount } from '@/hooks/useCurrentAccount';
 import { useCustomers } from '@/hooks/useCustomers';
-import { CreditCard, DollarSign, Eye, Plus } from 'lucide-react';
+import { CreditCard, DollarSign, Eye, Plus, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -104,22 +104,26 @@ export const CurrentAccountTab = () => {
 
     if (success) {
       setEditingTransaction(null);
-      handleViewMovements(selectedAccountId);
+      const updatedTransactions = await getTransactions(selectedAccountId);
+      setTransactions(updatedTransactions);
     }
   };
 
   const handleDeleteTransaction = async (transactionId: string) => {
+    console.log('handleDeleteTransaction: called with transactionId:', transactionId);
     const success = await deleteTransaction(transactionId);
     if (success) {
-      handleViewMovements(selectedAccountId);
+      setTransactions(transactions.filter(tx => tx.id !== transactionId));
     }
   };
 
   const handleViewMovements = async (accountId: string) => {
+    console.log('handleViewMovements: called with accountId:', accountId);
     setSelectedAccountId(accountId);
     setShowMovementsDialog(true);
     setLoadingTransactions(true);
     const txs = await getTransactions(accountId);
+    console.log('handleViewMovements: transactions fetched:', txs);
     setTransactions(txs);
     setLoadingTransactions(false);
   };
