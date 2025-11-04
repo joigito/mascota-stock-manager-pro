@@ -32,16 +32,23 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { CreditCard, DollarSign, Eye, Plus, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import AccountStatementPrint from './reports/AccountStatementPrint';
 
 export const CurrentAccountTab = () => {
   const { accounts, loading, isEnabled, addTransaction, getTransactions, updateCreditLimit, deleteTransaction, updateTransaction } = useCurrentAccount();
   const { customers, loading: loadingCustomers } = useCustomers();
   const [showTransactionDialog, setShowTransactionDialog] = useState(false);
   const [showMovementsDialog, setShowMovementsDialog] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
+  const [selectedAccount, setSelectedAccount] = useState<any | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any | null>(null);
+  const [dateFilter, setDateFilter] = useState<{ from: Date | null; to: Date | null }>({
+    from: null,
+    to: null
+  });
 
   const [transactionForm, setTransactionForm] = useState({
     customerId: '',
@@ -117,15 +124,41 @@ export const CurrentAccountTab = () => {
     }
   };
 
-  const handleViewMovements = async (accountId: string) => {
+  const handleViewMovements = async (accountId: string, account: any) => {
     console.log('handleViewMovements: called with accountId:', accountId);
     setSelectedAccountId(accountId);
+    setSelectedAccount(account);
     setShowMovementsDialog(true);
     setLoadingTransactions(true);
+    setDateFilter({ from: null, to: null }); // Reset date filter
     const txs = await getTransactions(accountId);
     console.log('handleViewMovements: transactions fetched:', txs);
     setTransactions(txs);
     setLoadingTransactions(false);
+  };
+
+  const getFilteredTransactions = () => {
+    if (!dateFilter.from && !dateFilter.to) {
+      return transactions;
+    }
+
+    return transactions.filter((tx) => {
+      const txDate = new Date(tx.created_at);
+      
+      if (dateFilter.from && dateFilter.to) {
+        return txDate >= dateFilter.from && txDate <= dateFilter.to;
+      } else if (dateFilter.from) {
+        return txDate >= dateFilter.from;
+      } else if (dateFilter.to) {
+        return txDate <= dateFilter.to;
+      }
+      
+      return true;
+    });
+  };
+
+  const handleGenerateReport = () => {
+    setShowPrintDialog(true);
   };
 
   const getTransactionTypeLabel = (type: string) => {
@@ -230,7 +263,7 @@ export const CurrentAccountTab = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleViewMovements(account.id)}
+                        onClick={() => handleViewMovements(account.id, account)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -324,13 +357,55 @@ export const CurrentAccountTab = () => {
 
       {/* Movements Dialog */}
       <Dialog open={showMovementsDialog} onOpenChange={setShowMovementsDialog}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Movimientos de Cuenta</DialogTitle>
             <DialogDescription>
               Historial de transacciones del cliente
             </DialogDescription>
           </DialogHeader>
+
+          {/* Date Filter Section */}
+          <div className="flex flex-wrap gap-4 items-end p-4 bg-muted/50 rounded-lg">
+            <div className="flex-1 min-w-[180px]">
+              <Label htmlFor="date-from">Fecha Desde</Label>
+              <Input
+                id="date-from"
+                type="date"
+                value={dateFilter.from ? format(dateFilter.from, 'yyyy-MM-dd') : ''}
+                onChange={(e) => setDateFilter(prev => ({
+                  ...prev,
+                  from: e.target.value ? new Date(e.target.value) : null
+                }))}
+              />
+            </div>
+            <div className="flex-1 min-w-[180px]">
+              <Label htmlFor="date-to">Fecha Hasta</Label>
+              <Input
+                id="date-to"
+                type="date"
+                value={dateFilter.to ? format(dateFilter.to, 'yyyy-MM-dd') : ''}
+                onChange={(e) => setDateFilter(prev => ({
+                  ...prev,
+                  to: e.target.value ? new Date(e.target.value) : null
+                }))}
+              />
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setDateFilter({ from: null, to: null })}
+              disabled={!dateFilter.from && !dateFilter.to}
+            >
+              Limpiar
+            </Button>
+            <Button
+              onClick={handleGenerateReport}
+              variant="default"
+            >
+              Generar Reporte PDF
+            </Button>
+          </div>
+
           {loadingTransactions ? (
             <p className="text-center py-8">Cargando movimientos...</p>
           ) : (
@@ -346,7 +421,7 @@ export const CurrentAccountTab = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.map((tx) => (
+                {getFilteredTransactions().map((tx) => (
                   <TableRow key={tx.id}>
                     <TableCell>
                       {format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
@@ -449,6 +524,15 @@ export const CurrentAccountTab = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Account Statement Print Dialog */}
+      <AccountStatementPrint
+        account={selectedAccount}
+        transactions={getFilteredTransactions()}
+        isOpen={showPrintDialog}
+        onClose={() => setShowPrintDialog(false)}
+        dateRange={dateFilter}
+      />
     </div>
   );
 };
