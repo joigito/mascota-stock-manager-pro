@@ -88,7 +88,7 @@ const Store: React.FC = () => {
     <StoreLayout organization={organization}>
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${(isSuperAdminUser || isOrgAdmin) ? 'grid-cols-6' : 'grid-cols-5'}`}>
+        <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdminUser ? 'grid-cols-6' : 'grid-cols-5'}`}>
           <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
             <span className="hidden sm:inline">Inicio</span>
             <span className="sm:hidden">Inicio</span>
@@ -108,7 +108,7 @@ const Store: React.FC = () => {
             <span className="hidden sm:inline">Reportes</span>
             <span className="sm:hidden">Rep.</span>
           </TabsTrigger>
-          {(isSuperAdminUser || isOrgAdmin) && (
+          {isSuperAdminUser && (
             <TabsTrigger value="admin" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Admin</span>
               <span className="sm:hidden">Admin</span>
@@ -174,13 +174,12 @@ const Store: React.FC = () => {
           <ReportsTab products={products} />
         </TabsContent>
 
-        {/* Admin Tab - For super admins and org admins */}
-        {(isSuperAdminUser || isOrgAdmin) && (
+        {/* Admin Tab - For super admins only */}
+        {isSuperAdminUser && (
           <TabsContent value="admin">
             <div className="space-y-6">
-              {isSuperAdminUser && <OrganizationManager />}
+              <OrganizationManager />
               <OrganizationUrlGenerator />
-              {!isSuperAdminUser && <OrganizationUserManagement />}
             </div>
           </TabsContent>
         )}

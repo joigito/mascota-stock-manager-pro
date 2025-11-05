@@ -157,7 +157,7 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Tabs Navigation */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin || isOrgAdmin ? 'grid-cols-7' : 'grid-cols-6'}`}>
+          <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdmin ? 'grid-cols-7' : 'grid-cols-6'}`}>
             <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Inicio</span>
               <span className="sm:hidden">Inicio</span>
@@ -181,10 +181,10 @@ const Index = () => {
               <span className="hidden sm:inline">Reportes</span>
               <span className="sm:hidden">Rep.</span>
             </TabsTrigger>
-            {(isSuperAdmin || isOrgAdmin) && (
+            {isSuperAdmin && (
               <TabsTrigger value="admin" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
-                <span className="hidden sm:inline">{isSuperAdmin ? 'Admin' : 'Usuarios'}</span>
-                <span className="sm:hidden">{isSuperAdmin ? 'Admin' : 'Users'}</span>
+                <span className="hidden sm:inline">Admin</span>
+                <span className="sm:hidden">Admin</span>
               </TabsTrigger>
             )}
           </TabsList>
@@ -252,13 +252,12 @@ const Index = () => {
             <ReportsTab products={products} />
           </TabsContent>
 
-          {/* Admin Tab - For super admins and org admins */}
-          {(isSuperAdmin || isOrgAdmin) && (
+          {/* Admin Tab - For super admins only */}
+          {isSuperAdmin && (
             <TabsContent value="admin">
               <div className="space-y-6">
-                {isSuperAdmin && <OrganizationManager />}
+                <OrganizationManager />
                 <OrganizationUrlGenerator />
-                {!isSuperAdmin && <OrganizationUserManagement />}
               </div>
             </TabsContent>
           )}
