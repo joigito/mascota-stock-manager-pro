@@ -1,12 +1,14 @@
 
 import { Product } from "@/hooks/useProducts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface PrintableStockReportProps {
   products: Product[];
 }
 
 const PrintableStockReport = ({ products }: PrintableStockReportProps) => {
+  const { currentOrganization } = useOrganization();
   const totalInventoryValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
   const totalInventoryCost = products.reduce((sum, product) => sum + (product.stock * (product.costPrice || 0)), 0);
   const potentialProfit = totalInventoryValue - totalInventoryCost;
@@ -14,7 +16,7 @@ const PrintableStockReport = ({ products }: PrintableStockReportProps) => {
   return (
     <div className="print-content p-8 bg-white">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">Sistemas de Gestión Comercial</h1>
+        <h1 className="text-2xl font-bold mb-2">{currentOrganization?.name || "Sistema de Gestión"}</h1>
         <h2 className="text-xl font-semibold mb-4">Reporte de Stock de Productos</h2>
         <p className="text-sm text-gray-600">Generado el: {new Date().toLocaleDateString()}</p>
       </div>
