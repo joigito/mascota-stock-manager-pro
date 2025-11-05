@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Package, Building2, LogOut, Settings, CreditCard, FolderOpen } from "lucide-react";
+import { Plus, Package, Building2, LogOut, Settings, CreditCard, FolderOpen, Crown, Shield, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/ProductList";
@@ -33,6 +34,7 @@ const Index = () => {
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isOrgAdmin, setIsOrgAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<'super_admin' | 'admin' | 'user'>('user');
   const [forceUpdate, setForceUpdate] = useState(0);
   const { signOut, user } = useAuth();
   const { currentOrganization, isSuperAdmin: checkSuperAdmin, isAdmin: checkOrgAdmin, clearOrganization, loading: orgLoading } = useOrganization();
@@ -46,6 +48,15 @@ const Index = () => {
       console.log('Index: Org admin status:', isOrgAdm);
       setIsSuperAdmin(isSuper);
       setIsOrgAdmin(isOrgAdm);
+      
+      // Determinar el rol del usuario
+      if (isSuper) {
+        setUserRole('super_admin');
+      } else if (isOrgAdm) {
+        setUserRole('admin');
+      } else {
+        setUserRole('user');
+      }
     };
     
     if (user?.id && currentOrganization) {
@@ -76,6 +87,33 @@ const Index = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const getRoleBadge = () => {
+    if (userRole === 'super_admin') {
+      return (
+        <Badge variant="destructive" className="border-destructive">
+          <Crown className="h-3 w-3 mr-1" />
+          Super Admin
+        </Badge>
+      );
+    }
+    
+    if (userRole === 'admin') {
+      return (
+        <Badge variant="default" className="bg-primary text-primary-foreground">
+          <Shield className="h-3 w-3 mr-1" />
+          Admin
+        </Badge>
+      );
+    }
+    
+    return (
+      <Badge variant="outline" className="border-border">
+        <User className="h-3 w-3 mr-1" />
+        Usuario
+      </Badge>
+    );
   };
 
   if (loading || orgLoading) {
@@ -137,6 +175,7 @@ const Index = () => {
               )}
               <SyncButton />
               <UserIndicator />
+              {getRoleBadge()}
               <ModeToggle />
               <Button
                 onClick={handleSignOut}
