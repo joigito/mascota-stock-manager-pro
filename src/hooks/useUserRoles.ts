@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface User {
   id: string;
@@ -39,6 +40,25 @@ export const useUserRoles = () => {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkSuperAdmin = async () => {
+      if (!currentUser) return;
+      
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: currentUser.id,
+        _role: 'super_admin'
+      });
+      
+      if (!error && data) {
+        setIsSuperAdmin(true);
+      }
+    };
+    
+    checkSuperAdmin();
+  }, [currentUser]);
 
   const loadUsers = async () => {
     try {
@@ -136,13 +156,43 @@ export const useUserRoles = () => {
 
   const removeGlobalRole = async (userId: string, role: string) => {
     try {
+      // Client-side validation
+      if (!isSuperAdmin) {
+        toast({
+          title: "Permiso denegado",
+          description: "Solo super admins pueden eliminar roles globales",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (currentUser?.id === userId) {
+        toast({
+          title: "Operación no permitida",
+          description: "No puedes eliminar tus propios roles por seguridad",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('user_roles')
         .delete()
         .eq('user_id', userId)
         .eq('role', role as 'super_admin' | 'admin' | 'user');
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('row-level security')) {
+          toast({
+            title: "Permiso denegado",
+            description: "No tienes permisos para eliminar este rol",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast({
         title: "Rol removido",

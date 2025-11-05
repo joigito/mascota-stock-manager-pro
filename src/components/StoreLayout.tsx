@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Building2, LogOut, ArrowLeft } from 'lucide-react';
+import { Building2, LogOut, Crown, Shield, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Link } from 'react-router-dom';
 import { ModeToggle } from '@/components/ui/ModeToggle';
 
@@ -23,8 +24,30 @@ interface StoreLayoutProps {
 }
 
 export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children }) => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { toast } = useToast();
+  const { isAdmin, isSuperAdmin } = useOrganization();
+  const [userRole, setUserRole] = useState<'super_admin' | 'admin' | 'user'>('user');
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const superAdmin = await isSuperAdmin();
+      if (superAdmin) {
+        setUserRole('super_admin');
+        return;
+      }
+      
+      const admin = await isAdmin();
+      if (admin) {
+        setUserRole('admin');
+        return;
+      }
+      
+      setUserRole('user');
+    };
+    
+    checkRole();
+  }, [isAdmin, isSuperAdmin, organization]);
 
   const handleSignOut = async () => {
     try {
@@ -40,6 +63,33 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
         variant: "destructive",
       });
     }
+  };
+
+  const getRoleBadge = () => {
+    if (userRole === 'super_admin') {
+      return (
+        <Badge variant="destructive" className="border-destructive">
+          <Crown className="h-3 w-3 mr-1" />
+          Super Admin
+        </Badge>
+      );
+    }
+    
+    if (userRole === 'admin') {
+      return (
+        <Badge variant="default" className="bg-primary text-primary-foreground">
+          <Shield className="h-3 w-3 mr-1" />
+          Admin
+        </Badge>
+      );
+    }
+    
+    return (
+      <Badge variant="outline" className="border-border">
+        <User className="h-3 w-3 mr-1" />
+        Usuario
+      </Badge>
+    );
   };
 
   return (
@@ -66,6 +116,7 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
                 <Building2 className="h-3 w-3 mr-1" />
                 {organization.name}
               </Badge>
+              {getRoleBadge()}
               <ModeToggle />
               <Button
                 onClick={handleSignOut}
