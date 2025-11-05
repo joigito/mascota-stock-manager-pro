@@ -4,6 +4,7 @@ import { RefreshCw } from "lucide-react";
 import { Product } from "@/hooks/useProducts";
 import { getPeriodLabel } from "@/utils/salesCalculations";
 import { useSalesData } from "@/hooks/useSalesData";
+import { useOrganization } from "@/hooks/useOrganization";
 import PrintableStockReport from "@/components/reports/PrintableStockReport";
 import PrintableSalesReport from "@/components/reports/PrintableSalesReport";
 import PrintSection from "@/components/reports/PrintSection";
@@ -21,6 +22,7 @@ interface ReportsTabProps {
 }
 
 const ReportsTab = ({ products }: ReportsTabProps) => {
+  const { currentOrganization } = useOrganization();
   const {
     filteredSales,
     salesSummary,
@@ -73,7 +75,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   };
 
   if (showStockPrint) {
-    return <PrintableStockReport products={products} />;
+    return <PrintableStockReport products={products} organizationName={currentOrganization?.name} />;
   }
 
   if (showSalesPrint) {
@@ -82,6 +84,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
       sales={salesForReport} 
       startDate={salesReportStartDate}
       endDate={salesReportEndDate}
+      organizationName={currentOrganization?.name}
     />;
   }
 

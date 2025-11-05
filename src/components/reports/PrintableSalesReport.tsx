@@ -26,9 +26,10 @@ interface PrintableSalesReportProps {
   sales: Sale[];
   startDate: string;
   endDate: string;
+  organizationName?: string;
 }
 
-const PrintableSalesReport = ({ sales, startDate, endDate }: PrintableSalesReportProps) => {
+const PrintableSalesReport = ({ sales, startDate, endDate, organizationName }: PrintableSalesReportProps) => {
   const { currentOrganization, isAdmin, isSuperAdmin } = useOrganization();
   const [canViewProfits, setCanViewProfits] = useState(false);
   
@@ -48,7 +49,7 @@ const PrintableSalesReport = ({ sales, startDate, endDate }: PrintableSalesRepor
   return (
     <div className="print-content p-8 bg-white">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">{currentOrganization?.name || "Sistema de Gestión"}</h1>
+        <h1 className="text-2xl font-bold mb-2">{organizationName || currentOrganization?.name || "Sistema de Gestión"}</h1>
         <h2 className="text-xl font-semibold mb-4">Reporte de Ventas</h2>
         <p className="text-sm text-muted-foreground">
           Período: {new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}

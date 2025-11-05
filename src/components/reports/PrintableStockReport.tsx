@@ -5,9 +5,10 @@ import { useOrganization } from "@/hooks/useOrganization";
 
 interface PrintableStockReportProps {
   products: Product[];
+  organizationName?: string;
 }
 
-const PrintableStockReport = ({ products }: PrintableStockReportProps) => {
+const PrintableStockReport = ({ products, organizationName }: PrintableStockReportProps) => {
   const { currentOrganization } = useOrganization();
   const totalInventoryValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
   const totalInventoryCost = products.reduce((sum, product) => sum + (product.stock * (product.costPrice || 0)), 0);
@@ -16,7 +17,7 @@ const PrintableStockReport = ({ products }: PrintableStockReportProps) => {
   return (
     <div className="print-content p-8 bg-white">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">{currentOrganization?.name || "Sistema de Gestión"}</h1>
+        <h1 className="text-2xl font-bold mb-2">{organizationName || currentOrganization?.name || "Sistema de Gestión"}</h1>
         <h2 className="text-xl font-semibold mb-4">Reporte de Stock de Productos</h2>
         <p className="text-sm text-gray-600">Generado el: {new Date().toLocaleDateString()}</p>
       </div>
