@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Package } from 'lucide-react';
+import { Plus, Package, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProductList from '@/components/ProductList';
@@ -26,6 +26,7 @@ const Store: React.FC = () => {
   const { products, loading: productsLoading, addProduct, updateProduct, deleteProduct } = useProducts();
   const { sales } = useSales();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const { user } = useAuth();
   const { switchOrganization, isSuperAdmin, hasRole } = useOrganization();
   const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
@@ -123,7 +124,6 @@ const Store: React.FC = () => {
         {/* Inventory Tab */}
         <TabsContent value="inventory">
           <div className="space-y-6">
-            <CategoryManager />
             <div className="bg-card rounded-xl shadow-sm border border-border">
               <div className="p-4 sm:p-6 border-b border-border">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
@@ -131,13 +131,23 @@ const Store: React.FC = () => {
                     <Package className="h-5 w-5 text-primary" />
                     <h2 className="text-lg sm:text-xl font-semibold text-foreground">Inventario de Productos</h2>
                   </div>
-                  <Button
-                    onClick={() => setIsAddDialogOpen(true)}
-                    className="shadow-md w-full sm:w-auto"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agregar Producto
-                  </Button>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button
+                      onClick={() => setIsCategoryManagerOpen(true)}
+                      variant="outline"
+                      className="flex-1 sm:flex-none"
+                    >
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                      Categorías
+                    </Button>
+                    <Button
+                      onClick={() => setIsAddDialogOpen(true)}
+                      className="shadow-md flex-1 sm:flex-none"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Agregar Producto
+                    </Button>
+                  </div>
                 </div>
               </div>
               <ProductList 
@@ -182,6 +192,12 @@ const Store: React.FC = () => {
         onOpenChange={setIsAddDialogOpen}
         onAddProduct={addProduct}
         storeName={organization?.name}
+      />
+
+      {/* Category Manager Dialog */}
+      <CategoryManager 
+        open={isCategoryManagerOpen}
+        onOpenChange={setIsCategoryManagerOpen}
       />
     </StoreLayout>
   );
