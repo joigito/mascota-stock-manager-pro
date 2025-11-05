@@ -53,7 +53,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
       setCanViewProfits(isAdminUser || isSuperAdminUser);
     };
     checkPermissions();
-  }, [isAdmin, isSuperAdmin]);
+  }, [currentOrganization, isAdmin, isSuperAdmin]);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
   const totalInventoryValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
