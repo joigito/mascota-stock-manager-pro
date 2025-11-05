@@ -82,6 +82,7 @@ export const UserManagement: React.FC = () => {
   const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('user');
   const [newUserOrganization, setNewUserOrganization] = useState('');
+  const [newUserOrgRole, setNewUserOrgRole] = useState('user');
   
   
   // Organizations for dropdowns
@@ -156,7 +157,8 @@ export const UserManagement: React.FC = () => {
           email: newUserEmail,
           password: newUserPassword,
           role: newUserRole,
-          organizationId: newUserOrganization
+          organizationId: newUserOrganization,
+          organizationRole: newUserOrgRole
         }
       });
 
@@ -192,6 +194,7 @@ export const UserManagement: React.FC = () => {
       setNewUserPassword('');
       setNewUserRole('user');
       setNewUserOrganization('');
+      setNewUserOrgRole('user');
       setCreateUserOpen(false);
       
       // Reload users list
@@ -306,6 +309,20 @@ export const UserManagement: React.FC = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                    {newUserOrganization && newUserOrganization !== 'none' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="newUserOrgRole">Rol en la Organización</Label>
+                        <Select value={newUserOrgRole} onValueChange={setNewUserOrgRole}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">Usuario</SelectItem>
+                            <SelectItem value="admin">Administrador</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                     <div className="flex justify-end space-x-2">
                       <Button variant="outline" onClick={() => setCreateUserOpen(false)}>
                         Cancelar

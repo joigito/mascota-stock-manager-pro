@@ -72,7 +72,7 @@ serve(async (req) => {
     }
 
     // Get request body
-    const { email, password, role, organizationId } = await req.json()
+    const { email, password, role, organizationId, organizationRole } = await req.json()
 
     if (!email || !password) {
       return new Response(
@@ -139,7 +139,7 @@ serve(async (req) => {
         .insert({
           user_id: newUser.user.id,
           organization_id: organizationId,
-          role: 'user'
+          role: organizationRole || 'user'
         })
 
       if (orgError) {
