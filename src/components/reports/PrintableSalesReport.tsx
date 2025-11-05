@@ -1,7 +1,6 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useOrganization } from "@/hooks/useOrganization";
-import { useEffect, useState } from "react";
 
 interface Sale {
   id: string;
@@ -27,20 +26,11 @@ interface PrintableSalesReportProps {
   startDate: string;
   endDate: string;
   organizationName?: string;
+  canViewProfits?: boolean;
 }
 
-const PrintableSalesReport = ({ sales, startDate, endDate, organizationName }: PrintableSalesReportProps) => {
-  const { currentOrganization, isAdmin, isSuperAdmin } = useOrganization();
-  const [canViewProfits, setCanViewProfits] = useState(false);
-  
-  useEffect(() => {
-    const checkPermissions = async () => {
-      const isAdminUser = await isAdmin();
-      const isSuperAdminUser = await isSuperAdmin();
-      setCanViewProfits(isAdminUser || isSuperAdminUser);
-    };
-    checkPermissions();
-  }, [isAdmin, isSuperAdmin]);
+const PrintableSalesReport = ({ sales, startDate, endDate, organizationName, canViewProfits = false }: PrintableSalesReportProps) => {
+  const { currentOrganization } = useOrganization();
 
   const totalSales = sales.reduce((sum, sale) => sum + sale.total, 0);
   const totalProfit = sales.reduce((sum, sale) => sum + (sale.totalProfit || 0), 0);

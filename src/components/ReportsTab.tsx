@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Product } from "@/hooks/useProducts";
 import { getPeriodLabel } from "@/utils/salesCalculations";
@@ -22,7 +22,7 @@ interface ReportsTabProps {
 }
 
 const ReportsTab = ({ products }: ReportsTabProps) => {
-  const { currentOrganization } = useOrganization();
+  const { currentOrganization, isAdmin, isSuperAdmin } = useOrganization();
   const {
     filteredSales,
     salesSummary,
@@ -36,6 +36,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
 
   const [showStockPrint, setShowStockPrint] = useState(false);
   const [showSalesPrint, setShowSalesPrint] = useState(false);
+  const [canViewProfits, setCanViewProfits] = useState(false);
   const [salesReportStartDate, setSalesReportStartDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() - 30);
@@ -44,6 +45,15 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   const [salesReportEndDate, setSalesReportEndDate] = useState(() => {
     return new Date().toISOString().split('T')[0];
   });
+
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const isAdminUser = await isAdmin();
+      const isSuperAdminUser = await isSuperAdmin();
+      setCanViewProfits(isAdminUser || isSuperAdminUser);
+    };
+    checkPermissions();
+  }, [isAdmin, isSuperAdmin]);
 
   const lowStockProducts = products.filter(product => product.stock <= product.minStock);
   const totalInventoryValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
@@ -85,6 +95,7 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
       startDate={salesReportStartDate}
       endDate={salesReportEndDate}
       organizationName={currentOrganization?.name}
+      canViewProfits={canViewProfits}
     />;
   }
 
