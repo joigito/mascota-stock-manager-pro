@@ -1,5 +1,5 @@
 export interface SaleItem {
-  productId: string;
+  productId: string; // Empty string ('') for free items (services, non-inventory items)
   productName: string;
   variantId?: string;
   variantInfo?: string;

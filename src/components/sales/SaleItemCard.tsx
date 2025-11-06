@@ -38,7 +38,12 @@ const SaleItemCard = ({ item, onUpdateQuantity, onUpdatePrice, onRemoveItem }: S
     <div className="bg-muted/50 p-3 rounded-lg border">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex-1">
-          <span className="font-medium">{item.productName}</span>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{item.productName}</span>
+            {!item.productId && (
+              <Badge variant="outline" className="text-xs">Item Libre</Badge>
+            )}
+          </div>
           {item.variantInfo && (
             <div className="text-xs text-muted-foreground">{item.variantInfo}</div>
           )}

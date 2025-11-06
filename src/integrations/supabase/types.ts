@@ -914,7 +914,7 @@ export type Database = {
           id: string
           margin: number | null
           price: number
-          product_id: string
+          product_id: string | null
           product_name: string
           profit: number | null
           quantity: number
@@ -929,7 +929,7 @@ export type Database = {
           id?: string
           margin?: number | null
           price: number
-          product_id: string
+          product_id?: string | null
           product_name: string
           profit?: number | null
           quantity: number
@@ -944,7 +944,7 @@ export type Database = {
           id?: string
           margin?: number | null
           price?: number
-          product_id?: string
+          product_id?: string | null
           product_name?: string
           profit?: number | null
           quantity?: number

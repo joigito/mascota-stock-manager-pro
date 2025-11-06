@@ -10,6 +10,7 @@ import { useBatches } from "@/hooks/useBatches";
 import ProductSelectorWithVariants from "./sales/ProductSelectorWithVariants";
 import SalesList from "./sales/SalesList";
 import CustomerSelector from "./sales/CustomerSelector";
+import FreeItemInput from "./sales/FreeItemInput";
 import { SaleItem } from "@/types/sales";
 
 interface SalesTabProps {
@@ -110,6 +111,37 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     setQuantity(1);
   };
 
+  const addFreeItemToSale = (freeItemData: {
+    name: string;
+    price: number;
+    quantity: number;
+    cost: number;
+  }) => {
+    const subtotal = freeItemData.quantity * freeItemData.price;
+    const profit = freeItemData.quantity * (freeItemData.price - freeItemData.cost);
+    const margin = freeItemData.price > 0 
+      ? ((freeItemData.price - freeItemData.cost) / freeItemData.price * 100) 
+      : 0;
+    
+    const newItem: SaleItem = {
+      productId: '',
+      productName: freeItemData.name,
+      quantity: freeItemData.quantity,
+      price: freeItemData.price,
+      finalUnitPrice: freeItemData.price,
+      costPrice: freeItemData.cost,
+      subtotal,
+      profit,
+      margin
+    };
+    
+    setSaleItems([...saleItems, newItem]);
+    toast({ 
+      title: "Item agregado", 
+      description: `${freeItemData.name} agregado a la venta` 
+    });
+  };
+
   const removeItemFromSale = (productId: string, variantId?: string) => {
     setSaleItems(saleItems.filter(item => 
       !(item.productId === productId && item.variantId === variantId)
@@ -181,10 +213,12 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
     try {
       for (const item of saleItems) {
-        const product = products.find(p => p.id === item.productId);
-        if (product) {
-          await updateBatchesAfterSale(item.productId, item.quantity);
-          await onUpdateProduct(item.productId, { stock: product.stock - item.quantity });
+        if (item.productId) {
+          const product = products.find(p => p.id === item.productId);
+          if (product) {
+            await updateBatchesAfterSale(item.productId, item.quantity);
+            await onUpdateProduct(item.productId, { stock: product.stock - item.quantity });
+          }
         }
       }
 
@@ -246,6 +280,20 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
             onQuantityChange={setQuantity}
             onAddItem={addItemToSale}
           />
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                O agregar item libre
+              </span>
+            </div>
+          </div>
+
+          <FreeItemInput onAddFreeItem={addFreeItemToSale} />
+
           <div className="space-y-4">
             <SalesList
               saleItems={saleItems}

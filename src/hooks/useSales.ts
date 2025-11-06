@@ -92,8 +92,8 @@ export const useSales = () => {
           .insert(
             saleData.items.map(item => ({
               sale_id: newSale.id,
-              product_id: item.productId,
-              variant_id: item.variantId, // Save the variantId
+              product_id: item.productId || null,
+              variant_id: item.variantId,
               product_name: item.productName,
               quantity: item.quantity,
               price: item.price,
