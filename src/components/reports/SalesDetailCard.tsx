@@ -116,8 +116,25 @@ const SalesDetailCard = () => {
   };
 
   // Flatten sales to show each item in a separate row
-  const detailedRows = reportSales.flatMap(sale => 
-    sale.items.map((item, index) => ({
+  const detailedRows = reportSales.flatMap(sale => {
+    // If sale has no items, create a synthetic row
+    if (!sale.items || sale.items.length === 0) {
+      return [{
+        saleId: sale.id,
+        date: sale.date,
+        customer: sale.customer,
+        product: "Venta sin detalle",
+        variantInfo: "",
+        quantity: 1,
+        itemTotal: sale.total,
+        saleTotal: sale.total,
+        isFirstItem: true,
+        itemCount: 1,
+      }];
+    }
+
+    // Normal case: one row per item
+    return sale.items.map((item: any, index: number) => ({
       saleId: sale.id,
       date: sale.date,
       customer: sale.customer,
@@ -127,9 +144,9 @@ const SalesDetailCard = () => {
       itemTotal: item.subtotal,
       saleTotal: sale.total,
       isFirstItem: index === 0,
-      itemCount: sale.items.length
-    }))
-  );
+      itemCount: sale.items.length,
+    }));
+  });
 
   return (
     <Card>

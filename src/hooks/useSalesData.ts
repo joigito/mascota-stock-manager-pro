@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Sale } from "@/types/sales";
 import { calculateSalesSummary, filterSalesForReport } from "@/utils/salesCalculations";
 import { useSales } from "./useSales";
@@ -20,9 +20,9 @@ export const useSalesData = () => {
     return calculateSalesSummary(filteredSales);
   }, [filteredSales]);
 
-  const getSalesForReport = (startDate: string, endDate: string) => {
+  const getSalesForReport = useCallback((startDate: string, endDate: string) => {
     return filterSalesForReport(sales, startDate, endDate);
-  };
+  }, [sales]);
 
   return {
     sales,
