@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, Printer } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { useSalesData } from "@/hooks/useSalesData";
 import DateRangeSelector from "./DateRangeSelector";
 
@@ -37,6 +38,82 @@ const SalesDetailCard = () => {
     setReportSales(sales);
   };
 
+  const handlePrint = () => {
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Detalle de Ventas</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { text-align: center; margin-bottom: 10px; }
+            .period { text-align: center; color: #666; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .text-right { text-align: right; }
+            .summary { margin-top: 30px; display: flex; justify-content: space-between; }
+            .summary-item { font-weight: bold; }
+            @media print {
+              body { margin: 0; }
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Detalle de Ventas</h1>
+          <p class="period">Período: ${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}</p>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Producto</th>
+                <th class="text-right">Cantidad</th>
+                <th class="text-right">Importe</th>
+                <th class="text-right">Total Venta</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${detailedRows.map(row => `
+                <tr>
+                  <td>${new Date(row.date).toLocaleDateString()}</td>
+                  <td>${row.customer}</td>
+                  <td>
+                    ${row.product}
+                    ${row.variantInfo ? `<span style="color: #666; font-size: 0.9em;"> (${row.variantInfo})</span>` : ''}
+                  </td>
+                  <td class="text-right">${row.quantity}</td>
+                  <td class="text-right">$${row.itemTotal.toLocaleString()}</td>
+                  <td class="text-right">
+                    ${row.isFirstItem ? `$${row.saleTotal.toLocaleString()}` : '—'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <div class="summary">
+            <div class="summary-item">
+              ${reportSales.length} ${reportSales.length === 1 ? 'venta' : 'ventas'} con ${detailedRows.length} ${detailedRows.length === 1 ? 'producto' : 'productos'}
+            </div>
+            <div class="summary-item">
+              Total del período: $${reportSales.reduce((sum, sale) => sum + sale.total, 0).toLocaleString()}
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
   // Flatten sales to show each item in a separate row
   const detailedRows = reportSales.flatMap(sale => 
     sale.items.map((item, index) => ({
@@ -56,13 +133,23 @@ const SalesDetailCard = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <FileText className="h-5 w-5" />
-          <span>Detalle de Ventas</span>
-        </CardTitle>
-        <CardDescription>
-          Listado completo de productos vendidos por período
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center space-x-2">
+              <FileText className="h-5 w-5" />
+              <span>Detalle de Ventas</span>
+            </CardTitle>
+            <CardDescription>
+              Listado completo de productos vendidos por período
+            </CardDescription>
+          </div>
+          {detailedRows.length > 0 && (
+            <Button onClick={handlePrint} variant="outline" size="sm">
+              <Printer className="h-4 w-4 mr-2" />
+              Imprimir
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <DateRangeSelector
