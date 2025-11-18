@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Printer } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSalesData } from "@/hooks/useSalesData";
 import DateRangeSelector from "./DateRangeSelector";
 
 const SalesDetailCard = () => {
-  const { getSalesForReport } = useSalesData();
+  const { getSalesForReport, loading } = useSalesData();
   
   // Default to current month
   const [startDate, setStartDate] = useState(() => {
@@ -23,15 +24,15 @@ const SalesDetailCard = () => {
     return date.toISOString().split('T')[0];
   });
 
-  const [reportSales, setReportSales] = useState(() => {
-    const date = new Date();
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    return getSalesForReport(
-      firstDay.toISOString().split('T')[0],
-      lastDay.toISOString().split('T')[0]
-    );
-  });
+  const [reportSales, setReportSales] = useState<any[]>([]);
+
+  // Automatically generate report when sales data is loaded
+  useEffect(() => {
+    if (!loading) {
+      const sales = getSalesForReport(startDate, endDate);
+      setReportSales(sales);
+    }
+  }, [loading, startDate, endDate, getSalesForReport]);
 
   const handleGenerateReport = () => {
     const sales = getSalesForReport(startDate, endDate);
@@ -160,7 +161,13 @@ const SalesDetailCard = () => {
           onGenerateReport={handleGenerateReport}
         />
 
-        {detailedRows.length === 0 ? (
+        {loading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : detailedRows.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No hay ventas en el período seleccionado</p>
