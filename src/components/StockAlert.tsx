@@ -1,6 +1,8 @@
-import { AlertTriangle, Package } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Product } from "@/hooks/useProducts";
 
 interface StockAlertProps {
@@ -8,16 +10,23 @@ interface StockAlertProps {
 }
 
 const StockAlert = ({ products }: StockAlertProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   if (products.length === 0) return null;
+
+  const displayedProducts = isExpanded ? products : products.slice(0, 3);
+  const hasMore = products.length > 3;
 
   return (
     <Alert className="border-destructive/50 bg-destructive/10">
       <AlertTriangle className="h-4 w-4 text-destructive" />
       <AlertTitle className="text-destructive dark:text-white">¡Atención! Stock Bajo Detectado</AlertTitle>
       <AlertDescription className="text-destructive/80 dark:text-white">
-        <p className="mb-3">Los siguientes productos tienen stock bajo y necesitan reabastecimiento:</p>
+        <p className="mb-3">
+          {products.length} {products.length === 1 ? 'producto tiene' : 'productos tienen'} stock bajo y {products.length === 1 ? 'necesita' : 'necesitan'} reabastecimiento:
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {products.map((product) => (
+          {displayedProducts.map((product) => (
             <div key={product.id} className="flex flex-col bg-card rounded-lg p-3 border border-destructive/20">
               <div className="flex items-center space-x-3 mb-2">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -34,6 +43,29 @@ const StockAlert = ({ products }: StockAlertProps) => {
             </div>
           ))}
         </div>
+        
+        {hasMore && (
+          <div className="mt-4 flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="gap-2"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="h-4 w-4" />
+                  Mostrar menos
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4" />
+                  Mostrar {products.length - 3} más
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </AlertDescription>
     </Alert>
   );
