@@ -28,25 +28,56 @@ export const useSales = () => {
 
       if (salesError) throw salesError;
 
-      const formattedSales: Sale[] = salesData.map(sale => ({
-        id: sale.id,
-        date: sale.date,
-        customer: sale.customer || 'Consumidor final',
-        total: Number(sale.total),
-        totalProfit: Number(sale.total_profit || 0),
-        averageMargin: Number(sale.average_margin || 0),
-        items: sale.sale_items.map((item: any): SaleItem => ({
-          productId: item.product_id,
-          productName: item.product_name,
-          variantId: item.variant_id, // Make sure to load the variantId
-          quantity: item.quantity,
-          price: Number(item.price),
-          finalUnitPrice: Number(item.final_unit_price),
-          costPrice: Number(item.cost_price || 0),
-          subtotal: Number(item.subtotal),
-          profit: Number(item.profit || 0),
-          margin: Number(item.margin || 0)
-        }))
+      const formattedSales: Sale[] = await Promise.all(salesData.map(async sale => {
+        const items = await Promise.all(sale.sale_items.map(async (item: any): Promise<SaleItem> => {
+          let variantInfo = '';
+          
+          // Load variant info if variant_id exists
+          if (item.variant_id) {
+            const { data: variantData } = await supabase
+              .from('product_variants')
+              .select('size, color, attributes')
+              .eq('id', item.variant_id)
+              .single();
+            
+            if (variantData) {
+              const parts = [];
+              if (variantData.size) parts.push(variantData.size);
+              if (variantData.color) parts.push(variantData.color);
+              if (variantData.attributes) {
+                const attrs = variantData.attributes as Record<string, string>;
+                Object.entries(attrs).forEach(([key, value]) => {
+                  if (value) parts.push(`${key}: ${value}`);
+                });
+              }
+              variantInfo = parts.join(', ');
+            }
+          }
+
+          return {
+            productId: item.product_id,
+            productName: item.product_name,
+            variantId: item.variant_id,
+            variantInfo,
+            quantity: item.quantity,
+            price: Number(item.price),
+            finalUnitPrice: Number(item.final_unit_price),
+            costPrice: Number(item.cost_price || 0),
+            subtotal: Number(item.subtotal),
+            profit: Number(item.profit || 0),
+            margin: Number(item.margin || 0)
+          };
+        }));
+
+        return {
+          id: sale.id,
+          date: sale.date,
+          customer: sale.customer || 'Consumidor final',
+          total: Number(sale.total),
+          totalProfit: Number(sale.total_profit || 0),
+          averageMargin: Number(sale.average_margin || 0),
+          items
+        };
       }));
 
       setSales(formattedSales);
