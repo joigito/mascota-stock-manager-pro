@@ -15,6 +15,7 @@ import AlertsCard from "@/components/reports/AlertsCard";
 import RecentSalesCard from "@/components/reports/RecentSalesCard";
 import ReportsHeader from "@/components/reports/ReportsHeader";
 import InvoicesCard from "@/components/reports/InvoicesCard";
+import SalesDetailCard from "@/components/reports/SalesDetailCard";
 
 interface ReportsTabProps {
   products: Product[];
@@ -346,6 +347,8 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
       </div>
 
       <RecentSalesCard filteredSales={filteredSales} />
+      
+      <SalesDetailCard />
       
       <InvoicesCard />
     </div>
