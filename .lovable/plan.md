@@ -1,55 +1,33 @@
 
 
-## Plan: Comprobante de venta (PDF/imprimible) tipo "X" (no válido como factura)
+## Plan: Venta a Crédito con Cuenta Corriente
 
 ### Objetivo
-Generar un comprobante imprimible para cada venta, con fecha, cliente, detalle de productos y total. Marcado como "Comprobante X - No válido como factura". Debe poder generarse:
-1. Al momento de completar una venta (automáticamente o con botón)
-2. Posteriormente desde "Ventas Recientes" en Reportes
+Agregar un switch/checkbox "Venta a crédito" en el formulario de venta. Cuando se activa, al completar la venta se registra automáticamente una transacción de tipo `sale` en la cuenta corriente del cliente seleccionado.
 
-### Cambios a realizar
+### Condiciones
+- Solo se habilita si el cliente seleccionado NO es "Consumidor final" (las cuentas corrientes requieren un cliente registrado)
+- Solo se habilita si la organización tiene `current_account_enabled = true`
+- Al completar la venta a crédito, se llama a `addTransaction(customerId, 'sale', total, 'Venta a crédito', saleId)` del hook `useCurrentAccount`
 
-#### 1. Crear `src/utils/saleReceiptGenerator.ts`
-Función utilitaria que recibe un `Sale` y el nombre de la organización, y genera un HTML imprimible con:
-- Encabezado: nombre de la organización, "Comprobante X - No válido como factura"
-- Fecha de la venta
-- Cliente
-- Tabla de productos: nombre (+ variante si aplica), cantidad, precio unitario, subtotal
-- Total de la venta
-- Pie: "Documento no válido como factura"
-- Abre `window.open` y llama a `print()`
+### Cambios
 
-#### 2. Modificar `src/components/SalesTab.tsx`
-- Importar la función generadora
-- Después de `completeSale` exitoso, llamar a la función para abrir el comprobante automáticamente (o preguntar al usuario si desea imprimirlo)
-- Pasar `currentOrganization?.name` desde `useOrganization`
+#### 1. Modificar `src/components/SalesTab.tsx`
+- Importar `useCurrentAccount` y `Switch`
+- Agregar estado `isCreditSale` (boolean, default false)
+- Buscar el `customerId` del cliente seleccionado por nombre en la lista de `customers`
+- Mostrar el switch "Venta a crédito" debajo del selector de cliente, visible solo cuando:
+  - `isEnabled` (cuenta corriente habilitada en la org)
+  - El cliente seleccionado no es "Consumidor final"
+- En `completeSale`, después de registrar la venta exitosamente, si `isCreditSale` es true:
+  - Obtener el `customerId` del cliente seleccionado
+  - Llamar `addTransaction(customerId, 'sale', total, 'Venta a crédito #ref', saleId)`
+  - Mostrar toast confirmando que se cargó a la cuenta corriente
+- Resetear `isCreditSale` a false tras completar la venta
 
-#### 3. Modificar `src/components/reports/RecentSalesCard.tsx`
-- Agregar un botón "Comprobante" (icono `Receipt` o `FileText`) en cada venta del listado
-- Al hacer clic, llamar a la misma función generadora con los datos de esa venta
-- Este botón estará disponible para todas las ventas, no solo para admins
+#### 2. Sin cambios en base de datos
+La infraestructura de `customer_accounts` y `account_transactions` ya existe y soporta este flujo.
 
-### Detalle técnico
-
-**`saleReceiptGenerator.ts`** - Función `generateSaleReceipt(sale: Sale, organizationName: string)`:
-- Construye HTML con estilos inline para impresión
-- Encabezado con "X" prominente y leyenda "No válido como factura"
-- Tabla con columnas: Producto, Cantidad, Precio Unitario, Subtotal
-- Fila por cada item en `sale.items`, incluyendo `variantInfo` si existe
-- Total al final
-- Abre ventana nueva y ejecuta `print()`
-
-**`SalesTab.tsx`**:
-- Importar `useOrganization` para obtener el nombre
-- Importar `generateSaleReceipt`
-- En `completeSale`, después de éxito, construir el objeto `Sale` completo y llamar `generateSaleReceipt`
-
-**`RecentSalesCard.tsx`**:
-- Agregar botón con icono `Receipt` junto a los botones existentes (Facturar, Eliminar)
-- Disponible para todos los usuarios (no requiere permisos especiales)
-
-### Archivos a crear/modificar
-- **Crear**: `src/utils/saleReceiptGenerator.ts`
-- **Modificar**: `src/components/SalesTab.tsx`
-- **Modificar**: `src/components/reports/RecentSalesCard.tsx`
+### Archivos a modificar
+- `src/components/SalesTab.tsx`
 
