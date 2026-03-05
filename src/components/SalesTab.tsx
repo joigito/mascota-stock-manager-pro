@@ -7,6 +7,8 @@ import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useBatches } from "@/hooks/useBatches";
+import { useOrganization } from "@/hooks/useOrganization";
+import { generateSaleReceipt } from "@/utils/saleReceiptGenerator";
 import ProductSelectorWithVariants from "./sales/ProductSelectorWithVariants";
 import SalesList from "./sales/SalesList";
 import CustomerSelector from "./sales/CustomerSelector";
@@ -23,6 +25,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { addSale } = useSales();
   const { customers, addCustomer } = useCustomers();
   const { updateBatchesAfterSale } = useBatches();
+  const { currentOrganization } = useOrganization();
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
@@ -238,6 +241,19 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       }
 
       toast({ title: "Venta completada", description: `Venta por $${getTotalAmount().toLocaleString()}` });
+
+      // Generate printable receipt
+      const completedSale: import("@/types/sales").Sale = {
+        id: '',
+        date: newSale.date,
+        customer: newSale.customer,
+        items: newSale.items,
+        total: newSale.total,
+        totalProfit: newSale.totalProfit,
+        averageMargin: newSale.averageMargin,
+      };
+      generateSaleReceipt(completedSale, currentOrganization?.name || 'Mi Negocio');
+
       setSaleItems([]);
       setCustomerName("Consumidor final");
     } catch (error) {

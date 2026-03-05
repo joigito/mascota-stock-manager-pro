@@ -1,5 +1,5 @@
 
-import { ShoppingBag, Trash2, FileText } from "lucide-react";
+import { ShoppingBag, Trash2, FileText, Receipt } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -9,6 +9,7 @@ import { useSales } from "@/hooks/useSales";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useElectronicInvoicing } from "@/hooks/useElectronicInvoicing";
 import { useInvoices } from "@/hooks/useInvoices";
+import { generateSaleReceipt } from "@/utils/saleReceiptGenerator";
 
 interface RecentSalesCardProps {
   filteredSales: Sale[];
@@ -82,6 +83,15 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateSaleReceipt(sale, currentOrganization?.name || 'Mi Negocio')}
+                      className="hover:bg-muted/50"
+                      title="Comprobante X"
+                    >
+                      <Receipt className="h-4 w-4" />
+                    </Button>
                     {canCreateInvoices && (
                       <Button
                         variant="outline"
