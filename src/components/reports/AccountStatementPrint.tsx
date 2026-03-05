@@ -285,7 +285,7 @@ const AccountStatementPrint = ({
                     </td>
                   </tr>
                 ) : (
-                  transactions.map((transaction) => {
+                  [...transactions].reverse().map((transaction) => {
                     const isDebe = transaction.transaction_type === "sale" || 
                                    (transaction.transaction_type === "adjustment" && Number(transaction.amount) > 0);
                     const isHaber = transaction.transaction_type === "payment" ||
