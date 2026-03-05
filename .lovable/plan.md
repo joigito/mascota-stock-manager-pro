@@ -1,33 +1,22 @@
 
 
-## Plan: Venta a Crédito con Cuenta Corriente
+## Plan: Simplificar resumen de cuenta corriente
 
-### Objetivo
-Agregar un switch/checkbox "Venta a crédito" en el formulario de venta. Cuando se activa, al completar la venta se registra automáticamente una transacción de tipo `sale` en la cuenta corriente del cliente seleccionado.
+### Cambios en `src/components/reports/AccountStatementPrint.tsx`
 
-### Condiciones
-- Solo se habilita si el cliente seleccionado NO es "Consumidor final" (las cuentas corrientes requieren un cliente registrado)
-- Solo se habilita si la organización tiene `current_account_enabled = true`
-- Al completar la venta a crédito, se llama a `addTransaction(customerId, 'sale', total, 'Venta a crédito', saleId)` del hook `useCurrentAccount`
+En la sección "Resumen" (líneas 322-377), eliminar:
+- Total ventas
+- Total pagos
+- Ajustes
+- Límite de crédito
+- Crédito disponible
 
-### Cambios
+Dejar solo:
+1. **Saldo anterior** — texto normal
+2. **Saldo actual** — en negrita y con fuente más grande (text-2xl / font-size: 24px)
 
-#### 1. Modificar `src/components/SalesTab.tsx`
-- Importar `useCurrentAccount` y `Switch`
-- Agregar estado `isCreditSale` (boolean, default false)
-- Buscar el `customerId` del cliente seleccionado por nombre en la lista de `customers`
-- Mostrar el switch "Venta a crédito" debajo del selector de cliente, visible solo cuando:
-  - `isEnabled` (cuenta corriente habilitada en la org)
-  - El cliente seleccionado no es "Consumidor final"
-- En `completeSale`, después de registrar la venta exitosamente, si `isCreditSale` es true:
-  - Obtener el `customerId` del cliente seleccionado
-  - Llamar `addTransaction(customerId, 'sale', total, 'Venta a crédito #ref', saleId)`
-  - Mostrar toast confirmando que se cargó a la cuenta corriente
-- Resetear `isCreditSale` a false tras completar la venta
+También actualizar los estilos CSS del `handlePrint` para que `.summary-row.total` tenga `font-size: 24px` y `font-weight: bold`.
 
-#### 2. Sin cambios en base de datos
-La infraestructura de `customer_accounts` y `account_transactions` ya existe y soporta este flujo.
-
-### Archivos a modificar
-- `src/components/SalesTab.tsx`
+### Archivo a modificar
+- `src/components/reports/AccountStatementPrint.tsx` (líneas 322-377)
 
