@@ -3,11 +3,14 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useBatches } from "@/hooks/useBatches";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useCurrentAccount } from "@/hooks/useCurrentAccount";
 import { generateSaleReceipt } from "@/utils/saleReceiptGenerator";
 import ProductSelectorWithVariants from "./sales/ProductSelectorWithVariants";
 import SalesList from "./sales/SalesList";
@@ -26,12 +29,17 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { customers, addCustomer } = useCustomers();
   const { updateBatchesAfterSale } = useBatches();
   const { currentOrganization } = useOrganization();
+  const { isEnabled: isCurrentAccountEnabled, addTransaction } = useCurrentAccount();
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
   const [customerName, setCustomerName] = useState<string>("Consumidor final");
+  const [isCreditSale, setIsCreditSale] = useState(false);
+
+  const selectedCustomer = customers.find(c => c.name === customerName);
+  const canUseCreditSale = isCurrentAccountEnabled && selectedCustomer && customerName !== "Consumidor final";
 
   const addItemToSale = () => {
     if (!selectedProductId) {
@@ -234,17 +242,28 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         averageMargin: getAverageMargin()
       };
       
-      const { error } = await addSale(newSale);
+      const { error, saleId } = await addSale(newSale);
       
       if (error) {
         throw error;
       }
 
-      toast({ title: "Venta completada", description: `Venta por $${getTotalAmount().toLocaleString()}` });
+      // Register credit sale in current account if enabled
+      if (isCreditSale && selectedCustomer && saleId) {
+        await addTransaction(
+          selectedCustomer.id,
+          'sale',
+          getTotalAmount(),
+          `Venta a crédito #${saleId.slice(0, 8)}`,
+          saleId
+        );
+      }
+
+      toast({ title: "Venta completada", description: `Venta por $${getTotalAmount().toLocaleString()}${isCreditSale ? ' (a crédito)' : ''}` });
 
       // Generate printable receipt
       const completedSale: import("@/types/sales").Sale = {
-        id: '',
+        id: saleId || '',
         date: newSale.date,
         customer: newSale.customer,
         items: newSale.items,
@@ -256,6 +275,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
       setSaleItems([]);
       setCustomerName("Consumidor final");
+      setIsCreditSale(false);
     } catch (error) {
       console.error('Error completing sale:', error);
       toast({ title: "Error", description: "No se pudo completar la venta.", variant: "destructive" });
@@ -282,6 +302,18 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
               }
             }}
           />
+          {canUseCreditSale && (
+            <div className="flex items-center space-x-3 p-3 rounded-lg border bg-muted/50">
+              <Switch
+                id="credit-sale"
+                checked={isCreditSale}
+                onCheckedChange={setIsCreditSale}
+              />
+              <Label htmlFor="credit-sale" className="cursor-pointer text-sm font-medium">
+                Venta a crédito (cargar a cuenta corriente de {customerName})
+              </Label>
+            </div>
+          )}
           <ProductSelectorWithVariants
             products={products}
             selectedProductId={selectedProductId}

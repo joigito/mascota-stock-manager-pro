@@ -145,7 +145,7 @@ export const useSales = () => {
       };
 
       setSales(prev => [completeSale, ...prev]);
-      return { error: null };
+      return { error: null, saleId: newSale.id };
     } catch (error) {
       console.error('Error agregando venta:', error);
       return { error };
