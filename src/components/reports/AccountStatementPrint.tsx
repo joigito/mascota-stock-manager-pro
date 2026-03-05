@@ -188,7 +188,7 @@ const AccountStatementPrint = ({
                 }
                 .summary-row.total {
                   font-weight: bold;
-                  font-size: 18px;
+                  font-size: 24px;
                   border-top: 2px solid #333;
                   padding-top: 10px;
                   margin-top: 15px;
@@ -327,52 +327,12 @@ const AccountStatementPrint = ({
                 <span>Saldo anterior:</span>
                 <span className="font-semibold">${summary.previousBalance.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Total ventas (+):</span>
-                <span className="font-semibold text-destructive">
-                  ${summary.totalSales.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Total pagos (-):</span>
-                <span className="font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
-                  ${summary.totalPayments.toLocaleString()}
-                </span>
-              </div>
-              {summary.totalAdjustments !== 0 && (
-                <div className="flex justify-between">
-                  <span>Ajustes:</span>
-                  <span className="font-semibold">
-                    ${summary.totalAdjustments.toLocaleString()}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-lg border-t pt-3 mt-3">
+              <div className="flex justify-between font-bold text-2xl border-t pt-3 mt-3">
                 <span>Saldo actual:</span>
                 <span className={summary.currentBalance > 0 ? "text-destructive" : ""}>
                   ${summary.currentBalance.toLocaleString()}
                 </span>
               </div>
-              {account.credit_limit !== null && account.credit_limit !== undefined && (
-                <>
-                  <div className="flex justify-between mt-4 pt-4 border-t">
-                    <span>Límite de crédito:</span>
-                    <span className="font-semibold">${Number(account.credit_limit).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Crédito disponible:</span>
-                    <span className="font-semibold" style={{ color: creditAvailable && creditAvailable > 0 ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}>
-                      ${creditAvailable !== null ? creditAvailable.toLocaleString() : "0"}
-                    </span>
-                  </div>
-                </>
-              )}
-              {(account.credit_limit === null || account.credit_limit === undefined) && (
-                <div className="flex justify-between mt-4 pt-4 border-t">
-                  <span>Límite de crédito:</span>
-                  <span className="font-semibold text-muted-foreground">Sin límite definido</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
