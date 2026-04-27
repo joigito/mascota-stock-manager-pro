@@ -202,10 +202,14 @@ const AccountStatementPrint = ({
                 }
                 .summary-row.total {
                   font-weight: bold;
-                  font-size: 24px;
+                  font-size: 28px;
                   border-top: 2px solid #333;
                   padding-top: 10px;
                   margin-top: 15px;
+                }
+                .last-balance-row td.last-balance-cell {
+                  font-weight: bold;
+                  font-size: 16px;
                 }
                 .positive { color: #16a34a; }
                 .negative { color: #dc2626; }
@@ -299,35 +303,40 @@ const AccountStatementPrint = ({
                     </td>
                   </tr>
                 ) : (
-                  [...transactions].reverse().map((transaction) => {
-                    const isDebe = transaction.transaction_type === "sale" || 
-                                   (transaction.transaction_type === "adjustment" && Number(transaction.amount) > 0);
-                    const isHaber = transaction.transaction_type === "payment" ||
-                                    (transaction.transaction_type === "adjustment" && Number(transaction.amount) < 0);
-                    
-                    return (
-                      <tr key={transaction.id}>
-                        <td className="border p-2">
-                          {format(new Date(transaction.created_at), "dd/MM/yyyy HH:mm")}
-                        </td>
-                        <td className="border p-2">
-                          {getTransactionTypeLabel(transaction.transaction_type)}
-                        </td>
-                        <td className="border p-2">
-                          {transaction.notes || "-"}
-                        </td>
-                        <td className="border p-2 text-right">
-                          {isDebe ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
-                        </td>
-                        <td className="border p-2 text-right">
-                          {isHaber ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
-                        </td>
-                        <td className="border p-2 text-right font-semibold">
-                          ${Number(transaction.balance_after).toLocaleString()}
-                        </td>
-                      </tr>
-                    );
-                  })
+                  (() => {
+                    const ordered = [...transactions].reverse();
+                    const lastIndex = ordered.length - 1;
+                    return ordered.map((transaction, idx) => {
+                      const isDebe = transaction.transaction_type === "sale" || 
+                                     (transaction.transaction_type === "adjustment" && Number(transaction.amount) > 0);
+                      const isHaber = transaction.transaction_type === "payment" ||
+                                      (transaction.transaction_type === "adjustment" && Number(transaction.amount) < 0);
+                      const isLast = idx === lastIndex;
+                      
+                      return (
+                        <tr key={transaction.id} className={isLast ? "last-balance-row" : ""}>
+                          <td className="border p-2">
+                            {format(new Date(transaction.created_at), "dd/MM/yyyy HH:mm")}
+                          </td>
+                          <td className="border p-2">
+                            {getTransactionTypeLabel(transaction.transaction_type)}
+                          </td>
+                          <td className="border p-2">
+                            {transaction.notes || "-"}
+                          </td>
+                          <td className="border p-2 text-right">
+                            {isDebe ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
+                          </td>
+                          <td className="border p-2 text-right">
+                            {isHaber ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
+                          </td>
+                          <td className={`border p-2 text-right ${isLast ? "font-bold text-base last-balance-cell" : "font-semibold"}`}>
+                            ${Number(transaction.balance_after).toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()
                 )}
               </tbody>
             </table>
@@ -337,11 +346,11 @@ const AccountStatementPrint = ({
           <div className="summary bg-muted/50 p-6 rounded-lg">
             <h3 className="font-semibold text-lg mb-4 border-b pb-2">Resumen:</h3>
             <div className="space-y-2">
-              <div className="flex justify-between">
+              <div className="summary-row flex justify-between">
                 <span>Saldo anterior:</span>
                 <span className="font-semibold">${summary.previousBalance.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between font-bold text-2xl border-t pt-3 mt-3">
+              <div className="summary-row total flex justify-between font-bold text-3xl border-t pt-3 mt-3">
                 <span>Saldo actual:</span>
                 <span className={summary.currentBalance > 0 ? "text-destructive" : ""}>
                   ${summary.currentBalance.toLocaleString()}
