@@ -299,35 +299,40 @@ const AccountStatementPrint = ({
                     </td>
                   </tr>
                 ) : (
-                  [...transactions].reverse().map((transaction) => {
-                    const isDebe = transaction.transaction_type === "sale" || 
-                                   (transaction.transaction_type === "adjustment" && Number(transaction.amount) > 0);
-                    const isHaber = transaction.transaction_type === "payment" ||
-                                    (transaction.transaction_type === "adjustment" && Number(transaction.amount) < 0);
-                    
-                    return (
-                      <tr key={transaction.id}>
-                        <td className="border p-2">
-                          {format(new Date(transaction.created_at), "dd/MM/yyyy HH:mm")}
-                        </td>
-                        <td className="border p-2">
-                          {getTransactionTypeLabel(transaction.transaction_type)}
-                        </td>
-                        <td className="border p-2">
-                          {transaction.notes || "-"}
-                        </td>
-                        <td className="border p-2 text-right">
-                          {isDebe ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
-                        </td>
-                        <td className="border p-2 text-right">
-                          {isHaber ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
-                        </td>
-                        <td className="border p-2 text-right font-semibold">
-                          ${Number(transaction.balance_after).toLocaleString()}
-                        </td>
-                      </tr>
-                    );
-                  })
+                  (() => {
+                    const ordered = [...transactions].reverse();
+                    const lastIndex = ordered.length - 1;
+                    return ordered.map((transaction, idx) => {
+                      const isDebe = transaction.transaction_type === "sale" || 
+                                     (transaction.transaction_type === "adjustment" && Number(transaction.amount) > 0);
+                      const isHaber = transaction.transaction_type === "payment" ||
+                                      (transaction.transaction_type === "adjustment" && Number(transaction.amount) < 0);
+                      const isLast = idx === lastIndex;
+                      
+                      return (
+                        <tr key={transaction.id} className={isLast ? "last-balance-row" : ""}>
+                          <td className="border p-2">
+                            {format(new Date(transaction.created_at), "dd/MM/yyyy HH:mm")}
+                          </td>
+                          <td className="border p-2">
+                            {getTransactionTypeLabel(transaction.transaction_type)}
+                          </td>
+                          <td className="border p-2">
+                            {transaction.notes || "-"}
+                          </td>
+                          <td className="border p-2 text-right">
+                            {isDebe ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
+                          </td>
+                          <td className="border p-2 text-right">
+                            {isHaber ? `$${Math.abs(Number(transaction.amount)).toLocaleString()}` : "-"}
+                          </td>
+                          <td className={`border p-2 text-right ${isLast ? "font-bold text-base last-balance-cell" : "font-semibold"}`}>
+                            ${Number(transaction.balance_after).toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()
                 )}
               </tbody>
             </table>
