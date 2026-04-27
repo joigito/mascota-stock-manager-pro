@@ -346,11 +346,11 @@ const AccountStatementPrint = ({
           <div className="summary bg-muted/50 p-6 rounded-lg">
             <h3 className="font-semibold text-lg mb-4 border-b pb-2">Resumen:</h3>
             <div className="space-y-2">
-              <div className="flex justify-between">
+              <div className="summary-row flex justify-between">
                 <span>Saldo anterior:</span>
                 <span className="font-semibold">${summary.previousBalance.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between font-bold text-2xl border-t pt-3 mt-3">
+              <div className="summary-row total flex justify-between font-bold text-3xl border-t pt-3 mt-3">
                 <span>Saldo actual:</span>
                 <span className={summary.currentBalance > 0 ? "text-destructive" : ""}>
                   ${summary.currentBalance.toLocaleString()}
