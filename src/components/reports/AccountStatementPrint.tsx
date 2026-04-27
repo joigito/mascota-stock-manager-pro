@@ -202,10 +202,14 @@ const AccountStatementPrint = ({
                 }
                 .summary-row.total {
                   font-weight: bold;
-                  font-size: 24px;
+                  font-size: 28px;
                   border-top: 2px solid #333;
                   padding-top: 10px;
                   margin-top: 15px;
+                }
+                .last-balance-row td.last-balance-cell {
+                  font-weight: bold;
+                  font-size: 16px;
                 }
                 .positive { color: #16a34a; }
                 .negative { color: #dc2626; }
