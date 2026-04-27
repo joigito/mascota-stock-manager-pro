@@ -373,10 +373,14 @@ export const CurrentAccountTab = () => {
                 id="date-from"
                 type="date"
                 value={dateFilter.from ? format(dateFilter.from, 'yyyy-MM-dd') : ''}
-                onChange={(e) => setDateFilter(prev => ({
-                  ...prev,
-                  from: e.target.value ? new Date(e.target.value) : null
-                }))}
+                onChange={(e) => {
+                  if (!e.target.value) {
+                    setDateFilter(prev => ({ ...prev, from: null }));
+                    return;
+                  }
+                  const [y, m, d] = e.target.value.split('-').map(Number);
+                  setDateFilter(prev => ({ ...prev, from: new Date(y, m - 1, d, 0, 0, 0, 0) }));
+                }}
               />
             </div>
             <div className="flex-1 min-w-[180px]">
@@ -385,10 +389,14 @@ export const CurrentAccountTab = () => {
                 id="date-to"
                 type="date"
                 value={dateFilter.to ? format(dateFilter.to, 'yyyy-MM-dd') : ''}
-                onChange={(e) => setDateFilter(prev => ({
-                  ...prev,
-                  to: e.target.value ? new Date(e.target.value) : null
-                }))}
+                onChange={(e) => {
+                  if (!e.target.value) {
+                    setDateFilter(prev => ({ ...prev, to: null }));
+                    return;
+                  }
+                  const [y, m, d] = e.target.value.split('-').map(Number);
+                  setDateFilter(prev => ({ ...prev, to: new Date(y, m - 1, d, 23, 59, 59, 999) }));
+                }}
               />
             </div>
             <Button
