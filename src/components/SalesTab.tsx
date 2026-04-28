@@ -29,7 +29,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { customers, addCustomer } = useCustomers();
   const { updateBatchesAfterSale } = useBatches();
   const { currentOrganization } = useOrganization();
-  const { isEnabled: isCurrentAccountEnabled, addTransaction } = useCurrentAccount();
+  const { isEnabled: isCurrentAccountEnabled, addTransaction, accounts: customerAccounts } = useCurrentAccount();
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
@@ -40,6 +40,10 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
   const selectedCustomer = customers.find(c => c.name === customerName);
   const canUseCreditSale = isCurrentAccountEnabled && selectedCustomer && customerName !== "Consumidor final";
+  const customerAccount = selectedCustomer
+    ? customerAccounts.find(a => a.customer_id === selectedCustomer.id)
+    : undefined;
+  const currentBalance = Number(customerAccount?.balance || 0);
 
   const addItemToSale = () => {
     if (!selectedProductId) {
@@ -303,15 +307,33 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
             }}
           />
           {canUseCreditSale && (
-            <div className="flex items-center space-x-3 p-3 rounded-lg border bg-muted/50">
-              <Switch
-                id="credit-sale"
-                checked={isCreditSale}
-                onCheckedChange={setIsCreditSale}
-              />
-              <Label htmlFor="credit-sale" className="cursor-pointer text-sm font-medium">
-                Venta a crédito (cargar a cuenta corriente de {customerName})
-              </Label>
+            <div className="space-y-2 p-3 rounded-lg border bg-muted/50">
+              <div className="flex items-center space-x-3">
+                <Switch
+                  id="credit-sale"
+                  checked={isCreditSale}
+                  onCheckedChange={setIsCreditSale}
+                />
+                <Label htmlFor="credit-sale" className="cursor-pointer text-sm font-medium">
+                  Venta a crédito (cargar a cuenta corriente de {customerName})
+                </Label>
+              </div>
+              <div className="text-sm text-muted-foreground pl-12 space-y-0.5">
+                <div>
+                  Saldo actual:{" "}
+                  <span className={`font-semibold ${currentBalance > 0 ? "text-destructive" : "text-foreground"}`}>
+                    ${currentBalance.toLocaleString()}
+                  </span>
+                </div>
+                {isCreditSale && saleItems.length > 0 && (
+                  <div>
+                    Saldo después de esta venta:{" "}
+                    <span className="font-semibold text-destructive">
+                      ${(currentBalance + getTotalAmount()).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           <ProductSelectorWithVariants
