@@ -38,6 +38,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const [quantity, setQuantity] = useState<number>(1);
   const [customerName, setCustomerName] = useState<string>("Consumidor final");
   const [isCreditSale, setIsCreditSale] = useState(false);
+  const [isProductPanelOpen, setIsProductPanelOpen] = useState(false);
 
   const selectedCustomer = customers.find(c => c.name === customerName);
   const canUseCreditSale = isCurrentAccountEnabled && selectedCustomer && customerName !== "Consumidor final";
