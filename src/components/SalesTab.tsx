@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Package, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -37,6 +38,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const [quantity, setQuantity] = useState<number>(1);
   const [customerName, setCustomerName] = useState<string>("Consumidor final");
   const [isCreditSale, setIsCreditSale] = useState(false);
+  const [isProductPanelOpen, setIsProductPanelOpen] = useState(false);
 
   const selectedCustomer = customers.find(c => c.name === customerName);
   const canUseCreditSale = isCurrentAccountEnabled && selectedCustomer && customerName !== "Consumidor final";
@@ -336,33 +338,38 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
               </div>
             </div>
           )}
-          <ProductSelectorWithVariants
-            products={products}
-            selectedProductId={selectedProductId}
-            selectedVariantId={selectedVariantId}
-            quantity={quantity}
-            finalPrice={finalPrice}
-            onProductSelect={setSelectedProductId}
-            onVariantSelect={(variantId, price) => {
-              setSelectedVariantId(variantId || undefined);
-              setFinalPrice(price);
-            }}
-            onQuantityChange={setQuantity}
-            onAddItem={addItemToSale}
-          />
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                O agregar item libre
-              </span>
-            </div>
+          <div className="space-y-2">
+            <Label className="text-xs uppercase text-muted-foreground">Agregar item libre</Label>
+            <FreeItemInput onAddFreeItem={addFreeItemToSale} />
           </div>
 
-          <FreeItemInput onAddFreeItem={addFreeItemToSale} />
+          <Collapsible open={isProductPanelOpen} onOpenChange={setIsProductPanelOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <span className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Buscar producto del inventario
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${isProductPanelOpen ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4">
+              <ProductSelectorWithVariants
+                products={products}
+                selectedProductId={selectedProductId}
+                selectedVariantId={selectedVariantId}
+                quantity={quantity}
+                finalPrice={finalPrice}
+                onProductSelect={setSelectedProductId}
+                onVariantSelect={(variantId, price) => {
+                  setSelectedVariantId(variantId || undefined);
+                  setFinalPrice(price);
+                }}
+                onQuantityChange={setQuantity}
+                onAddItem={addItemToSale}
+              />
+            </CollapsibleContent>
+          </Collapsible>
 
           <div className="space-y-4">
             <SalesList
