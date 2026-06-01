@@ -537,6 +537,7 @@ export const CurrentAccountTab = () => {
       <AccountStatementPrint
         account={selectedAccount}
         transactions={getFilteredTransactions()}
+        allTransactions={transactions}
         isOpen={showPrintDialog}
         onClose={() => setShowPrintDialog(false)}
         dateRange={dateFilter}
