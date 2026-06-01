@@ -47,7 +47,7 @@ export const CurrentAccountTab = () => {
   const [editingTransaction, setEditingTransaction] = useState<any | null>(null);
   const [dateFilter, setDateFilter] = useState<{ from: Date | null; to: Date | null }>({
     from: null,
-    to: null
+    to: new Date(new Date().setHours(23, 59, 59, 999)),
   });
 
   const [transactionForm, setTransactionForm] = useState({
