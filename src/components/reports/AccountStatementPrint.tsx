@@ -82,20 +82,18 @@ const AccountStatementPrint = ({
     });
 
     // transactions vienen ordenadas DESC (más reciente primero).
-    // El saldo anterior al período = balance_after de la transacción más antigua
-    // menos/más su efecto, según el tipo.
+    // Saldo anterior = balance_after de la transacción más reciente
+    // ANTERIOR a la fecha "Desde" del filtro. Si no hay filtro Desde, es 0.
     let previousBalance = 0;
-    if (transactions.length > 0) {
-      const oldest = transactions[transactions.length - 1];
-      const amt = Number(oldest.amount);
-      const balAfter = Number(oldest.balance_after);
-      if (oldest.transaction_type === "sale") {
-        previousBalance = balAfter - amt;
-      } else if (oldest.transaction_type === "payment") {
-        previousBalance = balAfter + amt;
-      } else {
-        // Ajuste fija el saldo: no podemos deducir el anterior con seguridad
-        previousBalance = 0;
+    const source = allTransactions && allTransactions.length > 0 ? allTransactions : transactions;
+    if (dateRange?.from) {
+      const fromTime = dateRange.from.getTime();
+      // Buscar la transacción más reciente con created_at < fromTime
+      const prior = source
+        .filter((t) => new Date(t.created_at).getTime() < fromTime)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+      if (prior) {
+        previousBalance = Number(prior.balance_after);
       }
     }
 
