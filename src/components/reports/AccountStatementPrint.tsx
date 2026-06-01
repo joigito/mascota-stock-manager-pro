@@ -44,6 +44,7 @@ interface AccountStatementPrintProps {
 const AccountStatementPrint = ({ 
   account, 
   transactions, 
+  allTransactions,
   isOpen, 
   onClose,
   dateRange 
