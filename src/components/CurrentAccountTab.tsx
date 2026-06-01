@@ -130,7 +130,7 @@ export const CurrentAccountTab = () => {
     setSelectedAccount(account);
     setShowMovementsDialog(true);
     setLoadingTransactions(true);
-    setDateFilter({ from: null, to: null }); // Reset date filter
+    setDateFilter({ from: null, to: new Date(new Date().setHours(23, 59, 59, 999)) }); // Reset date filter, "Hasta" por defecto hoy
     const txs = await getTransactions(accountId);
     console.log('handleViewMovements: transactions fetched:', txs);
     setTransactions(txs);
