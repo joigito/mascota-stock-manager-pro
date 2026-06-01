@@ -401,8 +401,8 @@ export const CurrentAccountTab = () => {
             </div>
             <Button
               variant="outline"
-              onClick={() => setDateFilter({ from: null, to: null })}
-              disabled={!dateFilter.from && !dateFilter.to}
+              onClick={() => setDateFilter({ from: null, to: new Date(new Date().setHours(23, 59, 59, 999)) })}
+              disabled={!dateFilter.from}
             >
               Limpiar
             </Button>
