@@ -32,6 +32,7 @@ interface CustomerAccount {
 interface AccountStatementPrintProps {
   account: CustomerAccount | null;
   transactions: AccountTransaction[];
+  allTransactions?: AccountTransaction[];
   isOpen: boolean;
   onClose: () => void;
   dateRange?: {
