@@ -29,7 +29,9 @@ import {
 } from '@/components/ui/select';
 import { useCurrentAccount } from '@/hooks/useCurrentAccount';
 import { useCustomers } from '@/hooks/useCustomers';
-import { CreditCard, DollarSign, Eye, Plus, Edit, Trash2 } from 'lucide-react';
+import { useOrganization } from '@/hooks/useOrganization';
+import { CreditCard, DollarSign, Eye, Plus, Edit, Trash2, Link as LinkIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import AccountStatementPrint from './reports/AccountStatementPrint';
