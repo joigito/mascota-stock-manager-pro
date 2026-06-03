@@ -25,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />
+            <Route path="/tienda/:slug/cuenta/:token" element={<PublicAccountStatement />} />
             <Route path="/tienda/:slug" element={
               <ProtectedRoute>
                 <Store />
