@@ -39,6 +39,21 @@ import AccountStatementPrint from './reports/AccountStatementPrint';
 export const CurrentAccountTab = () => {
   const { accounts, loading, isEnabled, addTransaction, getTransactions, updateCreditLimit, deleteTransaction, updateTransaction } = useCurrentAccount();
   const { customers, loading: loadingCustomers } = useCustomers();
+  const { currentOrganization } = useOrganization();
+
+  const handleCopyPublicLink = (account: any) => {
+    const slug = currentOrganization?.slug;
+    const token = account?.public_token;
+    if (!slug || !token) {
+      toast.error('No se pudo generar el link público');
+      return;
+    }
+    const url = `${window.location.origin}/tienda/${slug}/cuenta/${token}`;
+    navigator.clipboard.writeText(url).then(
+      () => toast.success('Link copiado al portapapeles'),
+      () => toast.error('No se pudo copiar el link')
+    );
+  };
   const [showTransactionDialog, setShowTransactionDialog] = useState(false);
   const [showMovementsDialog, setShowMovementsDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
