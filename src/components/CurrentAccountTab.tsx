@@ -29,7 +29,9 @@ import {
 } from '@/components/ui/select';
 import { useCurrentAccount } from '@/hooks/useCurrentAccount';
 import { useCustomers } from '@/hooks/useCustomers';
-import { CreditCard, DollarSign, Eye, Plus, Edit, Trash2 } from 'lucide-react';
+import { useOrganization } from '@/hooks/useOrganization';
+import { CreditCard, DollarSign, Eye, Plus, Edit, Trash2, Link as LinkIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import AccountStatementPrint from './reports/AccountStatementPrint';
@@ -37,6 +39,21 @@ import AccountStatementPrint from './reports/AccountStatementPrint';
 export const CurrentAccountTab = () => {
   const { accounts, loading, isEnabled, addTransaction, getTransactions, updateCreditLimit, deleteTransaction, updateTransaction } = useCurrentAccount();
   const { customers, loading: loadingCustomers } = useCustomers();
+  const { currentOrganization } = useOrganization();
+
+  const handleCopyPublicLink = (account: any) => {
+    const slug = currentOrganization?.slug;
+    const token = account?.public_token;
+    if (!slug || !token) {
+      toast.error('No se pudo generar el link público');
+      return;
+    }
+    const url = `${window.location.origin}/tienda/${slug}/cuenta/${token}`;
+    navigator.clipboard.writeText(url).then(
+      () => toast.success('Link copiado al portapapeles'),
+      () => toast.error('No se pudo copiar el link')
+    );
+  };
   const [showTransactionDialog, setShowTransactionDialog] = useState(false);
   const [showMovementsDialog, setShowMovementsDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -260,6 +277,14 @@ export const CurrentAccountTab = () => {
                       ${account.credit_limit.toFixed(2)}
                     </TableCell>
                     <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Copiar link público"
+                        onClick={() => handleCopyPublicLink(account)}
+                      >
+                        <LinkIcon className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"

@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
+import PublicAccountStatement from "./pages/PublicAccountStatement";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />
+            <Route path="/tienda/:slug/cuenta/:token" element={<PublicAccountStatement />} />
             <Route path="/tienda/:slug" element={
               <ProtectedRoute>
                 <Store />

@@ -168,6 +168,7 @@ export type Database = {
           customer_id: string
           id: string
           organization_id: string
+          public_token: string
           updated_at: string
         }
         Insert: {
@@ -177,6 +178,7 @@ export type Database = {
           customer_id: string
           id?: string
           organization_id: string
+          public_token?: string
           updated_at?: string
         }
         Update: {
@@ -186,6 +188,7 @@ export type Database = {
           customer_id?: string
           id?: string
           organization_id?: string
+          public_token?: string
           updated_at?: string
         }
         Relationships: [
@@ -1239,6 +1242,10 @@ export type Database = {
       get_product_total_stock: {
         Args: { p_product_id: string }
         Returns: number
+      }
+      get_public_account_statement: {
+        Args: { _slug: string; _token: string }
+        Returns: Json
       }
       get_user_default_organization: {
         Args: { user_uuid: string }
