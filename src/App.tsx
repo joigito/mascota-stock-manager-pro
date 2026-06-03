@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
+import PublicAccountStatement from "./pages/PublicAccountStatement";
 
 const queryClient = new QueryClient();
 
