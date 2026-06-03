@@ -280,6 +280,14 @@ export const CurrentAccountTab = () => {
                       <Button
                         variant="ghost"
                         size="sm"
+                        title="Copiar link público"
+                        onClick={() => handleCopyPublicLink(account)}
+                      >
+                        <LinkIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleViewMovements(account.id, account)}
                       >
                         <Eye className="h-4 w-4" />
