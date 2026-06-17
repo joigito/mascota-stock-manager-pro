@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider"
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ThemeProvider defaultTheme="system" storageKey="mascota-stock-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="mascota-stock-theme">
       <App />
     </ThemeProvider>
   </React.StrictMode>
