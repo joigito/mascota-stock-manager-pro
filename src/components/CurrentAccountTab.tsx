@@ -260,11 +260,12 @@ export const CurrentAccountTab = () => {
                   <TableHead>CUIT/DNI</TableHead>
                   <TableHead className="text-right">Saldo</TableHead>
                   <TableHead className="text-right">Límite</TableHead>
+                  <TableHead>Último acceso al link</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {accounts.map((account) => (
+                {accounts.map((account: any) => (
                   <TableRow key={account.id}>
                     <TableCell className="font-medium">
                       {account.customer?.name || 'Sin nombre'}
@@ -275,6 +276,11 @@ export const CurrentAccountTab = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       ${account.credit_limit.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {account.public_link_last_accessed_at
+                        ? format(new Date(account.public_link_last_accessed_at), "dd/MM/yyyy HH:mm", { locale: es })
+                        : 'Nunca consultado'}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
