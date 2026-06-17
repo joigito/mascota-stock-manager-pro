@@ -168,6 +168,7 @@ export type Database = {
           customer_id: string
           id: string
           organization_id: string
+          public_link_last_accessed_at: string | null
           public_token: string
           updated_at: string
         }
@@ -178,6 +179,7 @@ export type Database = {
           customer_id: string
           id?: string
           organization_id: string
+          public_link_last_accessed_at?: string | null
           public_token?: string
           updated_at?: string
         }
@@ -188,6 +190,7 @@ export type Database = {
           customer_id?: string
           id?: string
           organization_id?: string
+          public_link_last_accessed_at?: string | null
           public_token?: string
           updated_at?: string
         }
