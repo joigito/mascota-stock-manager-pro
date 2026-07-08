@@ -48,7 +48,7 @@ export const CurrentAccountTab = () => {
       toast.error('No se pudo generar el link público');
       return;
     }
-    const url = `https://sistemas-gestion.lovable.app/tienda/${slug}/cuenta/${token}`;
+    const url = `${window.location.origin}/tienda/${slug}/cuenta/${token}`;
     navigator.clipboard.writeText(url).then(
       () => toast.success('Link copiado al portapapeles'),
       () => toast.error('No se pudo copiar el link')
