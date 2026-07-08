@@ -118,10 +118,10 @@ const Index = () => {
 
   if (loading || orgLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 dark:from-green-950/30 dark:to-orange-950/30 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando productos...</p>
+          <p className="text-muted-foreground">Cargando productos...</p>
         </div>
       </div>
     );

@@ -88,7 +88,7 @@ const InvoicesCard = () => {
       </CardHeader>
       <CardContent>
         {invoices.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No hay facturas generadas aún</p>
             <p className="text-sm mt-2">Las facturas aparecerán aquí cuando generes facturas desde las ventas</p>
@@ -107,7 +107,7 @@ const InvoicesCard = () => {
                       {getInvoiceType(invoice.tipo_comprobante)}
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
                     <div>
                       <span className="font-medium">Fecha:</span> {new Date(invoice.fecha_emision).toLocaleDateString()}
                     </div>
@@ -121,7 +121,7 @@ const InvoicesCard = () => {
                     )}
                   </div>
                   {invoice.observaciones && (
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-muted-foreground mt-1">
                       {invoice.observaciones}
                     </div>
                   )}

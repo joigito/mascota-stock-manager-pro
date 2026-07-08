@@ -31,15 +31,15 @@ const InventoryOverviewCard = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Total de productos:</span>
+          <span className="text-sm text-muted-foreground">Total de productos:</span>
           <span className="font-semibold">{products.length}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Valor total del inventario:</span>
+          <span className="text-sm text-muted-foreground">Valor total del inventario:</span>
           <span className="font-semibold">${totalInventoryValue.toLocaleString()}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Costo total del inventario:</span>
+          <span className="text-sm text-muted-foreground">Costo total del inventario:</span>
           <span className="font-semibold">${totalInventoryCost.toLocaleString()}</span>
         </div>
         <div className="flex justify-between items-center border-t pt-2">
@@ -47,13 +47,13 @@ const InventoryOverviewCard = ({
           <span className="font-semibold text-green-600">${potentialProfit.toLocaleString()}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Productos con stock bajo:</span>
+          <span className="text-sm text-muted-foreground">Productos con stock bajo:</span>
           <Badge variant={lowStockProducts.length > 0 ? "destructive" : "secondary"}>
             {lowStockProducts.length}
           </Badge>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Productos con margen bajo:</span>
+          <span className="text-sm text-muted-foreground">Productos con margen bajo:</span>
           <Badge variant={lowMarginProducts.length > 0 ? "destructive" : "secondary"}>
             {lowMarginProducts.length}
           </Badge>

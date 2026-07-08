@@ -58,10 +58,10 @@ const Store: React.FC = () => {
 
   if (storeLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 dark:from-green-950/30 dark:to-orange-950/30 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando tienda...</p>
+          <p className="text-muted-foreground">Cargando tienda...</p>
         </div>
       </div>
     );
@@ -69,11 +69,11 @@ const Store: React.FC = () => {
 
   if (error || !organization) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🏪</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Tienda no encontrada</h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-2">Tienda no encontrada</h1>
+          <p className="text-muted-foreground mb-4">
             La tienda que buscas no existe o no tienes acceso a ella.
           </p>
           <Button onClick={() => window.location.href = '/'}>

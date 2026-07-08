@@ -87,8 +87,8 @@ export default function VariantAttributeManager({ organizationId, open, onClose 
               {attributes.map((a) => (
                 <li key={a.id} className="flex items-center justify-between p-2 border rounded">
                   <div>
-                    <div className="font-medium">{a.name} <span className="text-sm text-gray-500">({a.key})</span></div>
-                    <div className="text-sm text-gray-600">{a.data_type}{a.options ? ` — options: ${JSON.stringify(a.options)}` : ''}</div>
+                    <div className="font-medium">{a.name} <span className="text-sm text-muted-foreground">({a.key})</span></div>
+                    <div className="text-sm text-muted-foreground">{a.data_type}{a.options ? ` — options: ${JSON.stringify(a.options)}` : ''}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button className="px-2 py-1 text-sm bg-blue-500 text-white rounded" onClick={() => startEdit(a)}>Edit</button>
@@ -96,7 +96,7 @@ export default function VariantAttributeManager({ organizationId, open, onClose 
                   </div>
                 </li>
               ))}
-              {attributes.length === 0 && <li className="text-sm text-gray-600">No attributes defined for this organization.</li>}
+              {attributes.length === 0 && <li className="text-sm text-muted-foreground">No attributes defined for this organization.</li>}
             </ul>
           )}
           <div className="mt-2">

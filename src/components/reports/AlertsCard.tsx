@@ -18,7 +18,7 @@ const AlertsCard = ({ lowStockProducts, lowMarginProducts }: AlertsCardProps) =>
         {lowStockProducts.length === 0 && lowMarginProducts.length === 0 ? (
           <div className="text-center py-4 text-green-600">
             <p className="font-medium">✓ Todo está en orden</p>
-            <p className="text-xs text-gray-500">Stock y márgenes adecuados</p>
+            <p className="text-xs text-muted-foreground">Stock y márgenes adecuados</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -35,7 +35,7 @@ const AlertsCard = ({ lowStockProducts, lowMarginProducts }: AlertsCardProps) =>
                     </div>
                   ))}
                   {lowStockProducts.length > 3 && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       ... y {lowStockProducts.length - 3} más
                     </p>
                   )}
@@ -59,7 +59,7 @@ const AlertsCard = ({ lowStockProducts, lowMarginProducts }: AlertsCardProps) =>
                     );
                   })}
                   {lowMarginProducts.length > 3 && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       ... y {lowMarginProducts.length - 3} más
                     </p>
                   )}

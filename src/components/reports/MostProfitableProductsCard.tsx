@@ -19,7 +19,7 @@ const MostProfitableProductsCard = ({ mostProfitableProducts }: MostProfitablePr
       </CardHeader>
       <CardContent>
         {mostProfitableProducts.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No hay ventas registradas en este período</p>
           </div>
@@ -33,14 +33,14 @@ const MostProfitableProductsCard = ({ mostProfitableProducts }: MostProfitablePr
                   </Badge>
                   <div>
                     <h4 className="font-medium">{data.name}</h4>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {data.margin.toFixed(1)}% margen
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-semibold text-green-600">${data.profit.toLocaleString()}</div>
-                  <div className="text-sm text-gray-600">${data.revenue.toLocaleString()} ventas</div>
+                  <div className="text-sm text-muted-foreground">${data.revenue.toLocaleString()} ventas</div>
                 </div>
               </div>
             ))}

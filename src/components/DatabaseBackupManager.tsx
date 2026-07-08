@@ -321,11 +321,11 @@ export const DatabaseBackupManager: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Database className="h-5 w-5 text-gray-500" />
+            <Database className="h-5 w-5 text-muted-foreground" />
             <span>Información del Sistema</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-gray-600">
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>• Los respaldos incluyen todas las tablas principales del sistema</p>
           <p>• Formato de archivo: JSON</p>
           <p>• La restauración elimina todos los datos existentes antes de importar</p>
