@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Receipt, CreditCard, Settings } from 'lucide-react';
-import { useFeatureFlags } from '@/hooks/useFeatureFlag';
 import { FEATURES } from '@/config/features';
 import { ElectronicInvoicingConfig } from './ElectronicInvoicingConfig';
 import { CurrentAccountConfig } from './CurrentAccountConfig';
-import { FeatureFlagsManager } from './FeatureFlagsManager';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 
 interface Organization {
   id: string;
@@ -142,10 +141,61 @@ export const OrganizationConfigPanel: React.FC = () => {
   );
 };
 
-// Internal component for feature flags per organization
+// Standalone component for feature flags per organization (doesn't depend on global org state)
 const OrganizationFeatureFlags: React.FC<{ organizationId: string }> = ({ organizationId }) => {
-  const featureKeys = Object.keys(FEATURES);
-  const { features, loading, isEnabled, toggle } = useFeatureFlags(featureKeys);
+  const [features, setFeatures] = useState<Record<string, { enabled: boolean }>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFeatures();
+  }, [organizationId]);
+
+  const loadFeatures = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('organization_features')
+        .select('feature_key, enabled')
+        .eq('organization_id', organizationId);
+
+      if (error) throw error;
+
+      const featuresMap: Record<string, { enabled: boolean }> = {};
+      Object.keys(FEATURES).forEach((key) => {
+        featuresMap[key] = { enabled: false };
+      });
+      (data || []).forEach((row) => {
+        featuresMap[row.feature_key] = { enabled: row.enabled };
+      });
+      setFeatures(featuresMap);
+    } catch (error) {
+      console.error('Error loading features:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggle = async (key: string, enabled: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('organization_features')
+        .upsert(
+          { organization_id: organizationId, feature_key: key, enabled },
+          { onConflict: 'organization_id,feature_key' }
+        );
+
+      if (error) throw error;
+
+      setFeatures((prev) => ({
+        ...prev,
+        [key]: { enabled },
+      }));
+      sonnerToast(enabled ? 'Feature habilitada' : 'Feature deshabilitada');
+    } catch (error) {
+      console.error('Error toggling feature:', error);
+      sonnerToast.error('Error al actualizar feature');
+    }
+  };
 
   if (loading) {
     return (
@@ -162,7 +212,7 @@ const OrganizationFeatureFlags: React.FC<{ organizationId: string }> = ({ organi
       </p>
       {Object.values(FEATURES).map((feature) => {
         const Icon = feature.icon;
-        const enabled = isEnabled(feature.key);
+        const enabled = features[feature.key]?.enabled || false;
         return (
           <div
             key={feature.key}
@@ -183,7 +233,7 @@ const OrganizationFeatureFlags: React.FC<{ organizationId: string }> = ({ organi
               </div>
             </div>
             <button
-              onClick={() => toggle(!enabled)}
+              onClick={() => toggle(feature.key, !enabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 enabled ? 'bg-primary' : 'bg-muted'
               }`}

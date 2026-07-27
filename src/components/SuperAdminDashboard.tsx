@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOrganization } from '@/hooks/useOrganization';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building2, Users, Settings, Database, Shield, AlertTriangle } from 'lucide-react';
 import { OrganizationManager } from './OrganizationManager';
