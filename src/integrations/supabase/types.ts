@@ -1227,6 +1227,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { _token: string }; Returns: Json }
       calculate_fifo_cost: {
         Args: {
           p_organization_id: string
@@ -1268,6 +1269,7 @@ export type Database = {
         }
         Returns: string
       }
+      get_invitation_by_token: { Args: { _token: string }; Returns: Json }
       get_organization_by_slug: {
         Args: { org_slug: string }
         Returns: {
