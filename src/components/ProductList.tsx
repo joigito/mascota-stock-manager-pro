@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/hooks/useProducts";
 import { useProductSearch } from "@/hooks/useProductSearch";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import SearchInput from "@/components/ui/SearchInput";
 import EditProductDialog from "./EditProductDialog";
 import ProductVariantManager from "./variants/ProductVariantManager";
@@ -20,6 +21,7 @@ interface ProductListProps {
 const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChange }: ProductListProps) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { searchTerm, setSearchTerm, filteredProducts, resultCount, hasSearchTerm } = useProductSearch(products);
+  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -128,7 +130,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                   )}
                 </div>
                 <div className="flex space-x-1 ml-2">
-                  {product.hasVariants && (
+                  {product.hasVariants && variantsEnabled && (
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button
@@ -181,7 +183,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 <div>
                   <span className="text-muted-foreground">Stock:</span>
                   <div className="font-medium">
-                    {product.hasVariants ? (
+                    {product.hasVariants && variantsEnabled ? (
                       <span className="text-primary">Ver variantes</span>
                     ) : (
                       `${product.stock} unidades`
@@ -192,7 +194,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 <div>
                   <span className="text-muted-foreground">Precio:</span>
                   <div className="font-medium">{formatCurrency(product.price)}</div>
-                  {product.hasVariants && (
+                  {product.hasVariants && variantsEnabled && (
                     <div className="text-xs text-primary">Precio base</div>
                   )}
                 </div>
@@ -246,7 +248,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-foreground">
-                    {product.hasVariants ? (
+                    {product.hasVariants && variantsEnabled ? (
                       <span className="text-primary">Ver variantes</span>
                     ) : (
                       `${product.stock} unidades`
@@ -256,7 +258,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-foreground">{formatCurrency(product.price)}</div>
-                  {product.hasVariants && (
+                  {product.hasVariants && variantsEnabled && (
                     <div className="text-xs text-primary">Precio base</div>
                   )}
                 </td>
@@ -265,7 +267,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                   <div className="flex items-center space-x-2">
-                    {product.hasVariants && (
+                    {product.hasVariants && variantsEnabled && (
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button

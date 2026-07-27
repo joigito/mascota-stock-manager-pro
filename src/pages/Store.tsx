@@ -19,6 +19,7 @@ import { OrganizationManager } from '@/components/OrganizationManager';
 import { OrganizationUserManagement } from '@/components/OrganizationUserManagement';
 import { OrganizationUrlGenerator } from '@/components/OrganizationUrlGenerator';
 import { CategoryManager } from '@/components/CategoryManager';
+import { FeatureFlagsManager } from '@/components/FeatureFlagsManager';
 
 const Store: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -178,6 +179,7 @@ const Store: React.FC = () => {
         {isSuperAdminUser && (
           <TabsContent value="admin">
             <div className="space-y-6">
+              <FeatureFlagsManager />
               <OrganizationManager />
               <OrganizationUrlGenerator />
             </div>

@@ -6,14 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useBatches } from "@/hooks/useBatches";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useCurrentAccount } from "@/hooks/useCurrentAccount";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { generateSaleReceipt } from "@/utils/saleReceiptGenerator";
 import ProductSelectorWithVariants from "./sales/ProductSelectorWithVariants";
+import SearchInput from "@/components/ui/SearchInput";
+import { useProductSearch } from "@/hooks/useProductSearch";
 import SalesList from "./sales/SalesList";
 import CustomerSelector from "./sales/CustomerSelector";
 import FreeItemInput from "./sales/FreeItemInput";
@@ -31,6 +35,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { updateBatchesAfterSale } = useBatches();
   const { currentOrganization } = useOrganization();
   const { isEnabled: isCurrentAccountEnabled, addTransaction, accounts: customerAccounts } = useCurrentAccount();
+  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants');
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
@@ -56,34 +61,28 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     const product = products.find(p => p.id === selectedProductId);
     if (!product) return;
 
-    let availableStock = 0;
-    let currentPrice = finalPrice || product.price;
-    let variantInfo = "";
-
-    if (product.hasVariants && selectedVariantId) {
-      availableStock = 999; // Placeholder
-      variantInfo = `Variante: ${selectedVariantId}`;
-    } else if (!product.hasVariants) {
-      availableStock = product.stock;
-    } else {
-      toast({ title: "Error", description: "Por favor selecciona una variante para este producto", variant: "destructive" });
+    if (product.hasVariants && variantsEnabled && selectedVariantId) {
+      toast({ title: "Info", description: "Las variantes están deshabilitadas. Editá el stock directamente en el producto.", variant: "destructive" });
       return;
     }
 
-    if (quantity > availableStock && availableStock !== 999) {
+    const availableStock = product.stock;
+    let currentPrice = finalPrice || product.price;
+
+    if (quantity > availableStock) {
       toast({ title: "Stock insuficiente", description: `Solo hay ${availableStock} unidades disponibles`, variant: "destructive" });
       return;
     }
 
     const existingItemIndex = saleItems.findIndex(item => 
-      item.productId === selectedProductId && item.variantId === selectedVariantId
+      item.productId === selectedProductId && !item.variantId
     );
     
     if (existingItemIndex >= 0) {
       const newItems = [...saleItems];
       const newQuantity = newItems[existingItemIndex].quantity + quantity;
       
-      if (newQuantity > availableStock && availableStock !== 999) {
+      if (newQuantity > availableStock) {
         toast({ title: "Stock insuficiente", description: `Solo hay ${availableStock} unidades disponibles`, variant: "destructive" });
         return;
       }
@@ -109,11 +108,9 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       const newItem: SaleItem = {
         productId: selectedProductId,
         productName: product.name,
-        variantId: selectedVariantId,
-        variantInfo: variantInfo || undefined,
         quantity,
-        price: product.price, // Store original price
-        finalUnitPrice: currentPrice, // Editable price
+        price: product.price,
+        finalUnitPrice: currentPrice,
         costPrice: product.costPrice || 0,
         subtotal,
         profit,
@@ -228,11 +225,28 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       return;
     }
 
+    // Validate stock for all items before processing
+    for (const item of saleItems) {
+      if (item.productId) {
+        const product = products.find(p => p.id === item.productId);
+        if (product && !product.hasVariants) {
+          if (item.quantity > product.stock) {
+            toast({ 
+              title: "Stock insuficiente", 
+              description: `${product.name}: solo hay ${product.stock} unidades disponibles`, 
+              variant: "destructive" 
+            });
+            return;
+          }
+        }
+      }
+    }
+
     try {
       for (const item of saleItems) {
         if (item.productId) {
           const product = products.find(p => p.id === item.productId);
-          if (product) {
+          if (product && !product.hasVariants) {
             await updateBatchesAfterSale(item.productId, item.quantity);
             await onUpdateProduct(item.productId, { stock: product.stock - item.quantity });
           }

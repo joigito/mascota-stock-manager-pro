@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from './useOrganization';
+import { useFeatureFlag } from './useFeatureFlag';
 import { toast } from 'sonner';
 
 interface CustomerAccount {
@@ -35,35 +36,15 @@ interface AccountTransaction {
 
 export const useCurrentAccount = () => {
   const { currentOrganization } = useOrganization();
+  const { isEnabled } = useFeatureFlag('current_account');
   const [accounts, setAccounts] = useState<CustomerAccount[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
 
   useEffect(() => {
-    if (currentOrganization?.id) {
-      loadCurrentAccountStatus();
-      if (currentOrganization.current_account_enabled) {
-        loadAccounts();
-      }
+    if (currentOrganization?.id && isEnabled) {
+      loadAccounts();
     }
-  }, [currentOrganization?.id]);
-
-  const loadCurrentAccountStatus = async () => {
-    if (!currentOrganization?.id) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('current_account_enabled')
-        .eq('id', currentOrganization.id)
-        .single();
-
-      if (error) throw error;
-      setIsEnabled(data?.current_account_enabled || false);
-    } catch (error) {
-      console.error('Error loading current account status:', error);
-    }
-  };
+  }, [currentOrganization?.id, isEnabled]);
 
   const loadAccounts = async () => {
     if (!currentOrganization?.id) return;

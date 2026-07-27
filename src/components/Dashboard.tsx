@@ -11,10 +11,12 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ products, sales }: DashboardProps) => {
+  // Only include non-variant products in stock calculations
+  const normalProducts = products.filter(p => !p.hasVariants);
   const totalProducts = products.length;
-  const lowStockProducts = products.filter(p => p.stock <= p.minStock);
+  const lowStockProducts = normalProducts.filter(p => p.stock <= p.minStock);
   const lowStockCount = lowStockProducts.length;
-  const totalValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
+  const totalValue = normalProducts.reduce((sum, product) => sum + (product.stock * product.price), 0);
   const mascotasProducts = products.filter(p => p.category === "mascotas").length;
   const alimentosProducts = products.filter(p => p.category === "forrajeria").length;
 

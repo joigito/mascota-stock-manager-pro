@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from './useOrganization';
+import { useFeatureFlag } from './useFeatureFlag';
 import { toast } from 'sonner';
 
 interface AFIPConfiguration {
@@ -28,10 +29,10 @@ interface TaxCondition {
 
 export const useElectronicInvoicing = (organizationId?: string) => {
   const { currentOrganization } = useOrganization();
+  const { isEnabled, toggle } = useFeatureFlag('electronic_invoicing');
   const [afipConfig, setAfipConfig] = useState<AFIPConfiguration | null>(null);
   const [taxConditions, setTaxConditions] = useState<TaxCondition[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
   const [targetOrganization, setTargetOrganization] = useState<any>(null);
 
   const activeOrganizationId = organizationId || currentOrganization?.id;
@@ -60,7 +61,6 @@ export const useElectronicInvoicing = (organizationId?: string) => {
       }
 
       setTargetOrganization(data);
-      setIsEnabled(data?.electronic_invoicing_enabled || false);
     } catch (error) {
       console.error('Error loading organization:', error);
     }
@@ -108,33 +108,7 @@ export const useElectronicInvoicing = (organizationId?: string) => {
   };
 
   const toggleElectronicInvoicing = async (enabled: boolean) => {
-    if (!activeOrganizationId) return;
-
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('organizations')
-        .update({ electronic_invoicing_enabled: enabled })
-        .eq('id', activeOrganizationId);
-
-      if (error) {
-        toast.error('Error al actualizar configuración');
-        console.error('Error updating organization:', error);
-        return;
-      }
-
-      setIsEnabled(enabled);
-      toast.success(
-        enabled 
-          ? 'Facturación electrónica habilitada' 
-          : 'Facturación electrónica deshabilitada'
-      );
-    } catch (error) {
-      toast.error('Error al actualizar configuración');
-      console.error('Error updating organization:', error);
-    } finally {
-      setLoading(false);
-    }
+    await toggle(enabled);
   };
 
   const saveAFIPConfiguration = async (config: Omit<AFIPConfiguration, 'id' | 'organization_id' | 'created_at' | 'updated_at'>) => {
@@ -145,7 +119,7 @@ export const useElectronicInvoicing = (organizationId?: string) => {
       const configData = {
         ...config,
         organization_id: activeOrganizationId,
-        created_by: activeOrganizationId // Usando organization id como fallback
+        created_by: activeOrganizationId
       };
 
       let result;

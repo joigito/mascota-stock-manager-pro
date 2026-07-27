@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/hooks/useProducts";
 import { useProductSearch } from "@/hooks/useProductSearch";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import SearchInput from "@/components/ui/SearchInput";
 import VariantSelector from "@/components/variants/VariantSelector";
 
@@ -32,14 +33,19 @@ const ProductSelectorWithVariants = ({
   onQuantityChange,
   onAddItem
 }: ProductSelectorWithVariantsProps) => {
+  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants');
+  
   const availableProducts = products.filter(p => {
-    if (p.hasVariants) {
-      // For variant products, we'll check stock at variant level
-      return true;
-    } else {
-      // For simple products, check stock directly
-      return p.stock > 0;
+    // If variants are disabled, exclude variant products entirely
+    if (p.hasVariants && !variantsEnabled) {
+      return false;
     }
+    // For variant products with variants enabled, show them (stock checked at variant level)
+    if (p.hasVariants && variantsEnabled) {
+      return true;
+    }
+    // For simple products, check stock directly
+    return p.stock > 0;
   });
   const { searchTerm, setSearchTerm, filteredProducts, hasSearchTerm } = useProductSearch(availableProducts);
   const selectedProduct = products.find(p => p.id === selectedProductId);
@@ -132,8 +138,8 @@ const ProductSelectorWithVariants = ({
         </div>
       </div>
 
-      {/* Show variant selector if product has variants */}
-      {selectedProduct && selectedProduct.hasVariants && (
+      {/* Show variant selector if product has variants and variants are enabled */}
+      {selectedProduct && selectedProduct.hasVariants && variantsEnabled && (
         <div className="border-t pt-4">
           <VariantSelector
             productId={selectedProduct.id}

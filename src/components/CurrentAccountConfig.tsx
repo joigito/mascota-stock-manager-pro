@@ -1,68 +1,12 @@
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 export const CurrentAccountConfig = ({ organizationId }: { organizationId?: string }) => {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (organizationId) {
-      loadCurrentAccountStatus();
-    }
-  }, [organizationId]);
-
-  const loadCurrentAccountStatus = async () => {
-    if (!organizationId) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('current_account_enabled')
-        .eq('id', organizationId)
-        .single();
-
-      if (error) throw error;
-      setIsEnabled(data?.current_account_enabled || false);
-    } catch (error) {
-      console.error('Error loading current account status:', error);
-    }
-  };
-
-  const toggleCurrentAccount = async (enabled: boolean) => {
-    if (!organizationId) return;
-
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('organizations')
-        .update({ current_account_enabled: enabled })
-        .eq('id', organizationId);
-
-      if (error) {
-        toast.error('Error al actualizar configuración');
-        console.error('Error updating organization:', error);
-        return;
-      }
-
-      setIsEnabled(enabled);
-      toast.success(
-        enabled 
-          ? 'Cuenta corriente habilitada' 
-          : 'Cuenta corriente deshabilitada'
-      );
-    } catch (error) {
-      toast.error('Error al actualizar configuración');
-      console.error('Error updating organization:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { isEnabled, toggle, loading } = useFeatureFlag('current_account');
 
   return (
     <div className="space-y-6">
@@ -91,7 +35,7 @@ export const CurrentAccountConfig = ({ organizationId }: { organizationId?: stri
             </div>
             <Switch
               checked={isEnabled}
-              onCheckedChange={toggleCurrentAccount}
+              onCheckedChange={toggle}
               disabled={loading}
             />
           </div>

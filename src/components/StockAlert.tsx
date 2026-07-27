@@ -12,10 +12,13 @@ interface StockAlertProps {
 const StockAlert = ({ products }: StockAlertProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  if (products.length === 0) return null;
+  // Filter out variant products - they have stock=0 which would cause false alerts
+  const normalProducts = products.filter(p => !p.hasVariants);
+  
+  if (normalProducts.length === 0) return null;
 
-  const displayedProducts = isExpanded ? products : products.slice(0, 3);
-  const hasMore = products.length > 3;
+  const displayedProducts = isExpanded ? normalProducts : normalProducts.slice(0, 3);
+  const hasMore = normalProducts.length > 3;
 
   return (
     <Alert className="border-destructive/50 bg-destructive/10">
@@ -23,7 +26,7 @@ const StockAlert = ({ products }: StockAlertProps) => {
       <AlertTitle className="text-destructive dark:text-white">¡Atención! Stock Bajo Detectado</AlertTitle>
       <AlertDescription className="text-destructive/80 dark:text-white">
         <p className="mb-3">
-          {products.length} {products.length === 1 ? 'producto tiene' : 'productos tienen'} stock bajo y {products.length === 1 ? 'necesita' : 'necesitan'} reabastecimiento:
+          {normalProducts.length} {normalProducts.length === 1 ? 'producto tiene' : 'productos tienen'} stock bajo y {normalProducts.length === 1 ? 'necesita' : 'necesitan'} reabastecimiento:
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {displayedProducts.map((product) => (
@@ -60,7 +63,7 @@ const StockAlert = ({ products }: StockAlertProps) => {
               ) : (
                 <>
                   <ChevronDown className="h-4 w-4" />
-                  Mostrar {products.length - 3} más
+                  Mostrar {normalProducts.length - 3} más
                 </>
               )}
             </Button>
