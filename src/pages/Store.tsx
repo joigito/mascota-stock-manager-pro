@@ -61,6 +61,13 @@ const Store: React.FC = () => {
     checkAdminStatus();
   }, [user, isSuperAdmin, hasRole]);
 
+  // Update page title with store name
+  useEffect(() => {
+    if (organization) {
+      document.title = `${organization.name} - Stock y ventas`;
+    }
+  }, [organization]);
+
   if (storeLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 dark:from-green-950/30 dark:to-orange-950/30 flex items-center justify-center">
