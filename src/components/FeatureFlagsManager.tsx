@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings } from 'lucide-react';
-import { useFeatureFlags, useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { FEATURES, FEATURES_BY_CATEGORY, FeatureDefinition } from '@/config/features';
 
 const CATEGORY_LABELS: Record<string, string> = {

@@ -22,7 +22,7 @@ export const SuperAdminDashboard: React.FC = () => {
   const loadSystemStats = async () => {
     try {
       const [usersRes, storesRes, productsRes] = await Promise.all([
-        supabase.from('users').select('id', { count: 'exact', head: true }),
+        supabase.from('user_organizations').select('user_id', { count: 'exact', head: true }),
         supabase.from('organizations').select('id', { count: 'exact', head: true }),
         supabase.from('products').select('id', { count: 'exact', head: true })
       ]);
