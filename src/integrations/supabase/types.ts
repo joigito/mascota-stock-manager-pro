@@ -392,7 +392,6 @@ export type Database = {
       }
       organization_features: {
         Row: {
-          config: Json | null
           created_at: string
           enabled: boolean
           feature_key: string
@@ -401,7 +400,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          config?: Json | null
           created_at?: string
           enabled?: boolean
           feature_key: string
@@ -410,7 +408,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          config?: Json | null
           created_at?: string
           enabled?: boolean
           feature_key?: string
