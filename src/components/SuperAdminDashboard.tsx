@@ -40,13 +40,13 @@ export const SuperAdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Panel Central</h1>
-          <p className="text-muted-foreground">
-            Sistema de stock y ventas - Gestión centralizada
+          <h1 className="text-2xl sm:text-3xl font-bold">Panel Central</h1>
+          <p className="text-sm text-muted-foreground">
+            Sistema de stock y ventas
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -94,22 +94,26 @@ export const SuperAdminDashboard: React.FC = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="organizations" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="organizations" className="flex items-center gap-2">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full">
+          <TabsTrigger value="organizations" className="text-xs sm:text-sm gap-1 sm:gap-2">
             <Building2 className="h-4 w-4" />
-            Organizaciones
+            <span className="hidden sm:inline">Organizaciones</span>
+            <span className="sm:hidden">Orgs</span>
           </TabsTrigger>
-          <TabsTrigger value="config" className="flex items-center gap-2">
+          <TabsTrigger value="config" className="text-xs sm:text-sm gap-1 sm:gap-2">
             <Settings className="h-4 w-4" />
-            Configuración
+            <span className="hidden sm:inline">Configuración</span>
+            <span className="sm:hidden">Config</span>
           </TabsTrigger>
-          <TabsTrigger value="users" className="flex items-center gap-2">
+          <TabsTrigger value="users" className="text-xs sm:text-sm gap-1 sm:gap-2">
             <Users className="h-4 w-4" />
-            Usuarios
+            <span className="hidden sm:inline">Usuarios</span>
+            <span className="sm:hidden">Users</span>
           </TabsTrigger>
-          <TabsTrigger value="system" className="flex items-center gap-2">
+          <TabsTrigger value="system" className="text-xs sm:text-sm gap-1 sm:gap-2">
             <Database className="h-4 w-4" />
-            Sistema
+            <span className="hidden sm:inline">Sistema</span>
+            <span className="sm:hidden">Sys</span>
           </TabsTrigger>
         </TabsList>
 

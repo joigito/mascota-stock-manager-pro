@@ -126,26 +126,27 @@ const CustomersTab = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <CardTitle className="flex items-center space-x-2">
                 <Users className="h-5 w-5" />
                 <span>Gestión de Clientes</span>
               </CardTitle>
               <CardDescription>
-                Administra la información de tus clientes (sincronizado en la nube)
+                Administra la información de tus clientes
               </CardDescription>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <Button 
                 onClick={syncCustomers} 
                 disabled={syncing}
                 variant="outline"
+                className="flex-1 sm:flex-none"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
                 Sincronizar
               </Button>
-              <Button onClick={openNewCustomerDialog}>
+              <Button onClick={openNewCustomerDialog} className="flex-1 sm:flex-none">
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Cliente
               </Button>

@@ -67,14 +67,14 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
         ) : (
           <div className="space-y-4">
             {filteredSales.slice(0, 10).map((sale: Sale) => (
-              <div key={sale.id} className="flex justify-between items-center p-4 border rounded-lg">
+              <div key={sale.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg gap-3">
                 <div>
                   <div className="font-medium">{sale.customer}</div>
                   <div className="text-sm text-muted-foreground">
                     {new Date(sale.date).toLocaleDateString()} - {sale.items.length} productos
                   </div>
                 </div>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="text-right">
                     <div className="font-semibold">${sale.total.toLocaleString()}</div>
                     <div className="text-sm text-foreground">
@@ -82,7 +82,7 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
                       ({(sale.averageMargin || 0).toFixed(1)}%)
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"

@@ -195,12 +195,12 @@ export const CurrentAccountTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-3xl font-bold">Cuenta Corriente</h2>
-          <p className="text-muted-foreground">Gestión de deudas y pagos de clientes</p>
+          <h2 className="text-2xl sm:text-3xl font-bold">Cuenta Corriente</h2>
+          <p className="text-sm text-muted-foreground">Gestión de deudas y pagos de clientes</p>
         </div>
-        <Button onClick={() => setShowTransactionDialog(true)}>
+        <Button onClick={() => setShowTransactionDialog(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Nueva Transacción
         </Button>
@@ -253,56 +253,58 @@ export const CurrentAccountTab = () => {
           ) : accounts.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">No hay cuentas corrientes</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>CUIT/DNI</TableHead>
-                  <TableHead className="text-right">Saldo</TableHead>
-                  <TableHead className="text-right">Límite</TableHead>
-                  <TableHead>Último acceso al link</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {accounts.map((account: any) => (
-                  <TableRow key={account.id}>
-                    <TableCell className="font-medium">
-                      {account.customer?.name || 'Sin nombre'}
-                    </TableCell>
-                    <TableCell>{account.customer?.cuit_dni || '-'}</TableCell>
-                    <TableCell className={`text-right font-semibold ${getBalanceColor(account.balance)}`}>
-                      ${account.balance.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ${account.credit_limit.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {account.public_link_last_accessed_at
-                        ? format(new Date(account.public_link_last_accessed_at), "dd/MM/yyyy HH:mm", { locale: es })
-                        : 'Nunca consultado'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title="Copiar link público"
-                        onClick={() => handleCopyPublicLink(account)}
-                      >
-                        <LinkIcon className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewMovements(account.id, account)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead className="hidden md:table-cell">CUIT/DNI</TableHead>
+                    <TableHead className="text-right">Saldo</TableHead>
+                    <TableHead className="text-right hidden sm:table-cell">Límite</TableHead>
+                    <TableHead className="hidden lg:table-cell">Último acceso al link</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {accounts.map((account: any) => (
+                    <TableRow key={account.id}>
+                      <TableCell className="font-medium">
+                        {account.customer?.name || 'Sin nombre'}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">{account.customer?.cuit_dni || '-'}</TableCell>
+                      <TableCell className={`text-right font-semibold ${getBalanceColor(account.balance)}`}>
+                        ${account.balance.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right hidden sm:table-cell">
+                        ${account.credit_limit.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground hidden lg:table-cell">
+                        {account.public_link_last_accessed_at
+                          ? format(new Date(account.public_link_last_accessed_at), "dd/MM/yyyy HH:mm", { locale: es })
+                          : 'Nunca consultado'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Copiar link público"
+                          onClick={() => handleCopyPublicLink(account)}
+                        >
+                          <LinkIcon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewMovements(account.id, account)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -388,7 +390,7 @@ export const CurrentAccountTab = () => {
 
       {/* Movements Dialog */}
       <Dialog open={showMovementsDialog} onOpenChange={setShowMovementsDialog}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Movimientos de Cuenta</DialogTitle>
             <DialogDescription>
@@ -397,8 +399,8 @@ export const CurrentAccountTab = () => {
           </DialogHeader>
 
           {/* Date Filter Section */}
-          <div className="flex flex-wrap gap-4 items-end p-4 bg-muted/50 rounded-lg">
-            <div className="flex-1 min-w-[180px]">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-end p-4 bg-muted/50 rounded-lg">
+            <div className="flex-1 min-w-0 w-full sm:w-auto">
               <Label htmlFor="date-from">Fecha Desde</Label>
               <Input
                 id="date-from"
@@ -414,7 +416,7 @@ export const CurrentAccountTab = () => {
                 }}
               />
             </div>
-            <div className="flex-1 min-w-[180px]">
+            <div className="flex-1 min-w-0 w-full sm:w-auto">
               <Label htmlFor="date-to">Fecha Hasta</Label>
               <Input
                 id="date-to"

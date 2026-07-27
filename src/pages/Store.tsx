@@ -91,29 +91,29 @@ const Store: React.FC = () => {
     <StoreLayout organization={organization}>
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${showCurrentAccount ? 'grid-cols-6' : 'grid-cols-5'}`}>
-          <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+        <TabsList className="flex w-full mb-6 sm:mb-8 h-auto overflow-x-auto sm:grid sm:grid-cols-5 gap-0.5 p-1">
+          <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Inicio</span>
             <span className="sm:hidden">Inicio</span>
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+          <TabsTrigger value="inventory" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Inventario</span>
             <span className="sm:hidden">Stock</span>
           </TabsTrigger>
-          <TabsTrigger value="sales" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+          <TabsTrigger value="sales" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
             Ventas
           </TabsTrigger>
-          <TabsTrigger value="customers" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+          <TabsTrigger value="customers" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Clientes</span>
             <span className="sm:hidden">Clientes</span>
           </TabsTrigger>
           {showCurrentAccount && (
-            <TabsTrigger value="current-account" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+            <TabsTrigger value="current-account" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
               <span className="hidden sm:inline">Cta. Cte.</span>
               <span className="sm:hidden">Cta.</span>
             </TabsTrigger>
           )}
-          <TabsTrigger value="reports" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+          <TabsTrigger value="reports" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Reportes</span>
             <span className="sm:hidden">Rep.</span>
           </TabsTrigger>

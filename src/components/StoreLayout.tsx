@@ -117,8 +117,8 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-              <Badge variant="outline" className="border-border text-primary">
+            <div className="flex items-center flex-wrap gap-2 sm:gap-4 w-full sm:w-auto">
+              <Badge variant="outline" className="border-border text-primary hidden sm:inline-flex">
                 <Building2 className="h-3 w-3 mr-1" />
                 {organization.name}
               </Badge>
