@@ -14,6 +14,8 @@ import { useStoreSlug } from '@/hooks/useStoreSlug';
 import { useProducts } from '@/hooks/useProducts';
 import { useSales } from '@/hooks/useSales';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOrganization } from '@/hooks/useOrganization';
+import { CurrentAccountTab } from '@/components/CurrentAccountTab';
 import { CategoryManager } from '@/components/CategoryManager';
 
 const Store: React.FC = () => {
@@ -24,6 +26,20 @@ const Store: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const { user } = useAuth();
+  const { isSuperAdmin: checkSuperAdmin, isAdmin: checkOrgAdmin } = useOrganization();
+  const [showCurrentAccount, setShowCurrentAccount] = useState(false);
+
+  // Check admin status
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (user) {
+        const isSuper = await checkSuperAdmin();
+        const isAdmin = await checkOrgAdmin();
+        setShowCurrentAccount(isSuper || isAdmin);
+      }
+    };
+    checkAccess();
+  }, [user, checkSuperAdmin, checkOrgAdmin]);
 
   // When accessed via URL, sync localStorage and reload so all hook instances initialize correctly
   useEffect(() => {
@@ -75,7 +91,7 @@ const Store: React.FC = () => {
     <StoreLayout organization={organization}>
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8 h-auto">
+        <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${showCurrentAccount ? 'grid-cols-6' : 'grid-cols-5'}`}>
           <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
             <span className="hidden sm:inline">Inicio</span>
             <span className="sm:hidden">Inicio</span>
@@ -91,6 +107,12 @@ const Store: React.FC = () => {
             <span className="hidden sm:inline">Clientes</span>
             <span className="sm:hidden">Clientes</span>
           </TabsTrigger>
+          {showCurrentAccount && (
+            <TabsTrigger value="current-account" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+              <span className="hidden sm:inline">Cta. Cte.</span>
+              <span className="sm:hidden">Cta.</span>
+            </TabsTrigger>
+          )}
           <TabsTrigger value="reports" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
             <span className="hidden sm:inline">Reportes</span>
             <span className="sm:hidden">Rep.</span>
@@ -149,6 +171,13 @@ const Store: React.FC = () => {
         <TabsContent value="customers">
           <CustomersTab />
         </TabsContent>
+
+        {/* Current Account Tab */}
+        {showCurrentAccount && (
+          <TabsContent value="current-account">
+            <CurrentAccountTab />
+          </TabsContent>
+        )}
 
         {/* Reports Tab */}
         <TabsContent value="reports">

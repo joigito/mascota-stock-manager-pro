@@ -223,10 +223,12 @@ const Index = () => {
               <span className="hidden sm:inline">Clientes</span>
               <span className="sm:hidden">Clientes</span>
             </TabsTrigger>
-            <TabsTrigger value="current-account" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
-              <span className="hidden sm:inline">Cta. Cte.</span>
-              <span className="sm:hidden">Cta.</span>
-            </TabsTrigger>
+            {(isSuperAdmin || isOrgAdmin) && (
+              <TabsTrigger value="current-account" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
+                <span className="hidden sm:inline">Cta. Cte.</span>
+                <span className="sm:hidden">Cta.</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="reports" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
               <span className="hidden sm:inline">Reportes</span>
               <span className="sm:hidden">Rep.</span>
@@ -293,9 +295,11 @@ const Index = () => {
           </TabsContent>
 
           {/* Current Account Tab */}
-          <TabsContent value="current-account">
-            <CurrentAccountTab />
-          </TabsContent>
+          {(isSuperAdmin || isOrgAdmin) && (
+            <TabsContent value="current-account">
+              <CurrentAccountTab />
+            </TabsContent>
+          )}
 
           {/* Reports Tab */}
           <TabsContent value="reports">
