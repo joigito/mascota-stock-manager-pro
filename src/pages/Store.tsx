@@ -38,9 +38,13 @@ const Store: React.FC = () => {
     if (organization && user) {
       console.log('Store: Auto-switching to organization:', organization);
       // Always switch to the store's organization for personalized experience
-      switchOrganization(organization);
+      // Only call switchOrganization if not already on this org
+      const savedOrgId = localStorage.getItem('selectedOrganizationId');
+      if (savedOrgId !== organization.id) {
+        switchOrganization(organization);
+      }
     }
-  }, [organization?.id, user?.id, switchOrganization]);
+  }, [organization?.id, user?.id]);
 
   // Check admin status
   useEffect(() => {
