@@ -138,21 +138,21 @@ export const SuperAdminDashboard: React.FC = () => {
                 </p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {organizations.map((org) => (
+                  {organizations.map((userOrg) => (
                     <button
-                      key={org.id}
+                      key={userOrg.organization.id}
                       onClick={() => {
-                        switchOrganization(org);
+                        switchOrganization(userOrg.organization);
                         window.location.reload();
                       }}
                       className="flex items-center gap-3 p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left"
                     >
                       <Building2 className="h-5 w-5 flex-shrink-0" />
                       <div>
-                        <div className="font-medium">{org.name}</div>
-                        {org.description && (
+                        <div className="font-medium">{userOrg.organization.name}</div>
+                        {userOrg.organization.description && (
                           <div className="text-sm text-muted-foreground truncate">
-                            {org.description}
+                            {userOrg.organization.description}
                           </div>
                         )}
                       </div>
