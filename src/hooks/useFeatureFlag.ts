@@ -45,14 +45,34 @@ export const useFeatureFlag = (featureKey: string, organizationId?: string) => {
     if (!organizationId) return;
 
     try {
-      const { error } = await supabase
+      // Check if row exists first
+      const { data: existing } = await supabase
         .from('organization_features')
-        .upsert(
-          { organization_id: organizationId, feature_key: featureKey, enabled },
-          { onConflict: 'organization_id,feature_key' }
-        );
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('feature_key', featureKey)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existing) {
+        // Update existing row
+        const { error } = await supabase
+          .from('organization_features')
+          .update({ enabled })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new row
+        const { error } = await supabase
+          .from('organization_features')
+          .insert({
+            organization_id: organizationId,
+            feature_key: featureKey,
+            enabled,
+          });
+
+        if (error) throw error;
+      }
 
       setIsEnabled(enabled);
       toast(enabled ? 'Feature habilitada' : 'Feature deshabilitada');
