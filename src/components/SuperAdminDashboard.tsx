@@ -124,7 +124,7 @@ export const SuperAdminDashboard: React.FC = () => {
                 Acceso Rápido a Tiendas
               </CardTitle>
               <CardDescription>
-                Seleccioná una tienda para administrarla
+                Seleccioná una tienda para trabajar en ella
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -137,7 +137,7 @@ export const SuperAdminDashboard: React.FC = () => {
                   No hay tiendas disponibles
                 </p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {organizations.map((userOrg) => (
                     <button
                       key={userOrg.organization.id}
@@ -145,16 +145,20 @@ export const SuperAdminDashboard: React.FC = () => {
                         switchOrganization(userOrg.organization);
                         window.location.reload();
                       }}
-                      className="flex items-center gap-3 p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left"
+                      className="group p-5 border-2 rounded-xl hover:border-primary/50 hover:bg-accent transition-all text-left"
                     >
-                      <Building2 className="h-5 w-5 flex-shrink-0" />
-                      <div>
-                        <div className="font-medium">{userOrg.organization.name}</div>
-                        {userOrg.organization.description && (
-                          <div className="text-sm text-muted-foreground truncate">
-                            {userOrg.organization.description}
-                          </div>
-                        )}
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-orange-500 rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                          <Building2 className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-base truncate">{userOrg.organization.name}</div>
+                          {userOrg.organization.description && (
+                            <p className="text-sm text-muted-foreground truncate mt-0.5">
+                              {userOrg.organization.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </button>
                   ))}
