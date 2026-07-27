@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Product } from "@/hooks/useProducts";
 import { useProductSearch } from "@/hooks/useProductSearch";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useOrganization } from "@/hooks/useOrganization";
 import SearchInput from "@/components/ui/SearchInput";
 import EditProductDialog from "./EditProductDialog";
 import ProductVariantManager from "./variants/ProductVariantManager";
@@ -21,7 +22,8 @@ interface ProductListProps {
 const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChange }: ProductListProps) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { searchTerm, setSearchTerm, filteredProducts, resultCount, hasSearchTerm } = useProductSearch(products);
-  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants');
+  const { currentOrganization } = useOrganization();
+  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants', currentOrganization?.id);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {

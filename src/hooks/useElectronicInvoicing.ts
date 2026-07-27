@@ -29,13 +29,12 @@ interface TaxCondition {
 
 export const useElectronicInvoicing = (organizationId?: string) => {
   const { currentOrganization } = useOrganization();
-  const { isEnabled, toggle } = useFeatureFlag('electronic_invoicing');
+  const activeOrganizationId = organizationId || currentOrganization?.id;
+  const { isEnabled, toggle } = useFeatureFlag('electronic_invoicing', activeOrganizationId);
   const [afipConfig, setAfipConfig] = useState<AFIPConfiguration | null>(null);
   const [taxConditions, setTaxConditions] = useState<TaxCondition[]>([]);
   const [loading, setLoading] = useState(false);
   const [targetOrganization, setTargetOrganization] = useState<any>(null);
-
-  const activeOrganizationId = organizationId || currentOrganization?.id;
 
   useEffect(() => {
     if (activeOrganizationId) {

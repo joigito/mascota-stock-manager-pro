@@ -6,7 +6,7 @@ import { CreditCard } from 'lucide-react';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 export const CurrentAccountConfig = ({ organizationId }: { organizationId?: string }) => {
-  const { isEnabled, toggle, loading } = useFeatureFlag('current_account');
+  const { isEnabled, toggle, loading } = useFeatureFlag('current_account', organizationId);
 
   return (
     <div className="space-y-6">

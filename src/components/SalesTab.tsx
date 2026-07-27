@@ -35,7 +35,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { updateBatchesAfterSale } = useBatches();
   const { currentOrganization } = useOrganization();
   const { isEnabled: isCurrentAccountEnabled, addTransaction, accounts: customerAccounts } = useCurrentAccount();
-  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants');
+  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants', currentOrganization?.id);
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();

@@ -36,7 +36,7 @@ interface AccountTransaction {
 
 export const useCurrentAccount = () => {
   const { currentOrganization } = useOrganization();
-  const { isEnabled } = useFeatureFlag('current_account');
+  const { isEnabled } = useFeatureFlag('current_account', currentOrganization?.id);
   const [accounts, setAccounts] = useState<CustomerAccount[]>([]);
   const [loading, setLoading] = useState(false);
 

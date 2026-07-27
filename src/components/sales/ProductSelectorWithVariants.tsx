@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Product } from "@/hooks/useProducts";
 import { useProductSearch } from "@/hooks/useProductSearch";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useOrganization } from "@/hooks/useOrganization";
 import SearchInput from "@/components/ui/SearchInput";
 import VariantSelector from "@/components/variants/VariantSelector";
 
@@ -33,7 +34,8 @@ const ProductSelectorWithVariants = ({
   onQuantityChange,
   onAddItem
 }: ProductSelectorWithVariantsProps) => {
-  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants');
+  const { currentOrganization } = useOrganization();
+  const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants', currentOrganization?.id);
   
   const availableProducts = products.filter(p => {
     // If variants are disabled, exclude variant products entirely
