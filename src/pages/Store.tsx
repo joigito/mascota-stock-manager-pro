@@ -14,7 +14,6 @@ import { useStoreSlug } from '@/hooks/useStoreSlug';
 import { useProducts } from '@/hooks/useProducts';
 import { useSales } from '@/hooks/useSales';
 import { useAuth } from '@/contexts/AuthContext';
-import { useOrganization } from '@/hooks/useOrganization';
 import { CategoryManager } from '@/components/CategoryManager';
 
 const Store: React.FC = () => {
@@ -25,17 +24,14 @@ const Store: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const { user } = useAuth();
-  const { switchOrganization } = useOrganization();
 
-  // Auto-switch to the organization when it loads
+  // When accessed via URL, sync localStorage and reload so all hook instances initialize correctly
   useEffect(() => {
     if (organization && user) {
-      console.log('Store: Auto-switching to organization:', organization);
-      // Always switch to the store's organization for personalized experience
-      // Only call switchOrganization if not already on this org
       const savedOrgId = localStorage.getItem('selectedOrganizationId');
       if (savedOrgId !== organization.id) {
-        switchOrganization(organization);
+        localStorage.setItem('selectedOrganizationId', organization.id);
+        window.location.reload();
       }
     }
   }, [organization?.id, user?.id]);
