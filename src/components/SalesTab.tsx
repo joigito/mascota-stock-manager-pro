@@ -291,7 +291,9 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
         totalProfit: newSale.totalProfit,
         averageMargin: newSale.averageMargin,
       };
-      generateSaleReceipt(completedSale, currentOrganization?.name || 'Mi Negocio');
+      if (window.confirm('¿Imprimir comprobante?')) {
+        generateSaleReceipt(completedSale, currentOrganization?.name || 'Mi Negocio');
+      }
 
       setSaleItems([]);
       setCustomerName("Consumidor final");
