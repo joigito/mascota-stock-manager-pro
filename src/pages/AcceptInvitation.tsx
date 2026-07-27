@@ -65,14 +65,9 @@ export const AcceptInvitation: React.FC = () => {
     if (!token) return;
 
     try {
-      const { data, error } = await supabase
-        .from('organization_invitations')
-        .select(`
-          *,
-          organization:organizations(id, name, description)
-        `)
-        .eq('token', token)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('get_invitation_by_token', {
+        _token: token,
+      });
 
       if (error) throw error;
 
@@ -85,7 +80,7 @@ export const AcceptInvitation: React.FC = () => {
         return;
       }
 
-      if (data.used_at) {
+      if ((data as any).used_at) {
         toast({
           title: "Invitación ya utilizada",
           description: "Esta invitación ya ha sido aceptada",
@@ -94,7 +89,7 @@ export const AcceptInvitation: React.FC = () => {
         return;
       }
 
-      if (new Date(data.expires_at) < new Date()) {
+      if (new Date((data as any).expires_at) < new Date()) {
         toast({
           title: "Invitación expirada",
           description: "Esta invitación ha expirado",
@@ -103,8 +98,8 @@ export const AcceptInvitation: React.FC = () => {
         return;
       }
 
-      setInvitation(data);
-      setEmail(data.email);
+      setInvitation(data as any);
+      setEmail((data as any).email);
     } catch (error) {
       console.error('Error loading invitation:', error);
       toast({
@@ -185,41 +180,27 @@ export const AcceptInvitation: React.FC = () => {
   };
 
   const acceptInvitation = async () => {
-    if (!invitation || !user) return;
+    if (!invitation || !user || !token) return;
 
     try {
       setProcessing(true);
 
-      // Add user to organization
-      const { error: memberError } = await supabase
-        .from('user_organizations')
-        .insert({
-          user_id: user.id,
-          organization_id: invitation.organization.id,
-          role: invitation.role
-        });
+      const { error } = await supabase.rpc('accept_invitation', {
+        _token: token,
+      });
 
-      if (memberError) throw memberError;
-
-      // Mark invitation as used
-      const { error: updateError } = await supabase
-        .from('organization_invitations')
-        .update({ used_at: new Date().toISOString() })
-        .eq('id', invitation.id);
-
-      if (updateError) throw updateError;
+      if (error) throw error;
 
       toast({
         title: "¡Bienvenido!",
         description: `Te has unido exitosamente a ${invitation.organization.name}`,
       });
 
-      // Redirect to main app
       navigate('/');
     } catch (error: any) {
       console.error('Error accepting invitation:', error);
-      
-      if (error.code === '23505') {
+
+      if (error.code === '23505' || (error.message || '').includes('duplicate')) {
         toast({
           title: "Ya eres miembro",
           description: "Ya perteneces a esta organización",
@@ -228,7 +209,7 @@ export const AcceptInvitation: React.FC = () => {
       } else {
         toast({
           title: "Error",
-          description: "No se pudo aceptar la invitación",
+          description: error.message || "No se pudo aceptar la invitación",
           variant: "destructive",
         });
       }
