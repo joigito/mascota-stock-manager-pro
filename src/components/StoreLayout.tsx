@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Building2, LogOut, Crown, Shield, User } from 'lucide-react';
+import { Building2, LogOut, Crown, Shield, User, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ModeToggle } from '@/components/ui/ModeToggle';
 
 interface Organization {
@@ -26,7 +26,8 @@ interface StoreLayoutProps {
 export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children }) => {
   const { signOut, user } = useAuth();
   const { toast } = useToast();
-  const { isAdmin, isSuperAdmin } = useOrganization();
+  const { isAdmin, isSuperAdmin, clearOrganization } = useOrganization();
+  const navigate = useNavigate();
   const [userRole, setUserRole] = useState<'super_admin' | 'admin' | 'user'>('user');
 
   useEffect(() => {
@@ -63,6 +64,11 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
         variant: "destructive",
       });
     }
+  };
+
+  const handleGoToCentralPanel = () => {
+    clearOrganization();
+    navigate('/');
   };
 
   const getRoleBadge = () => {
@@ -117,6 +123,17 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
                 {organization.name}
               </Badge>
               {getRoleBadge()}
+              {userRole === 'super_admin' && (
+                <Button
+                  onClick={handleGoToCentralPanel}
+                  variant="outline"
+                  size="sm"
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Panel Central</span>
+                  <span className="sm:hidden">Panel</span>
+                </Button>
+              )}
               <ModeToggle />
               <Button
                 onClick={handleSignOut}
