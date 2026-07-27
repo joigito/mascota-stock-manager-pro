@@ -1,16 +1,10 @@
 import React from 'react';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Building2, Users, ChevronRight } from 'lucide-react';
-import { OrganizationManager } from './OrganizationManager';
-import { OrganizationUserManagement } from './OrganizationUserManagement';
-import VariantAttributeManager from './VariantAttributeManager';
-import { useState } from 'react';
 
 export const OrganizationDashboard: React.FC = () => {
   const { organizations, switchOrganization, loading } = useOrganization();
-  const [openOrgId, setOpenOrgId] = useState<string | undefined>(undefined);
 
   if (loading) {
     return (
@@ -32,7 +26,13 @@ export const OrganizationDashboard: React.FC = () => {
             <h1 className="text-3xl font-bold text-foreground mb-2">Bienvenido al Sistema</h1>
             <p className="text-muted-foreground">No tienes acceso a ninguna organización aún</p>
           </div>
-          <OrganizationManager />
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-muted-foreground">
+                Contactá al administrador para que te asigne a una organización
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -54,7 +54,6 @@ export const OrganizationDashboard: React.FC = () => {
               className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/20"
               onClick={() => {
                 switchOrganization(userOrg.organization);
-                // Force a page refresh to load the main app
                 window.location.reload();
               }}
             >
@@ -72,12 +71,7 @@ export const OrganizationDashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setOpenOrgId(userOrg.organization.id); }}>
-                      Atributos
-                    </Button>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
               </CardHeader>
               {userOrg.organization.description && (
@@ -88,17 +82,6 @@ export const OrganizationDashboard: React.FC = () => {
             </Card>
           ))}
         </div>
-
-        <div className="mt-12">
-          <OrganizationManager />
-        </div>
-        {openOrgId && (
-          <VariantAttributeManager
-            organizationId={openOrgId}
-            open={Boolean(openOrgId)}
-            onClose={() => setOpenOrgId(undefined)}
-          />
-        )}
       </div>
     </div>
   );

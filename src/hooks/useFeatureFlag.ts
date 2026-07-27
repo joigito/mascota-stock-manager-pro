@@ -185,11 +185,42 @@ export const useFeatureFlags = (featureKeys: string[]) => {
   const isEnabled = (key: string) => features[key]?.enabled || false;
   const getConfig = (key: string) => features[key]?.config || {};
 
+  const toggle = useCallback(async (key: string, enabled: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('organization_features')
+        .upsert(
+          {
+            organization_id: currentOrganization?.id,
+            feature_key: key,
+            enabled,
+          },
+          { onConflict: 'organization_id,feature_key' }
+        );
+
+      if (error) {
+        toast.error('Error al actualizar feature');
+        console.error(`Error toggling feature ${key}:`, error);
+        return;
+      }
+
+      setFeatures((prev) => ({
+        ...prev,
+        [key]: { ...prev[key], enabled },
+      }));
+      toast.success(enabled ? 'Feature habilitada' : 'Feature deshabilitada');
+    } catch (error) {
+      toast.error('Error al actualizar feature');
+      console.error(`Error toggling feature ${key}:`, error);
+    }
+  }, [currentOrganization?.id]);
+
   return {
     features,
     loading,
     isEnabled,
     getConfig,
+    toggle,
     reload: loadFeatures,
   };
 };

@@ -15,11 +15,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useSales } from '@/hooks/useSales';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization } from '@/hooks/useOrganization';
-import { OrganizationManager } from '@/components/OrganizationManager';
-import { OrganizationUserManagement } from '@/components/OrganizationUserManagement';
-import { OrganizationUrlGenerator } from '@/components/OrganizationUrlGenerator';
 import { CategoryManager } from '@/components/CategoryManager';
-import { FeatureFlagsManager } from '@/components/FeatureFlagsManager';
 
 const Store: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -29,9 +25,7 @@ const Store: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const { user } = useAuth();
-  const { switchOrganization, isSuperAdmin, hasRole } = useOrganization();
-  const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
-  const [isOrgAdmin, setIsOrgAdmin] = useState(false);
+  const { switchOrganization } = useOrganization();
 
   // Auto-switch to the organization when it loads
   useEffect(() => {
@@ -45,21 +39,6 @@ const Store: React.FC = () => {
       }
     }
   }, [organization?.id, user?.id]);
-
-  // Check admin status
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user) {
-        const superAdmin = await isSuperAdmin();
-        const orgAdmin = hasRole('admin');
-        setIsSuperAdminUser(superAdmin);
-        setIsOrgAdmin(orgAdmin);
-        console.log('Store: Super admin status:', superAdmin);
-        console.log('Store: Org admin status:', orgAdmin);
-      }
-    };
-    checkAdminStatus();
-  }, [user, isSuperAdmin, hasRole]);
 
   // Update page title with store name
   useEffect(() => {
@@ -100,7 +79,7 @@ const Store: React.FC = () => {
     <StoreLayout organization={organization}>
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className={`grid w-full mb-6 sm:mb-8 h-auto ${isSuperAdminUser ? 'grid-cols-6' : 'grid-cols-5'}`}>
+        <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8 h-auto">
           <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
             <span className="hidden sm:inline">Inicio</span>
             <span className="sm:hidden">Inicio</span>
@@ -120,12 +99,6 @@ const Store: React.FC = () => {
             <span className="hidden sm:inline">Reportes</span>
             <span className="sm:hidden">Rep.</span>
           </TabsTrigger>
-          {isSuperAdminUser && (
-            <TabsTrigger value="admin" className="text-xs sm:text-sm px-1 sm:px-3 py-2">
-              <span className="hidden sm:inline">Admin</span>
-              <span className="sm:hidden">Admin</span>
-            </TabsTrigger>
-          )}
         </TabsList>
 
         {/* Dashboard Tab */}
@@ -185,17 +158,6 @@ const Store: React.FC = () => {
         <TabsContent value="reports">
           <ReportsTab products={products} />
         </TabsContent>
-
-        {/* Admin Tab - For super admins only */}
-        {isSuperAdminUser && (
-          <TabsContent value="admin">
-            <div className="space-y-6">
-              <FeatureFlagsManager />
-              <OrganizationManager />
-              <OrganizationUrlGenerator />
-            </div>
-          </TabsContent>
-        )}
       </Tabs>
 
       {/* Add Product Dialog */}
