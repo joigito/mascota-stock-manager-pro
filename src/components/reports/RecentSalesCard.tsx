@@ -1,3 +1,4 @@
+"use client";
 
 import { ShoppingBag, Trash2, FileText, Receipt } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,75 +68,102 @@ const RecentSalesCard = ({ filteredSales }: RecentSalesCardProps) => {
         ) : (
           <div className="space-y-4">
             {filteredSales.slice(0, 10).map((sale: Sale) => (
-              <div key={sale.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg gap-3">
-                <div>
-                  <div className="font-medium">{sale.customer}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {new Date(sale.date).toLocaleDateString()} - {sale.items.length} productos
-                  </div>
-                </div>
-                  <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                  <div className="text-right">
-                    <div className="font-semibold">${sale.total.toLocaleString()}</div>
-                    <div className="text-sm text-foreground">
-                      +${(sale.totalProfit || 0).toLocaleString()} 
-                      ({(sale.averageMargin || 0).toFixed(1)}%)
+              <div key={sale.id} className="border rounded-lg">
+                {/* Sale header */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-muted/30 border-b gap-3">
+                  <div>
+                    <div className="font-medium">{sale.customer}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {new Date(sale.date).toLocaleDateString()} · {sale.items.length} {sale.items.length === 1 ? 'artículo' : 'artículos'}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => generateSaleReceipt(sale, currentOrganization?.name || 'Mi Negocio')}
-                      className="hover:bg-muted/50"
-                      title="Comprobante X"
-                    >
-                      <Receipt className="h-4 w-4" />
-                    </Button>
-                    {canCreateInvoices && (
+                  <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className="text-right">
+                      <div className="font-semibold">${sale.total.toLocaleString()}</div>
+                      <div className="text-sm text-foreground">
+                        +${(sale.totalProfit || 0).toLocaleString()} ({(sale.averageMargin || 0).toFixed(1)}%)
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCreateInvoice(sale)}
-                        disabled={invoiceLoading}
-                        className="text-primary hover:text-primary/90 hover:bg-muted/50"
+                        onClick={() => generateSaleReceipt(sale, currentOrganization?.name || 'Mi Negocio')}
+                        className="hover:bg-muted/50"
+                        title="Comprobante X"
                       >
-                        <FileText className="h-4 w-4" />
-                        {invoiceLoading ? "Creando..." : "Facturar"}
+                        <Receipt className="h-4 w-4" />
                       </Button>
-                    )}
-                    {canDeleteSales && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+                      {canCreateInvoices && (
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-destructive hover:text-destructive/90 hover:bg-muted/50"
+                          onClick={() => handleCreateInvoice(sale)}
+                          disabled={invoiceLoading}
+                          className="text-primary hover:text-primary/90 hover:bg-muted/50"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <FileText className="h-4 w-4" />
+                          {invoiceLoading ? "Creando..." : "Facturar"}
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Eliminar venta?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción eliminará permanentemente la venta de {sale.customer} por ${sale.total.toLocaleString()}.
-                            Esta acción no se puede deshacer.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => handleDeleteSale(sale.id, sale.total, sale.customer)}
+                      )}
+                      {canDeleteSales && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive/90 hover:bg-muted/50"
                           >
-                            Eliminar venta
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    )}
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Eliminar venta?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta acción eliminará permanentemente la venta de {sale.customer} por ${sale.total.toLocaleString()}.
+                              Esta acción no se puede deshacer.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => handleDeleteSale(sale.id, sale.total, sale.customer)}
+                            >
+                              Eliminar venta
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                      )}
+                    </div>
                   </div>
+                </div>
+                {/* Items detail */}
+                <div className="divide-y">
+                  {sale.items.map((item, idx) => (
+                    <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 sm:px-4 gap-1 sm:gap-2 text-sm">
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{item.productName}</span>
+                        {item.variantInfo && (
+                          <span className="text-muted-foreground ml-1">({item.variantInfo})</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm w-full sm:w-auto justify-between sm:justify-end">
+                        <span className="text-muted-foreground whitespace-nowrap">
+                          {item.quantity} × ${item.finalUnitPrice.toLocaleString()}
+                        </span>
+                        <span className="font-medium whitespace-nowrap">${item.subtotal.toLocaleString()}</span>
+                        <span className="text-green-600 dark:text-green-400 whitespace-nowrap">
+                          +${item.profit.toLocaleString()}
+                        </span>
+                        <span className="text-muted-foreground whitespace-nowrap w-12 text-right">
+                          {item.margin.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}

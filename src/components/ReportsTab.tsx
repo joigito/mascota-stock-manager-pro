@@ -1,9 +1,11 @@
+"use client";
 
 import { useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Product } from "@/hooks/useProducts";
 import { getPeriodLabel } from "@/utils/salesCalculations";
 import { useSalesData } from "@/hooks/useSalesData";
+import { Sale } from "@/types/sales";
 import { useOrganization } from "@/hooks/useOrganization";
 import PrintableStockReport from "@/components/reports/PrintableStockReport";
 import PrintSection from "@/components/reports/PrintSection";
@@ -66,22 +68,30 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
     return margin < 20 && margin > 0;
   });
 
-  const generateSalesPrintHTML = (sales: any[], startDate: string, endDate: string) => {
+  const generateSalesPrintHTML = (sales: Sale[], startDate: string, endDate: string) => {
     const totalSales = sales.reduce((sum, sale) => sum + sale.total, 0);
     const totalProfit = sales.reduce((sum, sale) => sum + (sale.totalProfit || 0), 0);
     const averageMargin = totalSales > 0 ? (totalProfit / totalSales * 100) : 0;
     
     const salesRows = sales.map(sale => `
-      <tr>
-        <td>${new Date(sale.date).toLocaleDateString()}</td>
-        <td>${sale.customer}</td>
-        <td>${sale.items.length} productos</td>
-        <td class="text-right font-semibold">$${sale.total.toLocaleString()}</td>
-        ${canViewProfits ? `
-          <td class="text-right font-semibold">$${(sale.totalProfit || 0).toLocaleString()}</td>
-          <td class="text-right">${(sale.averageMargin || 0).toFixed(1)}%</td>
-        ` : ''}
+      <tr style="background:#e5e7eb; font-weight:600;">
+        <td colspan="${canViewProfits ? '6' : '3'}">
+          ${new Date(sale.date).toLocaleDateString()} · ${sale.customer} · $${sale.total.toLocaleString()}
+          ${canViewProfits ? `· Ganancia: $${(sale.totalProfit || 0).toLocaleString()} · Margen: ${(sale.averageMargin || 0).toFixed(1)}%` : ''}
+        </td>
       </tr>
+      ${sale.items.map((item, idx) => `
+        <tr${idx % 2 === 1 ? ' style="background:#f9f9f9;"' : ''}>
+          <td></td>
+          <td>${item.productName}${item.variantInfo ? ` (${item.variantInfo})` : ''}</td>
+          <td class="text-right">${item.quantity} × $${item.finalUnitPrice.toLocaleString()} = $${item.subtotal.toLocaleString()}</td>
+          ${canViewProfits ? `
+            <td class="text-right">$${item.subtotal.toLocaleString()}</td>
+            <td class="text-right">+$${item.profit.toLocaleString()}</td>
+            <td class="text-right">${item.margin.toFixed(1)}%</td>
+          ` : ''}
+        </tr>
+      `).join('')}
     `).join('');
 
     return `
@@ -231,11 +241,11 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
             <thead>
               <tr>
                 <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Productos</th>
-                <th class="text-right">Total Venta</th>
+                <th>Producto</th>
+                <th class="text-right">Detalle</th>
                 ${canViewProfits ? `
-                  <th class="text-right">Total Ganancia</th>
+                  <th class="text-right">Subtotal</th>
+                  <th class="text-right">Ganancia</th>
                   <th class="text-right">Margen %</th>
                 ` : ''}
               </tr>
@@ -266,7 +276,6 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
 
   const handlePrintSales = () => {
     const salesForReport = getSalesForReport(salesReportStartDate, salesReportEndDate);
-    console.log('Printing sales report with data:', salesForReport);
     
     const printContent = generateSalesPrintHTML(salesForReport, salesReportStartDate, salesReportEndDate);
     
