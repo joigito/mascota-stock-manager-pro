@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Mail, Lock, User } from 'lucide-react';
+import { Building2, Mail, Lock, User, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useStoreSlug } from '@/hooks/useStoreSlug';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +23,9 @@ const Auth = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const redirectPath = urlParams.get('redirect');
   const storeSlug = redirectPath?.match(/\/tienda\/(.+)/)?.[1];
+
+  // Fetch organization name if coming from a store URL
+  const { organization } = useStoreSlug(storeSlug);
 
   // Store the slug for association after registration
   useEffect(() => {
@@ -100,12 +104,18 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg mx-auto mb-4">
-            <Building2 className="h-10 w-10 text-white" />
+            {organization ? (
+              <Store className="h-10 w-10 text-white" />
+            ) : (
+              <Building2 className="h-10 w-10 text-white" />
+            )}
           </div>
-          <CardTitle className="text-2xl font-bold">Sistemas de Gestión Comercial</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {organization ? organization.name : 'Sistemas de Gestión Comercial'}
+          </CardTitle>
           <CardDescription>
-            {storeSlug 
-              ? `Accede a tu tienda: ${storeSlug}` 
+            {organization
+              ? `Ingresá a tu tienda`
               : "Accede a tu plataforma de gestión comercial"
             }
           </CardDescription>
