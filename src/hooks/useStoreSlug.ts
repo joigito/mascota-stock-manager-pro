@@ -32,9 +32,7 @@ export const useStoreSlug = (slug?: string) => {
       setError(null);
 
       const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('slug', organizationSlug)
+        .rpc('get_organization_by_slug', { org_slug: organizationSlug })
         .maybeSingle();
 
       if (error) {
