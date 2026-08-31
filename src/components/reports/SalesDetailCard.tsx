@@ -190,14 +190,14 @@ const SalesDetailCard = () => {
             <p>No hay ventas en el período seleccionado</p>
           </div>
         ) : (
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-lg overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Fecha</TableHead>
-                  <TableHead>Cliente</TableHead>
+                  <TableHead className="hidden sm:table-cell">Cliente</TableHead>
                   <TableHead>Producto</TableHead>
-                  <TableHead className="text-right">Cantidad</TableHead>
+                  <TableHead className="hidden sm:table-cell text-right">Cantidad</TableHead>
                   <TableHead className="text-right">Importe</TableHead>
                   <TableHead className="text-right">Total Venta</TableHead>
                 </TableRow>
@@ -208,7 +208,7 @@ const SalesDetailCard = () => {
                     <TableCell className="text-sm">
                       {new Date(row.date).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>{row.customer}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{row.customer}</TableCell>
                     <TableCell>
                       {row.product}
                       {row.variantInfo && (
@@ -217,11 +217,11 @@ const SalesDetailCard = () => {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">{row.quantity}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-right">{row.quantity}</TableCell>
                     <TableCell className="text-right font-medium">
                       ${row.itemTotal.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right font-semibold">
+                    <TableCell className="text-right font-semibold whitespace-nowrap">
                       {row.isFirstItem && (
                         <span>${row.saleTotal.toLocaleString()}</span>
                       )}

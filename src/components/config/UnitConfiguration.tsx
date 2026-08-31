@@ -66,7 +66,7 @@ export const UnitConfiguration: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
             <Input
               placeholder="Nueva unidad de medida..."
               value={newUnit}
@@ -76,14 +76,15 @@ export const UnitConfiguration: React.FC = () => {
                   addUnit();
                 }
               }}
+              className="w-full"
             />
-            <Button onClick={addUnit} disabled={!newUnit.trim()}>
+            <Button onClick={addUnit} disabled={!newUnit.trim()} className="w-full sm:w-auto">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
 
           {isModified && (
-            <div className="flex space-x-2 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 pt-4 border-t">
               <Button onClick={saveChanges} disabled={loading}>
                 <Save className="h-4 w-4 mr-2" />
                 Guardar Cambios

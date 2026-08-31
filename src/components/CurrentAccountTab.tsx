@@ -447,61 +447,63 @@ export const CurrentAccountTab = () => {
           {loadingTransactions ? (
             <p className="text-center py-8">Cargando movimientos...</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead className="text-right">Monto</TableHead>
-                  <TableHead className="text-right">Saldo</TableHead>
-                  <TableHead>Notas</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {getFilteredTransactions().map((tx) => (
-                  <TableRow key={tx.id}>
-                    <TableCell>
-                      {format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
-                    </TableCell>
-                    <TableCell>{getTransactionTypeLabel(tx.transaction_type)}</TableCell>
-                    <TableCell className={`text-right ${tx.transaction_type === 'sale' ? 'text-destructive' : 'text-green-600'}`}>
-                      {tx.transaction_type === 'sale' ? '+' : '-'}${tx.amount.toFixed(2)}
-                    </TableCell>
-                    <TableCell className={`text-right font-semibold ${getBalanceColor(tx.balance_after)}`}>
-                      ${tx.balance_after.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {tx.notes || '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingTransaction(tx);
-                          setEditTransactionForm({
-                            id: tx.id,
-                            type: tx.transaction_type,
-                            amount: tx.amount.toString(),
-                            notes: tx.notes || ''
-                          });
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteTransaction(tx.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead className="text-right">Monto</TableHead>
+                    <TableHead className="text-right">Saldo</TableHead>
+                    <TableHead className="hidden md:table-cell">Notas</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {getFilteredTransactions().map((tx) => (
+                    <TableRow key={tx.id}>
+                      <TableCell>
+                        {format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                      </TableCell>
+                      <TableCell>{getTransactionTypeLabel(tx.transaction_type)}</TableCell>
+                      <TableCell className={`text-right ${tx.transaction_type === 'sale' ? 'text-destructive' : 'text-green-600'}`}>
+                        {tx.transaction_type === 'sale' ? '+' : '-'}${tx.amount.toFixed(2)}
+                      </TableCell>
+                      <TableCell className={`text-right font-semibold ${getBalanceColor(tx.balance_after)}`}>
+                        ${tx.balance_after.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                        {tx.notes || '-'}
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingTransaction(tx);
+                            setEditTransactionForm({
+                              id: tx.id,
+                              type: tx.transaction_type,
+                              amount: tx.amount.toString(),
+                              notes: tx.notes || ''
+                            });
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTransaction(tx.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </DialogContent>
       </Dialog>

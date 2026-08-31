@@ -302,13 +302,13 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h2 className="text-2xl font-bold">Reportes</h2>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
           <button
             onClick={syncSales}
             disabled={syncing}
-            className="flex items-center space-x-2 px-3 py-2 text-sm bg-muted/50 text-foreground rounded-md hover:bg-muted/60 transition-colors disabled:opacity-50"
+            className="flex items-center justify-center space-x-2 px-3 py-2 text-sm bg-muted/50 text-foreground rounded-md hover:bg-muted/60 transition-colors disabled:opacity-50 w-full sm:w-auto"
           >
             <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
             <span>{syncing ? 'Sincronizando...' : 'Actualizar Datos'}</span>

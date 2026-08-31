@@ -30,7 +30,7 @@ const CustomerSelector = ({
       <Label>Cliente</Label>
       <div className="flex gap-2">
         <Select value={selectedCustomer} onValueChange={onCustomerSelect}>
-          <SelectTrigger className="flex-1">
+          <SelectTrigger className="flex-1 min-w-0">
             <SelectValue placeholder="Seleccionar cliente" />
           </SelectTrigger>
           <SelectContent>
