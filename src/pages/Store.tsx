@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Package, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { CurrentAccountTab } from '@/components/CurrentAccountTab';
 import { CategoryManager } from '@/components/CategoryManager';
 
-const Store: React.FC = () => {
+const Store = () => {
   const { slug } = useParams<{ slug: string }>();
   const { organization, loading: storeLoading, error } = useStoreSlug(slug);
   const { products, loading: productsLoading, addProduct, updateProduct, deleteProduct } = useProducts();
@@ -26,31 +26,37 @@ const Store: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const { user } = useAuth();
-  const { isSuperAdmin: checkSuperAdmin, isAdmin: checkOrgAdmin } = useOrganization();
+  const { isSuperAdmin: checkSuperAdmin, isAdmin: checkOrgAdmin, reload: reloadOrganization } = useOrganization();
   const [showCurrentAccount, setShowCurrentAccount] = useState(false);
 
   // Check admin status
   useEffect(() => {
+    let isActive = true;
     const checkAccess = async () => {
       if (user) {
         const isSuper = await checkSuperAdmin();
         const isAdmin = await checkOrgAdmin();
-        setShowCurrentAccount(isSuper || isAdmin);
+        if (isActive) {
+          setShowCurrentAccount(isSuper || isAdmin);
+        }
       }
     };
     checkAccess();
+    return () => {
+      isActive = false;
+    };
   }, [user, checkSuperAdmin, checkOrgAdmin]);
 
-  // When accessed via URL, sync localStorage and reload so all hook instances initialize correctly
+  // When accessed via URL, sync localStorage and re-initialize so all hook instances use the selected organization
   useEffect(() => {
     if (organization && user) {
       const savedOrgId = localStorage.getItem('selectedOrganizationId');
       if (savedOrgId !== organization.id) {
         localStorage.setItem('selectedOrganizationId', organization.id);
-        window.location.reload();
+        reloadOrganization();
       }
     }
-  }, [organization?.id, user?.id]);
+  }, [organization?.id, user?.id, reloadOrganization]);
 
   // Update page title with store name
   useEffect(() => {
@@ -92,23 +98,23 @@ const Store: React.FC = () => {
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="flex w-full mb-6 sm:mb-8 h-auto overflow-x-auto sm:grid sm:grid-cols-5 gap-0.5 p-1">
-          <TabsTrigger value="dashboard" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
+          <TabsTrigger value="dashboard" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Inicio</span>
             <span className="sm:hidden">Inicio</span>
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
-            <span className="hidden sm:inline">Inventario</span>
-            <span className="sm:hidden">Stock</span>
+          <TabsTrigger value="inventory" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
+            <span className="hidden sm:inline">Productos</span>
+            <span className="sm:hidden">Prod.</span>
           </TabsTrigger>
-          <TabsTrigger value="sales" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
+          <TabsTrigger value="sales" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
             Ventas
           </TabsTrigger>
-          <TabsTrigger value="customers" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
+          <TabsTrigger value="customers" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Clientes</span>
             <span className="sm:hidden">Clientes</span>
           </TabsTrigger>
           {showCurrentAccount && (
-            <TabsTrigger value="current-account" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
+            <TabsTrigger value="current-account" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
               <span className="hidden sm:inline">Cta. Cte.</span>
               <span className="sm:hidden">Cta.</span>
             </TabsTrigger>
@@ -202,4 +208,4 @@ const Store: React.FC = () => {
   );
 };
 
-export default Store;
+export { Store };
