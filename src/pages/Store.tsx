@@ -97,98 +97,102 @@ const Store = () => {
     <StoreLayout organization={organization}>
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className={`flex w-full mb-6 sm:mb-8 h-auto overflow-x-auto sm:grid ${showCurrentAccount ? 'sm:grid-cols-6' : 'sm:grid-cols-5'} gap-0.5 p-1`}>
-          <TabsTrigger value="dashboard" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
-            <span className="hidden sm:inline">Inicio</span>
-            <span className="sm:hidden">Inicio</span>
-          </TabsTrigger>
-          <TabsTrigger value="inventory" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
-            <span className="hidden sm:inline">Productos</span>
-            <span className="sm:hidden">Prod.</span>
-          </TabsTrigger>
-          <TabsTrigger value="sales" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
-            Ventas
-          </TabsTrigger>
-          <TabsTrigger value="customers" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
-            <span className="hidden sm:inline">Clientes</span>
-            <span className="sm:hidden">Clientes</span>
-          </TabsTrigger>
-          {showCurrentAccount && (
-            <TabsTrigger value="current-account" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
-              <span className="hidden sm:inline">Cta. Cte.</span>
-              <span className="sm:hidden">Cta.</span>
+        <div className="flex flex-row sm:block gap-3 sm:gap-0 items-start">
+          <TabsList className={`flex flex-col sm:flex sm:grid w-auto sm:w-full mb-0 sm:mb-8 h-auto shrink-0 items-stretch sm:items-stretch gap-0.5 p-1 sm:overflow-x-auto ${showCurrentAccount ? 'sm:grid-cols-6' : 'sm:grid-cols-5'}`}>
+            <TabsTrigger value="dashboard" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0 justify-start whitespace-nowrap">
+              <span className="hidden sm:inline">Inicio</span>
+              <span className="sm:hidden">Inicio</span>
             </TabsTrigger>
-          )}
-          <TabsTrigger value="reports" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
-            <span className="hidden sm:inline">Reportes</span>
-            <span className="sm:hidden">Rep.</span>
-          </TabsTrigger>
-        </TabsList>
+            <TabsTrigger value="inventory" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0 justify-start whitespace-nowrap">
+              <span className="hidden sm:inline">Productos</span>
+              <span className="sm:hidden">Productos</span>
+            </TabsTrigger>
+            <TabsTrigger value="sales" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0 justify-start whitespace-nowrap">
+              Ventas
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0 justify-start whitespace-nowrap">
+              <span className="hidden sm:inline">Clientes</span>
+              <span className="sm:hidden">Clientes</span>
+            </TabsTrigger>
+            {showCurrentAccount && (
+              <TabsTrigger value="current-account" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0 justify-start whitespace-nowrap">
+                <span className="hidden sm:inline">Cta. Cte.</span>
+                <span className="sm:hidden">Cta.</span>
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="reports" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0 justify-start whitespace-nowrap">
+              <span className="hidden sm:inline">Reportes</span>
+              <span className="sm:hidden">Reportes</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Dashboard Tab */}
-        <TabsContent value="dashboard" className="space-y-6 sm:space-y-8">
-          <Dashboard products={products} sales={sales} />
-        </TabsContent>
+          <div className="flex-1 min-w-0">
+            {/* Dashboard Tab */}
+            <TabsContent value="dashboard" className="space-y-6 sm:space-y-8">
+              <Dashboard products={products} sales={sales} />
+            </TabsContent>
 
-        {/* Inventory Tab */}
-        <TabsContent value="inventory">
-          <div className="space-y-6">
-            <div className="bg-card rounded-xl shadow-sm border border-border">
-              <div className="p-4 sm:p-6 border-b border-border">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-                  <div className="flex items-center space-x-2">
-                    <Package className="h-5 w-5 text-primary" />
-                    <h2 className="text-lg sm:text-xl font-semibold text-foreground">Inventario de Productos</h2>
+            {/* Inventory Tab */}
+            <TabsContent value="inventory">
+              <div className="space-y-6">
+                <div className="bg-card rounded-xl shadow-sm border border-border">
+                  <div className="p-4 sm:p-6 border-b border-border">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Package className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg sm:text-xl font-semibold text-foreground">Inventario de Productos</h2>
+                      </div>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <Button
+                          onClick={() => setIsCategoryManagerOpen(true)}
+                          variant="outline"
+                          className="flex-1 sm:flex-none"
+                        >
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          Categorías
+                        </Button>
+                        <Button
+                          onClick={() => setIsAddDialogOpen(true)}
+                          className="shadow-md flex-1 sm:flex-none"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar Producto
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <Button
-                      onClick={() => setIsCategoryManagerOpen(true)}
-                      variant="outline"
-                      className="flex-1 sm:flex-none"
-                    >
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      Categorías
-                    </Button>
-                    <Button
-                      onClick={() => setIsAddDialogOpen(true)}
-                      className="shadow-md flex-1 sm:flex-none"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar Producto
-                    </Button>
-                  </div>
+                  <ProductList 
+                    products={products}
+                    onUpdateProduct={updateProduct}
+                    onDeleteProduct={deleteProduct}
+                  />
                 </div>
               </div>
-              <ProductList 
-                products={products}
-                onUpdateProduct={updateProduct}
-                onDeleteProduct={deleteProduct}
-              />
-            </div>
+            </TabsContent>
+
+            {/* Sales Tab */}
+            <TabsContent value="sales">
+              <SalesTab products={products} onUpdateProduct={updateProduct} />
+            </TabsContent>
+
+            {/* Customers Tab */}
+            <TabsContent value="customers">
+              <CustomersTab />
+            </TabsContent>
+
+            {/* Current Account Tab */}
+            {showCurrentAccount && (
+              <TabsContent value="current-account">
+                <CurrentAccountTab />
+              </TabsContent>
+            )}
+
+            {/* Reports Tab */}
+            <TabsContent value="reports">
+              <ReportsTab products={products} />
+            </TabsContent>
           </div>
-        </TabsContent>
-
-        {/* Sales Tab */}
-        <TabsContent value="sales">
-          <SalesTab products={products} onUpdateProduct={updateProduct} />
-        </TabsContent>
-
-        {/* Customers Tab */}
-        <TabsContent value="customers">
-          <CustomersTab />
-        </TabsContent>
-
-        {/* Current Account Tab */}
-        {showCurrentAccount && (
-          <TabsContent value="current-account">
-            <CurrentAccountTab />
-          </TabsContent>
-        )}
-
-        {/* Reports Tab */}
-        <TabsContent value="reports">
-          <ReportsTab products={products} />
-        </TabsContent>
+        </div>
       </Tabs>
 
       {/* Add Product Dialog */}
