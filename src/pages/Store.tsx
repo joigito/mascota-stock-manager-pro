@@ -97,7 +97,7 @@ const Store = () => {
     <StoreLayout organization={organization}>
       {/* Tabs Navigation */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="flex w-full mb-6 sm:mb-8 h-auto overflow-x-auto sm:grid sm:grid-cols-5 gap-0.5 p-1">
+        <TabsList className={`flex w-full mb-6 sm:mb-8 h-auto overflow-x-auto sm:grid ${showCurrentAccount ? 'sm:grid-cols-6' : 'sm:grid-cols-5'} gap-0.5 p-1`}>
           <TabsTrigger value="dashboard" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Inicio</span>
             <span className="sm:hidden">Inicio</span>
@@ -119,7 +119,7 @@ const Store = () => {
               <span className="sm:hidden">Cta.</span>
             </TabsTrigger>
           )}
-          <TabsTrigger value="reports" className="text-xs sm:text-sm px-2 sm:px-3 py-2 shrink-0">
+          <TabsTrigger value="reports" className="text-lg sm:text-xl px-2 sm:px-3 py-2 shrink-0">
             <span className="hidden sm:inline">Reportes</span>
             <span className="sm:hidden">Rep.</span>
           </TabsTrigger>
