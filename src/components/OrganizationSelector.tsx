@@ -8,13 +8,6 @@ import { Button } from '@/components/ui/button';
 export const OrganizationSelector: React.FC = () => {
   const { organizations, currentOrganization, switchOrganization, loading, reload } = useOrganization();
 
-  console.log('OrganizationSelector: Render state:', {
-    loading,
-    organizationsCount: organizations.length,
-    currentOrganization: currentOrganization?.name || 'none',
-    hasOrganizations: organizations.length > 0
-  });
-
   // Always show the selector container
   return (
     <div className="flex items-center space-x-2">
@@ -46,13 +39,10 @@ export const OrganizationSelector: React.FC = () => {
         <Select 
           value={currentOrganization?.id || ''} 
           onValueChange={(value) => {
-            console.log('OrganizationSelector: Changing to organization:', value);
             const org = organizations.find(o => o.organization.id === value);
             if (org) {
-              console.log('OrganizationSelector: Found organization:', org.organization.name);
               switchOrganization(org.organization);
             } else {
-              console.log('OrganizationSelector: Organization not found in list');
             }
           }}
         >

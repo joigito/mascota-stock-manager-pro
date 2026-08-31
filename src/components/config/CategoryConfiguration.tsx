@@ -19,15 +19,9 @@ export const CategoryConfiguration: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
 useEffect(() => {
-    console.log('CategoryConfiguration: Loading effect triggered', { 
-      loading, 
-      currentOrganization: currentOrganization?.name || 'none'
-    });
-    
     if (!loading && currentOrganization) {
       const enabled = getEnabledCategories();
       const currentType = getStoreType();
-      console.log('CategoryConfiguration: Setting enabled categories:', enabled, 'storeType:', currentType);
       setSelectedCategories(enabled);
       setStoreType(currentType);
       setIsModified(false);
@@ -37,7 +31,6 @@ useEffect(() => {
 const handleCategoryToggle = (categoryKey: string, checked: boolean | 'indeterminate') => {
     if (checked === 'indeterminate') return;
     
-    console.log('CategoryConfiguration: Toggle category', { categoryKey, checked, currentSelected: selectedCategories });
     
     let newSelected: string[];
     if (checked) {
@@ -48,17 +41,14 @@ const handleCategoryToggle = (categoryKey: string, checked: boolean | 'indetermi
     
     // Prevent disabling all categories
     if (newSelected.length === 0) {
-      console.log('CategoryConfiguration: Cannot disable all categories');
       return;
     }
     
-    console.log('CategoryConfiguration: New selected categories:', newSelected);
     setSelectedCategories(newSelected);
     setIsModified(true);
   };
 
   const handleStoreTypeChange = (value: string) => {
-    console.log('CategoryConfiguration: Store type changed to', value);
     setStoreType(value);
     const recommended = getRecommendedCategoriesByStoreType(value);
     setSelectedCategories(recommended);
@@ -71,7 +61,6 @@ const saveChanges = async () => {
       return;
     }
 
-    console.log('CategoryConfiguration: Saving categories and store type for org:', currentOrganization.name, { selectedCategories, storeType });
     setSaving(true);
     
     try {
@@ -79,7 +68,6 @@ const saveChanges = async () => {
         updateConfiguration('category_settings', 'enabled_categories', selectedCategories),
         updateConfiguration('store_settings', 'store_type', storeType)
       ]);
-      console.log('CategoryConfiguration: Settings saved successfully');
       setIsModified(false);
     } catch (error) {
       console.error('CategoryConfiguration: Error saving settings:', error);
@@ -90,7 +78,6 @@ const saveChanges = async () => {
 
   const resetChanges = () => {
     const enabled = getEnabledCategories();
-    console.log('CategoryConfiguration: Resetting to:', enabled);
     setSelectedCategories(enabled);
     setIsModified(false);
   };

@@ -134,7 +134,6 @@ export const CurrentAccountTab = () => {
   };
 
   const handleDeleteTransaction = async (transactionId: string) => {
-    console.log('handleDeleteTransaction: called with transactionId:', transactionId);
     const success = await deleteTransaction(transactionId);
     if (success) {
       setTransactions(transactions.filter(tx => tx.id !== transactionId));
@@ -142,14 +141,12 @@ export const CurrentAccountTab = () => {
   };
 
   const handleViewMovements = async (accountId: string, account: any) => {
-    console.log('handleViewMovements: called with accountId:', accountId);
     setSelectedAccountId(accountId);
     setSelectedAccount(account);
     setShowMovementsDialog(true);
     setLoadingTransactions(true);
     setDateFilter({ from: null, to: new Date(new Date().setHours(23, 59, 59, 999)) }); // Reset date filter, "Hasta" por defecto hoy
     const txs = await getTransactions(accountId);
-    console.log('handleViewMovements: transactions fetched:', txs);
     setTransactions(txs);
     setLoadingTransactions(false);
   };

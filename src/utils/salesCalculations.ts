@@ -63,13 +63,8 @@ export const filterSalesForReport = (
   startDate: string, 
   endDate: string
 ): Sale[] => {
-  console.log('=== FILTERING SALES FOR REPORT (FIXED) ===');
-  console.log('Start date input (salesReportStartDate):', startDate);
-  console.log('End date input (salesReportEndDate):', endDate);
-  console.log('Total sales to filter:', sales.length);
   
   if (sales.length === 0) {
-    console.log('No sales found in localStorage');
     return [];
   }
   
@@ -77,25 +72,15 @@ export const filterSalesForReport = (
   const startDateUTC = new Date(startDate + 'T00:00:00.000Z');
   const endDateUTC = new Date(endDate + 'T23:59:59.999Z');
   
-  console.log('UTC start date:', startDateUTC.toISOString());
-  console.log('UTC end date:', endDateUTC.toISOString());
   
   const filtered = sales.filter((sale: Sale) => {
     const saleDate = new Date(sale.date);
     const isInRange = saleDate >= startDateUTC && saleDate <= endDateUTC;
     
-    console.log(`Sale ${sale.id}:`);
-    console.log(`  - Original date string: "${sale.date}"`);
-    console.log(`  - Parsed date: ${saleDate.toISOString()}`);
-    console.log(`  - Is valid date: ${!isNaN(saleDate.getTime())}`);
-    console.log(`  - Is in range: ${isInRange}`);
-    console.log(`  - Compare: ${saleDate.toISOString()} >= ${startDateUTC.toISOString()} && <= ${endDateUTC.toISOString()}`);
     
     return isInRange;
   });
   
-  console.log('Filtered sales count:', filtered.length);
-  console.log('Filtered sales:', filtered);
   
   return filtered;
 };

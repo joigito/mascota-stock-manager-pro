@@ -24,7 +24,6 @@ const SearchInput = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => {
-          console.log("🔍 SearchInput - onChange:", e.target.value);
           onChange(e.target.value);
         }}
         className="pl-9 pr-9"

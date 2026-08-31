@@ -109,13 +109,6 @@ export const useSystemConfiguration = () => {
       return;
     }
 
-    console.log('useSystemConfiguration: Updating configuration:', {
-      organization_id: currentOrganization.id,
-      config_type: configType,
-      config_key: configKey,
-      config_value: configValue
-    });
-
     try {
       const { error } = await supabase
         .from('system_configurations')
@@ -132,7 +125,6 @@ export const useSystemConfiguration = () => {
         throw error;
       }
 
-      console.log('useSystemConfiguration: Configuration updated successfully');
 
       toast({
         title: "Configuración actualizada",

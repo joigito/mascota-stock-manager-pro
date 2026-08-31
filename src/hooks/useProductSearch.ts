@@ -5,16 +5,12 @@ export const useProductSearch = (products: Product[]) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredProducts = useMemo(() => {
-    console.log("🔍 useProductSearch - searchTerm:", searchTerm);
-    console.log("🔍 useProductSearch - products count:", products.length);
     
     if (!searchTerm.trim()) {
-      console.log("🔍 No search term, returning all products");
       return products;
     }
 
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
-    console.log("🔍 Normalized search term:", normalizedSearchTerm);
 
     const filtered = products.filter((product) => {
       // Search in product name
@@ -28,13 +24,11 @@ export const useProductSearch = (products: Product[]) => {
 
       const matches = nameMatch || skuMatch || descriptionMatch;
       if (matches) {
-        console.log("🔍 Product matches:", product.name, "baseSku:", product.baseSku);
       }
       
       return matches;
     });
     
-    console.log("🔍 Filtered products count:", filtered.length);
     return filtered;
   }, [products, searchTerm]);
 

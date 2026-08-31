@@ -49,7 +49,6 @@ const ProductSelector = ({
           </SelectTrigger>
           <SelectContent>
               {(() => {
-                console.log("🔍 Rendering SelectContent with products:", filteredProducts.map(p => p.name));
                 return filteredProducts.map((product) => (
                   <SelectItem key={product.id} value={product.id}>
                     <div className="flex items-center justify-between w-full">

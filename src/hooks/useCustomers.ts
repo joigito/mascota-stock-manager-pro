@@ -31,7 +31,6 @@ export const useCustomers = () => {
 
     try {
       const localCustomers = JSON.parse(savedCustomers);
-      console.log('Migrando clientes de localStorage a Supabase:', localCustomers.length);
       
       for (const customer of localCustomers) {
         const { error } = await supabase
@@ -111,10 +110,8 @@ export const useCustomers = () => {
   };
 
   useEffect(() => {
-    console.log('useCustomers: Effect triggered with:', { user: user?.id, currentOrganization: currentOrganization?.id });
     
     if (user && currentOrganization) {
-      console.log('useCustomers: Starting data loading...');
       migrateLocalStorageData()
         .then(() => loadCustomers())
         .catch(error => {
@@ -122,7 +119,6 @@ export const useCustomers = () => {
           setLoading(false);
         });
     } else {
-      console.log('useCustomers: Missing dependencies - user or organization not ready');
       setLoading(false);
     }
   }, [user, currentOrganization]);

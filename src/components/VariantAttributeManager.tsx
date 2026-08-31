@@ -19,10 +19,6 @@ export default function VariantAttributeManager({ organizationId, open, onClose 
     }
   }, [open]);
 
-  React.useEffect(() => {
-    console.debug('VariantAttributeManager: open=', open, 'organizationId=', organizationId);
-  }, [open, organizationId]);
-
   const startEdit = (a: VariantAttributeDef) => {
     setEditing(a);
     setForm({

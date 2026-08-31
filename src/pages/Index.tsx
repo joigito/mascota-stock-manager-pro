@@ -44,8 +44,6 @@ const Index = () => {
     const loadSuperAdminStatus = async () => {
       const isSuper = await checkSuperAdmin();
       const isOrgAdm = await checkOrgAdmin();
-      console.log('Index: Super admin status:', isSuper);
-      console.log('Index: Org admin status:', isOrgAdm);
       setIsSuperAdmin(isSuper);
       setIsOrgAdmin(isOrgAdm);
       
@@ -65,11 +63,6 @@ const Index = () => {
   }, [user?.id, currentOrganization, checkSuperAdmin, checkOrgAdmin]);
 
   useEffect(() => {
-    console.log('Index: currentOrganization changed:', currentOrganization);
-    console.log('Index: orgLoading:', orgLoading);
-    console.log('Index: isSuperAdmin:', isSuperAdmin);
-    console.log('Index: Will show SuperAdminDashboard?', isSuperAdmin && !currentOrganization && !orgLoading);
-    console.log('Index: Will show OrganizationDashboard?', !orgLoading && !currentOrganization && !isSuperAdmin);
     setForceUpdate(prev => prev + 1);
   }, [currentOrganization, orgLoading, isSuperAdmin]);
 
@@ -140,14 +133,10 @@ const Index = () => {
 
   // Show super admin dashboard if no organization is selected and user is super admin
   if (!currentOrganization && isSuperAdmin) {
-    console.log('Index: Showing SuperAdminDashboard');
     return <SuperAdminDashboard />;
   }
 
   // Log current organization for debugging
-  console.log('Index: Current organization:', currentOrganization);
-  console.log('Index: Organization loading:', orgLoading);
-  console.log('Index: Is super admin:', isSuperAdmin);
 
   // Show organization dashboard if no organization is selected
   if (!currentOrganization && !orgLoading) {

@@ -53,13 +53,11 @@ export const useProducts = () => {
       // Verificar si ya hay productos en la base de datos
       const hasExistingProducts = await checkExistingProducts();
       if (hasExistingProducts) {
-        console.log('Ya existen productos en la base de datos, saltando migración');
         localStorage.removeItem('products');
         return;
       }
 
       const localProducts = JSON.parse(savedProducts);
-      console.log('Migrando productos de localStorage a Supabase:', localProducts.length);
       
       // Migrar productos uno por uno con manejo de duplicados
       for (const product of localProducts) {
@@ -149,13 +147,11 @@ export const useProducts = () => {
   // Cargar productos desde Supabase
   const loadProducts = async () => {
     if (!user || !currentOrganization) {
-      console.log('useProducts: loadProducts called without user or organization');
       setLoading(false);
       return;
     }
 
     try {
-      console.log('useProducts: Loading products for organization:', currentOrganization.id);
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -164,7 +160,6 @@ export const useProducts = () => {
 
       if (error) throw error;
 
-      console.log('useProducts: Loaded products count:', data?.length || 0);
 
       const formattedProducts = data.map(product => ({
         id: product.id,
@@ -183,7 +178,6 @@ export const useProducts = () => {
       }));
 
       setProducts(formattedProducts);
-      console.log('useProducts: Products set successfully');
     } catch (error) {
       console.error('useProducts: Error loading products:', error);
       toast({
@@ -208,10 +202,8 @@ export const useProducts = () => {
   };
 
   useEffect(() => {
-    console.log('useProducts: Effect triggered with:', { user: user?.id, currentOrganization: currentOrganization?.id });
     
     if (user && currentOrganization) {
-      console.log('useProducts: Starting data loading...');
       migrateLocalStorageData()
         .then(() => loadProducts())
         .catch(error => {
@@ -219,15 +211,11 @@ export const useProducts = () => {
           setLoading(false);
         });
     } else {
-      console.log('useProducts: Missing dependencies - user or organization not ready');
       setLoading(false);
     }
   }, [user, currentOrganization]);
 
   const addProduct = async (productData: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'organization_id'>) => {
-    console.log('addProduct: Starting with data:', productData);
-    console.log('addProduct: User:', user?.id);
-    console.log('addProduct: Current organization:', currentOrganization?.id, currentOrganization?.name);
     
     if (!user || !currentOrganization) {
       console.error('addProduct: Missing user or organization');
@@ -249,7 +237,6 @@ export const useProducts = () => {
         organization_id: currentOrganization.id
       };
       
-      console.log('addProduct: About to insert:', insertData);
       
       const { data, error } = await supabase
         .from('products')
@@ -257,8 +244,6 @@ export const useProducts = () => {
         .select()
         .single();
 
-      console.log('addProduct: Response from database - data:', data);
-      console.log('addProduct: Response from database - error:', error);
 
       if (error) {
         // Manejar error de duplicado de manera más amigable
@@ -309,15 +294,12 @@ export const useProducts = () => {
       if (updates.hasVariants !== undefined) updateData.has_variants = updates.hasVariants;
       if (updates.baseSku !== undefined) updateData.base_sku = updates.baseSku;
 
-      console.log('updateProduct: About to update with data:', updateData);
-      console.log('updateProduct: Product ID:', id);
 
       const { error } = await supabase
         .from('products')
         .update(updateData)
         .eq('id', id);
 
-      console.log('updateProduct: Response error:', error);
 
       if (error) {
         if (error.message.includes('unique_product_per_user_org')) {
