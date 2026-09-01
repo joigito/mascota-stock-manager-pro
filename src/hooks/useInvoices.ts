@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 import { Sale } from "@/types/sales";
@@ -27,47 +28,55 @@ interface Invoice {
   observaciones: string | null;
 }
 
+const invoicesKey = (orgId: string) => ['invoices', orgId] as const;
+
 export const useInvoices = () => {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const loadInvoices = async () => {
-    if (!currentOrganization?.id) return;
+  const orgId = currentOrganization?.id;
 
-    setLoading(true);
-    try {
+  const query = useQuery({
+    queryKey: invoicesKey(orgId || 'none'),
+    queryFn: async (): Promise<Invoice[]> => {
+      if (!orgId) return [];
+
       const { data, error } = await supabase
         .from('invoices')
         .select('*')
-        .eq('organization_id', currentOrganization.id)
+        .eq('organization_id', orgId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInvoices(data || []);
-    } catch (error) {
-      console.error('Error loading invoices:', error);
-    } finally {
-      setLoading(false);
-    }
+      return data || [];
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const invoices = query.data ?? [];
+
+  const loadInvoices = async () => {
+    await queryClient.refetchQueries({ queryKey: invoicesKey(orgId || 'none') });
   };
 
   const getNextInvoiceNumber = async (puntoVenta: number = 1, tipoComprobante: number = 6) => {
-    if (!currentOrganization?.id) return 1;
+    if (!orgId) return 1;
 
     try {
       const { data, error } = await supabase
         .from('invoices')
         .select('invoice_number')
-        .eq('organization_id', currentOrganization.id)
+        .eq('organization_id', orgId)
         .eq('punto_venta', puntoVenta)
         .eq('tipo_comprobante', tipoComprobante)
         .order('invoice_number', { ascending: false })
         .limit(1);
 
       if (error) throw error;
-      
+
       return (data && data.length > 0) ? data[0].invoice_number + 1 : 1;
     } catch (error) {
       console.error('Error getting next invoice number:', error);
@@ -76,34 +85,32 @@ export const useInvoices = () => {
   };
 
   const createInvoiceFromSale = async (sale: Sale) => {
-    if (!currentOrganization?.id) {
+    if (!orgId) {
       throw new Error('No organization selected');
     }
 
     try {
-      setLoading(true);
+      setCreating(true);
 
-      // Obtener el siguiente número de factura
       const nextNumber = await getNextInvoiceNumber();
 
-      // Calcular montos (por ahora sin IVA, como facturas de tipo C)
       const importeNeto = sale.total;
-      const importeIva = 0; // Para facturas tipo C no hay IVA discriminado
+      const importeIva = 0;
       const importeExento = 0;
       const importeTotal = importeNeto + importeIva;
 
       const invoiceData = {
-        organization_id: currentOrganization.id,
+        organization_id: orgId,
         sale_id: sale.id,
         invoice_number: nextNumber,
-        punto_venta: 1, // Por defecto, se puede configurar más adelante
-        tipo_comprobante: 11, // Factura C (sin discriminar IVA)
+        punto_venta: 1,
+        tipo_comprobante: 11,
         fecha_emision: new Date().toISOString().split('T')[0],
         importe_total: importeTotal,
         importe_neto: importeNeto,
         importe_iva: importeIva,
         importe_exento: importeExento,
-        created_by: currentOrganization.id,
+        created_by: orgId,
         estado: 'pending',
         observaciones: `Factura generada para venta de ${sale.customer} - ${sale.items.length} productos`
       };
@@ -116,7 +123,6 @@ export const useInvoices = () => {
 
       if (error) throw error;
 
-      // Actualizar la lista local
       await loadInvoices();
 
       toast({
@@ -134,17 +140,13 @@ export const useInvoices = () => {
       });
       return { data: null, error };
     } finally {
-      setLoading(false);
+      setCreating(false);
     }
   };
 
-  useEffect(() => {
-    loadInvoices();
-  }, [currentOrganization?.id]);
-
   return {
     invoices,
-    loading,
+    loading: creating || (query.isLoading && !query.data),
     createInvoiceFromSale,
     loadInvoices
   };

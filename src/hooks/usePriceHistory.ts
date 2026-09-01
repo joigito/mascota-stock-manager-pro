@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -17,38 +18,42 @@ export interface PriceHistory {
   created_at: string;
 }
 
+const priceHistoryKey = (orgId: string, productId?: string) =>
+  ['price-history', orgId, productId ?? 'all'] as const;
+
 export const usePriceHistory = () => {
-  const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [activeProductId, setActiveProductId] = useState<string | undefined>(undefined);
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
+  const queryClient = useQueryClient();
 
-  const loadPriceHistory = async (productId?: string) => {
-    if (!user || !currentOrganization) return;
+  const orgId = currentOrganization?.id;
 
-    setLoading(true);
-    try {
-      let query = supabase
+  const query = useQuery({
+    queryKey: priceHistoryKey(orgId || 'none', activeProductId),
+    queryFn: async (): Promise<PriceHistory[]> => {
+      if (!user || !orgId || !activeProductId) return [];
+
+      let q = supabase
         .from('price_history')
         .select('*')
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false });
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false })
+        .eq('product_id', activeProductId);
 
-      if (productId) {
-        query = query.eq('product_id', productId);
-      }
-
-      const { data, error } = await query;
+      const { data, error } = await q;
 
       if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && !!orgId && !!activeProductId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-      setPriceHistory(data || []);
-    } catch (error) {
-      console.error('Error loading price history:', error);
-      toast.error('Error al cargar el historial de precios');
-    } finally {
-      setLoading(false);
-    }
+  const priceHistory = query.data ?? [];
+
+  const loadPriceHistory = async (productId?: string) => {
+    setActiveProductId(productId);
   };
 
   const recordPriceChange = async (
@@ -59,7 +64,7 @@ export const usePriceHistory = () => {
     newSellingPrice?: number,
     reason: string = 'Manual update'
   ) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       console.error('Usuario no autenticado');
       return false;
     }
@@ -69,7 +74,7 @@ export const usePriceHistory = () => {
         .from('price_history')
         .insert({
           product_id: productId,
-          organization_id: currentOrganization.id,
+          organization_id: orgId,
           old_cost_price: oldCostPrice,
           new_cost_price: newCostPrice,
           old_selling_price: oldSellingPrice,
@@ -82,7 +87,9 @@ export const usePriceHistory = () => {
 
       if (error) throw error;
 
-      setPriceHistory(prev => [data, ...prev]);
+      if (activeProductId === productId) {
+        queryClient.setQueryData<PriceHistory[]>(priceHistoryKey(orgId, activeProductId), (prev) => [data, ...(prev ?? [])]);
+      }
       return true;
     } catch (error) {
       console.error('Error recording price change:', error);
@@ -90,15 +97,9 @@ export const usePriceHistory = () => {
     }
   };
 
-  useEffect(() => {
-    if (user && currentOrganization) {
-      loadPriceHistory();
-    }
-  }, [user, currentOrganization]);
-
   return {
     priceHistory,
-    loading,
+    loading: query.isLoading && !query.data,
     loadPriceHistory,
     recordPriceChange
   };

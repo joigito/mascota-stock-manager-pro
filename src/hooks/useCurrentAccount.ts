@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from './useOrganization';
 import { useFeatureFlag } from './useFeatureFlag';
@@ -34,62 +34,60 @@ interface AccountTransaction {
   created_at: string;
 }
 
+const accountsKey = (orgId: string) => ['customer-accounts', orgId] as const;
+
 export const useCurrentAccount = () => {
   const { currentOrganization } = useOrganization();
   const { isEnabled } = useFeatureFlag('current_account', currentOrganization?.id);
-  const [accounts, setAccounts] = useState<CustomerAccount[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (currentOrganization?.id && isEnabled) {
-      loadAccounts();
-    }
-  }, [currentOrganization?.id, isEnabled]);
+  const orgId = currentOrganization?.id;
 
-  const loadAccounts = async () => {
-    if (!currentOrganization?.id) return;
+  const query = useQuery({
+    queryKey: accountsKey(orgId || 'none'),
+    queryFn: async (): Promise<CustomerAccount[]> => {
+      if (!orgId) return [];
 
-    setLoading(true);
-    try {
       const { data, error } = await supabase
         .from('customer_accounts')
         .select(`
           *,
           customer:customers(*)
         `)
-        .eq('organization_id', currentOrganization.id)
+        .eq('organization_id', orgId)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setAccounts(data || []);
-    } catch (error) {
-      console.error('Error loading accounts:', error);
-      toast.error('Error al cargar cuentas corrientes');
-    } finally {
-      setLoading(false);
-    }
+      return data || [];
+    },
+    enabled: !!orgId && isEnabled,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const accounts = query.data ?? [];
+
+  const loadAccounts = async () => {
+    await queryClient.refetchQueries({ queryKey: accountsKey(orgId || 'none') });
   };
 
   const getOrCreateAccount = async (customerId: string): Promise<CustomerAccount | null> => {
-    if (!currentOrganization?.id) return null;
+    if (!orgId) return null;
 
     try {
-    // Check if account exists
     const { data: existing } = await supabase
       .from('customer_accounts')
       .select('*')
       .eq('customer_id', customerId)
-      .eq('organization_id', currentOrganization.id)
+      .eq('organization_id', orgId)
       .maybeSingle();
 
     if (existing) return existing;
 
-      // Create new account
       const { data, error } = await supabase
         .from('customer_accounts')
         .insert({
           customer_id: customerId,
-          organization_id: currentOrganization.id,
+          organization_id: orgId,
           balance: 0,
           credit_limit: 0
         })
@@ -112,7 +110,7 @@ export const useCurrentAccount = () => {
     notes?: string,
     referenceId?: string
   ) => {
-    if (!currentOrganization?.id) return false;
+    if (!orgId) return false;
 
     try {
       const account = await getOrCreateAccount(customerId);
@@ -121,22 +119,20 @@ export const useCurrentAccount = () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return false;
 
-      // Calculate new balance
       let newBalance = account.balance;
       if (type === 'sale') {
-        newBalance += amount; // Sale increases debt
+        newBalance += amount;
       } else if (type === 'payment') {
-        newBalance -= amount; // Payment decreases debt
+        newBalance -= amount;
       } else {
-        newBalance = amount; // Adjustment sets balance
+        newBalance = amount;
       }
 
-      // Insert transaction
       const { error: txError } = await supabase
         .from('account_transactions')
         .insert({
           customer_account_id: account.id,
-          organization_id: currentOrganization.id,
+          organization_id: orgId,
           transaction_type: type,
           amount,
           balance_after: newBalance,
@@ -147,7 +143,6 @@ export const useCurrentAccount = () => {
 
       if (txError) throw txError;
 
-      // Update account balance
       const { error: updateError } = await supabase
         .from('customer_accounts')
         .update({ balance: newBalance })
@@ -239,7 +234,7 @@ export const useCurrentAccount = () => {
 
   return {
     accounts,
-    loading,
+    loading: query.isLoading && !query.data,
     isEnabled,
     loadAccounts,
     addTransaction,

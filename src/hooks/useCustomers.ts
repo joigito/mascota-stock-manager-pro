@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -14,24 +15,60 @@ export interface Customer {
   created_at?: string;
 }
 
+const customersKey = (orgId: string) => ['customers', orgId] as const;
+
 export const useCustomers = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const orgId = currentOrganization?.id;
+
+  const loadCustomers = async (): Promise<Customer[]> => {
+    if (!user || !orgId) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('organization_id', orgId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data.map(customer => ({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      organization_id: customer.organization_id,
+      created_at: customer.created_at,
+    }));
+  };
+
+  const query = useQuery({
+    queryKey: customersKey(orgId || 'none'),
+    queryFn: loadCustomers,
+    enabled: !!user && !!orgId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const customers = query.data ?? [];
 
   // Migrar datos de localStorage a Supabase
   const migrateLocalStorageData = async () => {
-    if (!user || !currentOrganization) return;
+    if (!user || !orgId) return;
 
     const savedCustomers = localStorage.getItem('customers');
     if (!savedCustomers) return;
 
     try {
       const localCustomers = JSON.parse(savedCustomers);
-      
+
       for (const customer of localCustomers) {
         const { error } = await supabase
           .from('customers')
@@ -41,90 +78,41 @@ export const useCustomers = () => {
             phone: customer.phone,
             address: customer.address,
             user_id: user.id,
-            organization_id: currentOrganization.id
+            organization_id: orgId
           });
-        
+
         if (error && !error.message.includes('duplicate key')) {
           console.error('Error migrando cliente:', error);
         }
       }
-      
+
       localStorage.removeItem('customers');
       toast({
         title: "Migración completada",
         description: "Clientes migrados a la base de datos",
       });
+      queryClient.invalidateQueries({ queryKey: customersKey(orgId) });
     } catch (error) {
       console.error('Error durante la migración de clientes:', error);
-    }
-  };
-
-  // Cargar clientes desde Supabase
-  const loadCustomers = async () => {
-    if (!user || !currentOrganization) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedCustomers = data.map(customer => ({
-        id: customer.id,
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-        organization_id: customer.organization_id,
-        created_at: customer.created_at,
-      }));
-
-      setCustomers(formattedCustomers);
-    } catch (error) {
-      console.error('Error cargando clientes:', error);
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar los clientes",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
   // Sincronizar manualmente
   const syncCustomers = async () => {
     setSyncing(true);
-    await loadCustomers();
-    setSyncing(false);
-    toast({
-      title: "Sincronización completada",
-      description: "Clientes actualizados desde la base de datos",
-    });
+    try {
+      await queryClient.refetchQueries({ queryKey: customersKey(orgId || 'none') });
+      toast({
+        title: "Sincronización completada",
+        description: "Clientes actualizados desde la base de datos",
+      });
+    } finally {
+      setSyncing(false);
+    }
   };
 
-  useEffect(() => {
-    
-    if (user && currentOrganization) {
-      migrateLocalStorageData()
-        .then(() => loadCustomers())
-        .catch(error => {
-          console.error('useCustomers: Error in data loading:', error);
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-  }, [user, currentOrganization]);
-
   const addCustomer = async (customerData: Omit<Customer, 'id' | 'created_at' | 'organization_id'>) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       return { error: new Error('Usuario no autenticado o organización no seleccionada') };
     }
 
@@ -137,7 +125,7 @@ export const useCustomers = () => {
           phone: customerData.phone,
           address: customerData.address,
           user_id: user.id,
-          organization_id: currentOrganization.id
+          organization_id: orgId
         })
         .select()
         .single();
@@ -154,7 +142,7 @@ export const useCustomers = () => {
         created_at: data.created_at,
       };
 
-      setCustomers(prev => [newCustomer, ...prev]);
+      queryClient.setQueryData<Customer[]>(customersKey(orgId), (prev) => [newCustomer, ...(prev ?? [])]);
       return { error: null };
     } catch (error) {
       console.error('Error agregando cliente:', error);
@@ -163,7 +151,7 @@ export const useCustomers = () => {
   };
 
   const updateCustomer = async (id: string, updates: Partial<Customer>) => {
-    if (!user) {
+    if (!user || !orgId) {
       return { error: new Error('Usuario no autenticado') };
     }
 
@@ -175,9 +163,9 @@ export const useCustomers = () => {
 
       if (error) throw error;
 
-      setCustomers(prev => 
-        prev.map(customer => 
-          customer.id === id 
+      queryClient.setQueryData<Customer[]>(customersKey(orgId), (prev) =>
+        (prev ?? []).map(customer =>
+          customer.id === id
             ? { ...customer, ...updates }
             : customer
         )
@@ -190,7 +178,7 @@ export const useCustomers = () => {
   };
 
   const deleteCustomer = async (id: string) => {
-    if (!user) {
+    if (!user || !orgId) {
       return { error: new Error('Usuario no autenticado') };
     }
 
@@ -202,7 +190,9 @@ export const useCustomers = () => {
 
       if (error) throw error;
 
-      setCustomers(prev => prev.filter(customer => customer.id !== id));
+      queryClient.setQueryData<Customer[]>(customersKey(orgId), (prev) =>
+        (prev ?? []).filter(customer => customer.id !== id)
+      );
       return { error: null };
     } catch (error) {
       console.error('Error eliminando cliente:', error);
@@ -212,7 +202,7 @@ export const useCustomers = () => {
 
   return {
     customers,
-    loading,
+    loading: query.isLoading && !query.data,
     syncing,
     addCustomer,
     updateCustomer,

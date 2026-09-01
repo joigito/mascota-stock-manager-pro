@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "./useOrganization";
@@ -30,68 +31,78 @@ export interface ProductAttribute {
   created_at: string;
 }
 
+const variantsKey = (orgId: string, productId: string) =>
+  ['product-variants', orgId, productId] as const;
+const attributesKey = (orgId: string, productId: string) =>
+  ['product-attributes', orgId, productId] as const;
+
 export const useProductVariants = (productId?: string) => {
-  const [variants, setVariants] = useState<ProductVariant[]>([]);
-  const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
-  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
+  const queryClient = useQueryClient();
 
-  const loadVariants = useCallback(async () => {
-    if (!user || !currentOrganization || !productId) return;
+  const orgId = currentOrganization?.id;
 
-    setLoading(true);
-    try {
-      // Server-side ordered fetch (preferred now that DB schema is updated)
-      const { data: variantsData, error: variantsError } = await supabase
+  const variantsQuery = useQuery({
+    queryKey: variantsKey(orgId || 'none', productId || 'none'),
+    queryFn: async (): Promise<ProductVariant[]> => {
+      if (!user || !orgId || !productId) return [];
+
+      const { data, error } = await supabase
         .from("product_variants")
         .select("*")
         .eq("product_id", productId)
-        .eq("organization_id", currentOrganization.id)
+        .eq("organization_id", orgId)
         .order('color', { ascending: true })
         .order('size', { ascending: true });
 
-      if (variantsError) throw variantsError;
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && !!orgId && !!productId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-      const { data: attributesData, error: attributesError } = await supabase
+  const attributesQuery = useQuery({
+    queryKey: attributesKey(orgId || 'none', productId || 'none'),
+    queryFn: async (): Promise<ProductAttribute[]> => {
+      if (!user || !orgId || !productId) return [];
+
+      const { data, error } = await supabase
         .from("product_attributes")
         .select("*")
         .eq("product_id", productId)
-        .eq("organization_id", currentOrganization.id);
+        .eq("organization_id", orgId);
 
-      if (attributesError) throw attributesError;
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && !!orgId && !!productId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-      // Ordenar client-side por color y luego size para evitar problemas con la
-      // cláusula `order` en la petición REST (algunas configuraciones de PostgREST
-      // pueden rechazar la query). Esto mantiene la UX y es más robusto.
-      // Use server-ordered data directly
-      setVariants(variantsData || []);
-      setAttributes(attributesData || []);
-    } catch (error) {
-      console.error("Error loading variants:", error);
-      toast.error("Error al cargar variantes");
-    } finally {
-      setLoading(false);
-    }
-  }, [user, currentOrganization, productId]);
+  const variants = variantsQuery.data ?? [];
+  const attributes = attributesQuery.data ?? [];
 
-  useEffect(() => {
-    loadVariants();
-  }, [loadVariants]);
+  const loadVariants = useCallback(() => {
+    return Promise.all([
+      queryClient.refetchQueries({ queryKey: variantsKey(orgId || 'none', productId || 'none') }),
+      queryClient.refetchQueries({ queryKey: attributesKey(orgId || 'none', productId || 'none') }),
+    ]);
+  }, [queryClient, orgId, productId]);
 
   const addVariant = async (variantData: Omit<ProductVariant, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'organization_id'>) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       toast.error("Usuario no autenticado");
       return;
     }
 
     try {
-      // Use server-returning insert for best UX now that schema is healthy
       const { data: newVariant, error } = await supabase
         .from("product_variants")
         .insert({
           ...variantData,
-          organization_id: currentOrganization.id,
+          organization_id: orgId,
           created_by: user.id
         })
         .select()
@@ -110,7 +121,7 @@ export const useProductVariants = (productId?: string) => {
   };
 
   const updateVariant = async (id: string, updates: Partial<ProductVariant>) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       toast.error("Usuario no autenticado");
       return;
     }
@@ -120,7 +131,7 @@ export const useProductVariants = (productId?: string) => {
         .from("product_variants")
         .update(updates)
         .eq("id", id)
-        .eq("organization_id", currentOrganization.id)
+        .eq("organization_id", orgId)
         .select()
         .single();
 
@@ -137,7 +148,7 @@ export const useProductVariants = (productId?: string) => {
   };
 
   const deleteVariant = async (id: string) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       toast.error("Usuario no autenticado");
       return;
     }
@@ -147,11 +158,13 @@ export const useProductVariants = (productId?: string) => {
         .from("product_variants")
         .delete()
         .eq("id", id)
-        .eq("organization_id", currentOrganization.id);
+        .eq("organization_id", orgId);
 
       if (error) throw error;
 
-      setVariants(prev => prev.filter(variant => variant.id !== id));
+      queryClient.setQueryData<ProductVariant[]>(variantsKey(orgId, productId || 'none'), (prev) =>
+        (prev ?? []).filter(variant => variant.id !== id)
+      );
       toast.success("Variante eliminada");
     } catch (error) {
       console.error("Error deleting variant:", error);
@@ -161,7 +174,7 @@ export const useProductVariants = (productId?: string) => {
   };
 
   const addAttribute = async (attributeData: Omit<ProductAttribute, 'id' | 'created_at' | 'organization_id'>) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       toast.error("Usuario no autenticado");
       return;
     }
@@ -171,7 +184,7 @@ export const useProductVariants = (productId?: string) => {
         .from("product_attributes")
         .insert({
           ...attributeData,
-          organization_id: currentOrganization.id
+          organization_id: orgId
         })
         .select()
         .single();
@@ -209,7 +222,7 @@ export const useProductVariants = (productId?: string) => {
   return {
     variants,
     attributes,
-    loading,
+    loading: (variantsQuery.isLoading && !variantsQuery.data) || (attributesQuery.isLoading && !attributesQuery.data),
     addVariant,
     updateVariant,
     deleteVariant,

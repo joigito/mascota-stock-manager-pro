@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export type VariantAttributeDef = {
@@ -13,17 +14,16 @@ export type VariantAttributeDef = {
   updated_at?: string;
 };
 
-export function useVariantAttributes(organizationId?: string) {
-  const [attributes, setAttributes] = useState<VariantAttributeDef[]>([]);
-  const [loading, setLoading] = useState(false);
+const variantAttributesKey = (orgId: string) => ['variant-attribute-definitions', orgId] as const;
 
-  const load = useCallback(async () => {
-    if (!organizationId) {
-      setAttributes([]);
-      return;
-    }
-    setLoading(true);
-    try {
+export function useVariantAttributes(organizationId?: string) {
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: variantAttributesKey(organizationId || 'none'),
+    queryFn: async (): Promise<VariantAttributeDef[]> => {
+      if (!organizationId) return [];
+
       const { data, error } = await (supabase as any)
         .from('variant_attribute_definitions')
         .select('*')
@@ -31,18 +31,17 @@ export function useVariantAttributes(organizationId?: string) {
         .order('position', { ascending: true });
 
       if (error) throw error;
-      setAttributes((data as any) || []);
-    } catch (err) {
-      console.error('load variant attributes error', err);
-      setAttributes([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [organizationId]);
+      return (data as VariantAttributeDef[]) || [];
+    },
+    enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const attributes = query.data ?? [];
+
+  const load = useCallback(async () => {
+    await queryClient.refetchQueries({ queryKey: variantAttributesKey(organizationId || 'none') });
+  }, [queryClient, organizationId]);
 
   const add = useCallback(
     async (payload: Partial<VariantAttributeDef>) => {
@@ -61,7 +60,6 @@ export function useVariantAttributes(organizationId?: string) {
         .select()
         .single();
       if (error) throw error;
-      // refresh
       await load();
       return data as VariantAttributeDef;
     },
@@ -96,5 +94,5 @@ export function useVariantAttributes(organizationId?: string) {
     [load]
   );
 
-  return { attributes, loading, load, add, update, remove };
+  return { attributes, loading: query.isLoading && !query.data, load, add, update, remove };
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -15,53 +15,43 @@ interface CustomCategory {
   is_active: boolean;
 }
 
+const categoriesKey = (orgId: string) => ['custom-categories', orgId] as const;
+
 export const useCustomCategories = () => {
-  const [categories, setCategories] = useState<CustomCategory[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
-
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const loadCategories = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    
-    if (!currentOrganization) {
-      setCategories([]);
-      setLoading(false);
-      return;
-    }
+  const orgId = currentOrganization?.id;
 
-    try {
-      setLoading(true);
+  const query = useQuery({
+    queryKey: categoriesKey(orgId || 'none'),
+    queryFn: async (): Promise<CustomCategory[]> => {
+      if (!user || !orgId) return [];
+
       const { data, error } = await supabase
         .from('custom_categories')
         .select('*')
-        .eq('organization_id', currentOrganization.id)
+        .eq('organization_id', orgId)
         .eq('is_active', true)
         .order('name', { ascending: true });
 
       if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && !!orgId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      toast({
-        title: "Error",
-        description: "Error al cargar las categorías",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const categories = query.data ?? [];
+
+  const loadCategories = async () => {
+    await queryClient.refetchQueries({ queryKey: categoriesKey(orgId || 'none') });
   };
 
   const createCategory = async (name: string, description?: string) => {
-    
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       toast({
         title: "Error",
         description: "Usuario o organización no válidos",
@@ -74,7 +64,7 @@ export const useCustomCategories = () => {
       const { data, error } = await supabase
         .from('custom_categories')
         .insert({
-          organization_id: currentOrganization.id,
+          organization_id: orgId,
           name: name.trim(),
           description: description?.trim(),
           created_by: user.id,
@@ -84,7 +74,9 @@ export const useCustomCategories = () => {
 
       if (error) throw error;
 
-      setCategories(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      queryClient.setQueryData<CustomCategory[]>(categoriesKey(orgId), (prev) =>
+        [...(prev ?? []), data].sort((a, b) => a.name.localeCompare(b.name))
+      );
       toast({
         title: "Éxito",
         description: "Categoría creada exitosamente",
@@ -110,7 +102,7 @@ export const useCustomCategories = () => {
   };
 
   const updateCategory = async (id: string, name: string, description?: string) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       toast({
         title: "Error",
         description: "Usuario o organización no válidos",
@@ -127,14 +119,14 @@ export const useCustomCategories = () => {
           description: description?.trim(),
         })
         .eq('id', id)
-        .eq('organization_id', currentOrganization.id)
+        .eq('organization_id', orgId)
         .select()
         .single();
 
       if (error) throw error;
 
-      setCategories(prev =>
-        prev.map(cat => cat.id === id ? data : cat).sort((a, b) => a.name.localeCompare(b.name))
+      queryClient.setQueryData<CustomCategory[]>(categoriesKey(orgId), (prev) =>
+        (prev ?? []).map(cat => cat.id === id ? data : cat).sort((a, b) => a.name.localeCompare(b.name))
       );
       toast({
         title: "Éxito",
@@ -161,7 +153,7 @@ export const useCustomCategories = () => {
   };
 
   const deleteCategory = async (id: string) => {
-    if (!user || !currentOrganization) {
+    if (!user || !orgId) {
       toast({
         title: "Error",
         description: "Usuario o organización no válidos",
@@ -171,11 +163,10 @@ export const useCustomCategories = () => {
     }
 
     try {
-      // Check if category is used by any products
       const { data: products, error: productsError } = await supabase
         .from('products')
         .select('id')
-        .eq('organization_id', currentOrganization.id)
+        .eq('organization_id', orgId)
         .eq('category', categories.find(cat => cat.id === id)?.name)
         .limit(1);
 
@@ -194,11 +185,13 @@ export const useCustomCategories = () => {
         .from('custom_categories')
         .delete()
         .eq('id', id)
-        .eq('organization_id', currentOrganization.id);
+        .eq('organization_id', orgId);
 
       if (error) throw error;
 
-      setCategories(prev => prev.filter(cat => cat.id !== id));
+      queryClient.setQueryData<CustomCategory[]>(categoriesKey(orgId), (prev) =>
+        (prev ?? []).filter(cat => cat.id !== id)
+      );
       toast({
         title: "Éxito",
         description: "Categoría eliminada exitosamente",
@@ -216,17 +209,15 @@ export const useCustomCategories = () => {
   };
 
   const migrateExistingCategories = async () => {
-    if (!user || !currentOrganization) return;
+    if (!user || !orgId) return;
 
     try {
-      // Call the migration function
       const { error } = await supabase.rpc('migrate_organization_categories', {
-        _org_id: currentOrganization.id
+        _org_id: orgId
       });
 
       if (error) throw error;
 
-      // Reload categories after migration
       await loadCategories();
       toast({
         title: "Éxito",
@@ -242,13 +233,9 @@ export const useCustomCategories = () => {
     }
   };
 
-  useEffect(() => {
-    loadCategories();
-  }, [user, currentOrganization]);
-
   return {
     categories,
-    loading,
+    loading: query.isLoading && !query.data,
     createCategory,
     updateCategory,
     deleteCategory,
