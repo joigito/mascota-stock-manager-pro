@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 
 interface AuthPromptProps {
   onClose?: () => void;
@@ -17,13 +17,6 @@ export const AuthPrompt: React.FC<AuthPromptProps> = ({ onClose, storeName }) =>
     navigate(`/auth?redirect=${encodeURIComponent(currentUrl)}`);
   };
 
-  const handleSignup = () => {
-    const currentUrl = window.location.pathname;
-    // Store the current store URL for after registration
-    localStorage.setItem('pendingStoreUrl', currentUrl);
-    navigate(`/auth?redirect=${encodeURIComponent(currentUrl)}&tab=signup`);
-  };
-
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
@@ -33,8 +26,8 @@ export const AuthPrompt: React.FC<AuthPromptProps> = ({ onClose, storeName }) =>
         </CardTitle>
         <CardDescription>
           {storeName ? 
-            `Para agregar productos a "${storeName}", necesitas iniciar sesión o crear una cuenta.` :
-            'Para agregar productos, necesitas iniciar sesión o crear una cuenta.'
+            `Para agregar productos a "${storeName}", necesitas iniciar sesión.` :
+            'Para agregar productos, necesitas iniciar sesión.'
           }
         </CardDescription>
       </CardHeader>
@@ -46,14 +39,6 @@ export const AuthPrompt: React.FC<AuthPromptProps> = ({ onClose, storeName }) =>
         >
           <LogIn className="mr-2 h-4 w-4" />
           Iniciar Sesión
-        </Button>
-        <Button 
-          onClick={handleSignup} 
-          className="w-full"
-          variant="outline"
-        >
-          <UserPlus className="mr-2 h-4 w-4" />
-          Crear Cuenta Nueva
         </Button>
         {onClose && (
           <Button 
