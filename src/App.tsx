@@ -6,6 +6,8 @@ import { OrganizationProvider } from "@/contexts/OrganizationProvider";
 import Index from "./pages/Index";
 import { Store } from "./pages/Store";
 import Auth from "./pages/Auth";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
@@ -19,6 +21,12 @@ const App = () => (
       <OrganizationProvider>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/change-password" element={
+            <ProtectedRoute>
+              <ChangePasswordPage />
+            </ProtectedRoute>
+          } />
           <Route path="/accept-invitation" element={<AcceptInvitation />} />
           <Route path="/tienda/:slug/cuenta/:token" element={<PublicAccountStatement />} />
           <Route path="/tienda/:slug" element={

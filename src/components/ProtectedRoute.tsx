@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, forcePasswordChange } = useAuth();
 
   if (loading) {
     return (
@@ -34,6 +34,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     }
     
     return <Navigate to={`/auth?redirect=${encodeURIComponent(currentPath)}`} replace />;
+  }
+
+  // Force password change on first login / or when admin requires it
+  if (forcePasswordChange && window.location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
   }
 
   return <>{children}</>;

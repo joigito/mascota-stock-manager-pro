@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Building2, LogOut, Crown, Shield, User, LayoutDashboard } from 'lucide-react';
+import { Building2, Crown, Shield, User, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Link, useNavigate } from 'react-router-dom';
 import { ModeToggle } from '@/components/ui/ModeToggle';
+import UserMenu from '@/components/UserMenu';
 
 interface Organization {
   id: string;
@@ -24,8 +24,7 @@ interface StoreLayoutProps {
 }
 
 export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children }) => {
-  const { signOut, user } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
   const { isAdmin, isSuperAdmin, clearOrganization } = useOrganization();
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState<'super_admin' | 'admin' | 'user'>('user');
@@ -49,22 +48,6 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
     
     checkRole();
   }, [isAdmin, isSuperAdmin, organization]);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error al cerrar sesión",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleGoToCentralPanel = () => {
     clearOrganization();
@@ -135,16 +118,7 @@ export const StoreLayout: React.FC<StoreLayoutProps> = ({ organization, children
                 </Button>
               )}
               <ModeToggle />
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Cerrar Sesión</span>
-                <span className="sm:hidden">Salir</span>
-              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>

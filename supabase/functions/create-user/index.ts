@@ -92,6 +92,9 @@ serve(async (req) => {
       email,
       password,
       email_confirm: true,
+      user_metadata: {
+        force_password_change: true,
+      },
     })
 
     if (createError) {

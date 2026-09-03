@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Package, Building2, LogOut, Settings, CreditCard, FolderOpen, Truck, Crown, Shield, User } from "lucide-react";
+import { Plus, Package, Building2, Settings, CreditCard, FolderOpen, Truck, Crown, Shield, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,13 +20,13 @@ import { OrganizationUserManagement } from "@/components/OrganizationUserManagem
 import { OrganizationUrlGenerator } from "@/components/OrganizationUrlGenerator";
 import { UserIndicator } from "@/components/UserIndicator";
 import { ModeToggle } from "@/components/ui/ModeToggle";
+import UserMenu from "@/components/UserMenu";
 import { CategoryManager } from "@/components/CategoryManager";
 import { SupplierManager } from "@/components/SupplierManager";
 import { useProducts } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/hooks/useOrganization";
-import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
@@ -38,9 +38,8 @@ const Index = () => {
   const [isOrgAdmin, setIsOrgAdmin] = useState(false);
   const [userRole, setUserRole] = useState<'super_admin' | 'admin' | 'user'>('user');
   const [forceUpdate, setForceUpdate] = useState(0);
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const { currentOrganization, isSuperAdmin: checkSuperAdmin, isAdmin: checkOrgAdmin, clearOrganization, loading: orgLoading } = useOrganization();
-  const { toast } = useToast();
 
   useEffect(() => {
     const loadSuperAdminStatus = async () => {
@@ -78,22 +77,6 @@ const Index = () => {
       document.title = 'Sistema de Gestión Comercial';
     }
   }, [currentOrganization, isSuperAdmin]);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error al cerrar sesión",
-        variant: "destructive",
-      });
-    }
-  };
 
   const getRoleBadge = () => {
     if (userRole === 'super_admin') {
@@ -179,16 +162,7 @@ const Index = () => {
               <UserIndicator />
               {getRoleBadge()}
               <ModeToggle />
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Cerrar Sesión</span>
-                <span className="sm:hidden">Salir</span>
-              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>

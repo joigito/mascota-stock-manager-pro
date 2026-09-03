@@ -8,10 +8,19 @@ Guía de uso del sistema. Cada sección describe una pestaña, qué hace y cómo
 
 Para entrar: abrí la URL de tu tienda e ingresá tu email y contraseña (las cuentas las gestiona el administrador de la plataforma). Al entrar, la pestaña **Inicio** muestra un resumen rápido de tu negocio.
 
+### Primer ingreso
+
+La primera vez que entrás con una cuenta nueva, el sistema te pedirá **cambiar la contraseña** que te asignaron antes de poder usar la tienda. Elegí una contraseña que conozcas solo vos (mínimo 6 caracteres).
+
 ### Qué verás
 
 - **Alertas de Stock Bajo:** productos que necesitan reposición
 - **Resumen de actividad:** datos generales de la tienda
+
+### Cambiar o recuperar la contraseña
+
+- **Cambiarla vos mismo:** en la barra superior, tocá tu **usuario** (círculo con tus iniciales) → **Cambiar contraseña**. Te pedirá tu contraseña actual y una nueva.
+- **No la recordás:** en la pantalla de inicio de sesión tocá **"¿Olvidaste tu contraseña?"**, ingresá tu email y seguí el enlace que te llega para elegir una nueva.
 
 ### Tips
 
@@ -286,4 +295,4 @@ El sistema distingue dos perfiles:
 
 ---
 
-*Manual version 1.4 — Para soporte contactar al administrador de la plataforma.*
+*Manual version 1.5 — Para soporte contactar al administrador de la plataforma.*

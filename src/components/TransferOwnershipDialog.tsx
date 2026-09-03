@@ -85,7 +85,8 @@ export const TransferOwnershipDialog: React.FC<TransferOwnershipDialogProps> = (
         email_confirm: true,
         user_metadata: {
           name: newOwnerName,
-          transfer_organization_id: organization.id
+          transfer_organization_id: organization.id,
+          force_password_change: true
         }
       });
 

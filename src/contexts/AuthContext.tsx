@@ -7,6 +7,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  forcePasswordChange: boolean;
+  isPasswordRecovery: boolean;
+  clearForcePasswordChange: () => void;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -26,14 +29,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [forcePasswordChange, setForcePasswordChange] = useState(false);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+
+  const syncUserState = (session: Session | null) => {
+    setSession(session);
+    setUser(session?.user ?? null);
+    setForcePasswordChange(session?.user?.user_metadata?.force_password_change === true);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+        if (event === 'PASSWORD_RECOVERY') {
+          setIsPasswordRecovery(true);
+        }
+        syncUserState(session);
 
         // Handle new user registration from store URL
         if (event === 'SIGNED_IN' && session?.user) {
@@ -80,9 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      syncUserState(session);
     });
 
     return () => subscription.unsubscribe();
@@ -116,10 +126,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
   };
 
+  const clearForcePasswordChange = async () => {
+    // Clear the flag so the user isn't forced again after changing the password
+    try {
+      await supabase.auth.updateUser({
+        data: { force_password_change: false },
+      });
+    } catch (error) {
+      console.error("Error clearing force password change:", error);
+    }
+    setForcePasswordChange(false);
+  };
+
   const value = {
     user,
     session,
     loading,
+    forcePasswordChange,
+    isPasswordRecovery,
+    clearForcePasswordChange,
     signUp,
     signIn,
     signOut,
