@@ -46,14 +46,17 @@ Gestión completa del inventario de tu tienda.
 2. Completá los campos:
    - **Nombre** (obligatorio)
    - **Categoría** (elegí de las disponibles)
+   - **Proveedor** (opcional, elegí de los cargados)
    - **Stock actual** (cantidad en inventario)
    - **Stock mínimo** (para alertas de reposición)
-   - **SKU** (código único del producto, opcional)
    - **Precio de costo** (cuánto te cuesta)
    - **Precio de venta** (a cuánto lo vendés)
-   - **Con variantes** (activar si el producto tiene talles, colores, etc.)
    - **Descripción** (opcional)
 3. Presioná **Guardar**
+
+> **Para la mayoría de los productos (stock simple):** no actives el interruptor "Producto con variantes". Cargás una sola cantidad de stock y listo.
+>
+> El campo **SKU** es opcional y **solo aparece** si activás el modo variantes. En el uso normal, no se necesita.
 
 > **Importante:** El precio de costo debe ser menor al de venta. El sistema calcula el margen de ganancia automáticamente.
 
@@ -73,15 +76,31 @@ Gestión completa del inventario de tu tienda.
 1. Presioná el botón **Categorías** en la parte superior
 2. Creá, editá o eliminá categorías para organizar tus productos
 
-### Variantes
+### Proveedores
 
-Si activaste "Con variantes" al crear un producto:
+Los proveedores son quienes te venden la mercadería. Son útiles para saber a quién comprarle cada producto.
+
+1. Presioná el botón **Proveedores** en la parte superior (junto a Categorías)
+2. Creá, editá o eliminá proveedores
+   - **Nombre** (obligatorio)
+   - **Contacto** (opcional: teléfono, persona, etc.)
+   - **Descripción** (opcional)
+3. Al cargar un producto, podés asignarle su proveedor (campo **Proveedor**)
+
+> **Nota:** Un proveedor solo se puede eliminar si no tiene productos asignados.
+
+### Variantes (avanzado, opcional)
+
+> **Recomendado:** Para el uso actual (forrajería y accesorios), **no uses variantes**.
+> Este modo suma complejidad y se reserva para casos donde un mismo producto tiene talles, colores, etc., con stock distinto por variante.
+
+Si algún día activás "Producto con variantes" al crear un producto:
 
 1. Hacé clic en el **ícono de paquete** junto al producto
 2. Agregá variantes (ej: color "Rojo", talle "M", ajuste de precio +$500)
 3. Cada variante tiene su propio stock y SKU
 
-> **Nota:** Las variantes se gestionan por producto. El stock se controla por variante, no a nivel producto.
+> **Nota:** Cuando un producto usa variantes, el stock se controla por variante, no a nivel producto.
 
 ---
 
@@ -111,7 +130,6 @@ Al concretar una venta, podés imprimir un comprobante para el cliente.
 ### Datos Importantes
 
 - Al registrar una venta, el stock se descuenta automáticamente
-- Si el producto tiene variantes, elegí la variante específica
 - Las ventas se pueden eliminar solo desde la pestaña de Reportes (solo admin)
 
 ---
@@ -217,14 +235,15 @@ Análisis e impresión de datos de tu negocio.
 | **Costo < Venta** | El precio de costo siempre debe ser menor al de venta |
 | **Stock automático** | Al registrar una venta, el stock se descuenta solo |
 | **Historial de precios** | Todo cambio de precio queda registrado automáticamente |
-| **Variantes** | Requieren que la feature esté habilitada para la tienda |
+| **Variantes** | Avanzado; no se usan en el flujo estándar (stock simple) |
+| **Proveedores** | Opcionales; ayudan a saber de quién se compra cada producto |
 | **Cta. Cte.** | Solo los administradores pueden acceder |
 
 ### Buenas Prácticas
 
 1. **Revisá las alertas** de stock bajo al inicio de cada día
 2. **Actualizá precios** cuando cambien los costos de proveedor
-3. **Usá categorías** para mantener el inventario organizado
+3. **Usá categorías y proveedores** para mantener el inventario organizado
 4. **Registrá todas las ventas** (incluidas las de crédito) para tener datos precisos
 5. **Imprimí reportes** periódicamente para analizar el rendimiento
 
@@ -247,4 +266,4 @@ Análisis e impresión de datos de tu negocio.
 
 ---
 
-*Manual version 1.0 — Para soporte contactar al administrador de la plataforma.*
+*Manual version 1.1 — Para soporte contactar al administrador de la plataforma.*
