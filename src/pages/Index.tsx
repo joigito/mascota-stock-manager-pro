@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Package, Building2, LogOut, Settings, CreditCard, FolderOpen, Crown, Shield, User } from "lucide-react";
+import { Plus, Package, Building2, LogOut, Settings, CreditCard, FolderOpen, Truck, Crown, Shield, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +21,7 @@ import { OrganizationUrlGenerator } from "@/components/OrganizationUrlGenerator"
 import { UserIndicator } from "@/components/UserIndicator";
 import { ModeToggle } from "@/components/ui/ModeToggle";
 import { CategoryManager } from "@/components/CategoryManager";
+import { SupplierManager } from "@/components/SupplierManager";
 import { useProducts } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +33,7 @@ const Index = () => {
   const { sales } = useSales();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+  const [isSupplierManagerOpen, setIsSupplierManagerOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isOrgAdmin, setIsOrgAdmin] = useState(false);
   const [userRole, setUserRole] = useState<'super_admin' | 'admin' | 'user'>('user');
@@ -255,6 +257,14 @@ const Index = () => {
                         Categorías
                       </Button>
                       <Button
+                        onClick={() => setIsSupplierManagerOpen(true)}
+                        variant="outline"
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Truck className="h-4 w-4 mr-2" />
+                        Proveedores
+                      </Button>
+                      <Button
                         onClick={() => setIsAddDialogOpen(true)}
                         className="shadow-md flex-1 sm:flex-none"
                       >
@@ -318,6 +328,12 @@ const Index = () => {
       <CategoryManager 
         open={isCategoryManagerOpen}
         onOpenChange={setIsCategoryManagerOpen}
+      />
+
+      {/* Supplier Manager Dialog */}
+      <SupplierManager 
+        open={isSupplierManagerOpen}
+        onOpenChange={setIsSupplierManagerOpen}
       />
     </div>
   );

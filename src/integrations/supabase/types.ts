@@ -872,6 +872,7 @@ export type Database = {
           organization_id: string
           price: number
           stock: number
+          supplier_id: string | null
           updated_at: string
           user_id: string
         }
@@ -888,6 +889,7 @@ export type Database = {
           organization_id: string
           price: number
           stock: number
+          supplier_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -904,6 +906,7 @@ export type Database = {
           organization_id?: string
           price?: number
           stock?: number
+          supplier_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -913,6 +916,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -1057,6 +1067,50 @@ export type Database = {
           },
         ]
       }
+      suppliers: {
+        Row: {
+          contact_info: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_info?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_info?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_configurations: {
         Row: {
           config_key: string
@@ -1066,8 +1120,7 @@ export type Database = {
           created_by: string
           id: string
           organization_id: string
-          updated_at: string
-        }
+          updated_at: string        }
         Insert: {
           config_key: string
           config_type: string

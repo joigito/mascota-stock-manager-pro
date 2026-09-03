@@ -24,6 +24,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthPrompt } from "@/components/AuthPrompt";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
+import { useSuppliers } from "@/hooks/useSuppliers";
 import { useVariantAttributes } from "@/hooks/useVariantAttributes";
 import { useOrganization } from "@/hooks/useOrganization";
 import { Badge } from "@/components/ui/badge";
@@ -39,11 +40,13 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
   const { toast } = useToast();
   const { user } = useAuth();
   const { categories, reloadCategories } = useCustomCategories();
+  const { suppliers, reloadSuppliers } = useSuppliers();
   const { currentOrganization } = useOrganization();
   const { attributes } = useVariantAttributes(currentOrganization?.id);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
+    supplierId: "",
     stock: "",
     minStock: "",
     price: "",
@@ -54,12 +57,13 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
   });
   const [loading, setLoading] = useState(false);
 
-  // Reload categories when dialog opens
+  // Reload categories and suppliers when dialog opens
   useEffect(() => {
     if (open) {
       reloadCategories();
+      reloadSuppliers();
     }
-  }, [open, reloadCategories]);
+  }, [open, reloadCategories, reloadSuppliers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,7 +122,8 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
         costPrice,
         description: formData.description.trim() || undefined,
         hasVariants: formData.hasVariants,
-        baseSku: formData.baseSku.trim() || undefined
+        baseSku: formData.baseSku.trim() || undefined,
+        supplierId: formData.supplierId || null
       });
 
       if (result.error === null) {
@@ -132,6 +137,7 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
         setFormData({
           name: "",
           category: "",
+          supplierId: "",
           stock: "",
           minStock: "",
           price: "",
@@ -231,6 +237,28 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                     <span className="text-xs">
                       Primero selecciona una organización, luego ve a Configuración → Mis Categorías para crear categorías.
                     </span>
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="supplier">Proveedor (opcional)</Label>
+            <Select value={formData.supplierId} onValueChange={(value) => handleInputChange("supplierId", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un proveedor" />
+              </SelectTrigger>
+              <SelectContent>
+                {suppliers.length > 0 ? (
+                  suppliers.map((supplier) => (
+                    <SelectItem key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    No hay proveedores disponibles.
                   </div>
                 )}
               </SelectContent>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Package, FolderOpen } from 'lucide-react';
+import { Plus, Package, FolderOpen, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProductList from '@/components/ProductList';
@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization } from '@/hooks/useOrganization';
 import { CurrentAccountTab } from '@/components/CurrentAccountTab';
 import { CategoryManager } from '@/components/CategoryManager';
+import { SupplierManager } from '@/components/SupplierManager';
 
 const Store = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -25,6 +26,7 @@ const Store = () => {
   const { sales } = useSales();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+  const [isSupplierManagerOpen, setIsSupplierManagerOpen] = useState(false);
   const { user } = useAuth();
   const { isSuperAdmin: checkSuperAdmin, isAdmin: checkOrgAdmin, reload: reloadOrganization } = useOrganization();
   const [showCurrentAccount, setShowCurrentAccount] = useState(false);
@@ -150,6 +152,14 @@ const Store = () => {
                       Categorías
                     </Button>
                     <Button
+                      onClick={() => setIsSupplierManagerOpen(true)}
+                      variant="outline"
+                      className="flex-1 sm:flex-none"
+                    >
+                      <Truck className="h-4 w-4 mr-2" />
+                      Proveedores
+                    </Button>
+                    <Button
                       onClick={() => setIsAddDialogOpen(true)}
                       className="shadow-md flex-1 sm:flex-none"
                     >
@@ -203,6 +213,12 @@ const Store = () => {
       <CategoryManager 
         open={isCategoryManagerOpen}
         onOpenChange={setIsCategoryManagerOpen}
+      />
+
+      {/* Supplier Manager Dialog */}
+      <SupplierManager 
+        open={isSupplierManagerOpen}
+        onOpenChange={setIsSupplierManagerOpen}
       />
     </StoreLayout>
   );

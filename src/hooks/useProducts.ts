@@ -18,6 +18,7 @@ export interface Product {
   organization_id: string;
   hasVariants?: boolean;
   baseSku?: string;
+  supplier_id?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -58,6 +59,7 @@ export const useProducts = () => {
       organization_id: product.organization_id,
       hasVariants: product.has_variants || false,
       baseSku: product.base_sku,
+      supplier_id: product.supplier_id,
       created_at: product.created_at,
       updated_at: product.updated_at,
     }));
@@ -215,6 +217,7 @@ export const useProducts = () => {
         description: productData.description,
         has_variants: productData.hasVariants || false,
         base_sku: productData.baseSku,
+        supplier_id: productData.supplier_id || null,
         user_id: user.id,
         organization_id: orgId
       };
@@ -244,6 +247,7 @@ export const useProducts = () => {
         organization_id: data.organization_id,
         hasVariants: data.has_variants || false,
         baseSku: data.base_sku,
+        supplier_id: data.supplier_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
       };
@@ -272,6 +276,7 @@ export const useProducts = () => {
       if (updates.description !== undefined) updateData.description = updates.description;
       if (updates.hasVariants !== undefined) updateData.has_variants = updates.hasVariants;
       if (updates.baseSku !== undefined) updateData.base_sku = updates.baseSku;
+      if (updates.supplier_id !== undefined) updateData.supplier_id = updates.supplier_id;
 
       const { error } = await supabase
         .from('products')

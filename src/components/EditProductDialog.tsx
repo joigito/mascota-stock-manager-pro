@@ -22,6 +22,7 @@ import {
 import { Product } from "@/hooks/useProducts";
 import { useToast } from "@/components/ui/use-toast";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
+import { useSuppliers } from "@/hooks/useSuppliers";
 import { usePriceHistory } from "@/hooks/usePriceHistory";
 import { Button as HistoryButton } from "@/components/ui/button";
 import { History } from "lucide-react";
@@ -40,6 +41,7 @@ interface EditProductDialogProps {
 const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: EditProductDialogProps) => {
   const { toast } = useToast();
   const { categories, reloadCategories } = useCustomCategories();
+  const { suppliers, reloadSuppliers } = useSuppliers();
   const { recordPriceChange } = usePriceHistory();
   const { currentOrganization } = useOrganization();
   const { attributes } = useVariantAttributes(currentOrganization?.id);
@@ -47,6 +49,7 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
   const [formData, setFormData] = useState({
     name: "",
     category: "",
+    supplierId: "",
     stock: "",
     minStock: "",
     price: "",
@@ -54,18 +57,20 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
     description: ""
   });
 
-  // Reload categories when dialog opens
+  // Reload categories and suppliers when dialog opens
   useEffect(() => {
     if (open) {
       reloadCategories();
+      reloadSuppliers();
     }
-  }, [open, reloadCategories]);
+  }, [open, reloadCategories, reloadSuppliers]);
 
   useEffect(() => {
     if (product) {
       setFormData({
         name: product.name,
         category: product.category,
+        supplierId: product.supplier_id || "",
         stock: product.stock.toString(),
         minStock: product.minStock.toString(),
         price: product.price.toString(),
@@ -117,6 +122,7 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
     onUpdateProduct({
       name: formData.name,
       category: formData.category as any,
+      supplierId: formData.supplierId || null,
       stock: parseInt(formData.stock),
       minStock: parseInt(formData.minStock),
       price: price,
@@ -203,6 +209,28 @@ const EditProductDialog = ({ product, open, onOpenChange, onUpdateProduct }: Edi
                     <span className="text-xs">
                       Primero selecciona una organización, luego ve a Configuración → Mis Categorías para crear categorías.
                     </span>
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-supplier">Proveedor (opcional)</Label>
+            <Select value={formData.supplierId} onValueChange={(value) => handleInputChange("supplierId", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un proveedor" />
+              </SelectTrigger>
+              <SelectContent>
+                {suppliers.length > 0 ? (
+                  suppliers.map((supplier) => (
+                    <SelectItem key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    No hay proveedores disponibles.
                   </div>
                 )}
               </SelectContent>

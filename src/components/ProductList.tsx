@@ -7,6 +7,7 @@ import { Product } from "@/hooks/useProducts";
 import { useProductSearch } from "@/hooks/useProductSearch";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useSuppliers } from "@/hooks/useSuppliers";
 import SearchInput from "@/components/ui/SearchInput";
 import EditProductDialog from "./EditProductDialog";
 import ProductVariantManager from "./variants/ProductVariantManager";
@@ -24,6 +25,12 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
   const { searchTerm, setSearchTerm, filteredProducts, resultCount, hasSearchTerm } = useProductSearch(products);
   const { currentOrganization } = useOrganization();
   const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants', currentOrganization?.id);
+  const { suppliers } = useSuppliers();
+
+  const getSupplierName = (supplierId?: string | null) => {
+    if (!supplierId) return null;
+    return suppliers.find(s => s.id === supplierId)?.name || null;
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -180,6 +187,13 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 {getCategoryBadge(product.category)}
                 {getStockStatus(product.stock, product.minStock)}
               </div>
+
+              {getSupplierName(product.supplier_id) && (
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <span>Proveedor:</span>
+                  <span className="font-medium text-foreground">{getSupplierName(product.supplier_id)}</span>
+                </div>
+              )}
               
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
@@ -218,6 +232,9 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 Categoría
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Proveedor
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Stock
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -247,6 +264,13 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getCategoryBadge(product.category)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getSupplierName(product.supplier_id) ? (
+                    <span className="text-sm text-foreground">{getSupplierName(product.supplier_id)}</span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">-</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-foreground">
