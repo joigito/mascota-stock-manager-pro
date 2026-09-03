@@ -24,7 +24,8 @@ import {
   User,
   Calendar,
   UserPlus,
-  Plus
+  Plus,
+  KeyRound
 } from 'lucide-react';
 import { UserRoleDialog } from './UserRoleDialog';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -75,6 +76,12 @@ export const UserManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
   const [userDialogOpen, setUserDialogOpen] = useState(false);
+
+  // Reset Password Dialog State
+  const [resetUser, setResetUser] = useState<UserWithRoles | null>(null);
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
   
   // Create User Dialog State
   const [createUserOpen, setCreateUserOpen] = useState(false);
@@ -138,6 +145,70 @@ export const UserManagement: React.FC = () => {
   const handleEditUser = (userWithRoles: UserWithRoles) => {
     setSelectedUser(userWithRoles);
     setUserDialogOpen(true);
+  };
+
+  const handleResetPassword = (userWithRoles: UserWithRoles) => {
+    setResetUser(userWithRoles);
+    setNewPassword('');
+    setResetPasswordOpen(true);
+  };
+
+  const handleConfirmResetPassword = async () => {
+    if (!resetUser) return;
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "La contraseña debe tener al menos 6 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-password', {
+        body: {
+          userId: resetUser.user.id,
+          password: newPassword,
+        },
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message || "No se pudo resetear la contraseña",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data && !data.success && data.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Contraseña reseteada",
+        description: `Se asignó una nueva contraseña a ${resetUser.user.email}. La deberá cambiar al ingresar.`,
+      });
+
+      setResetPasswordOpen(false);
+      setNewPassword('');
+    } catch (err) {
+      console.error('Unexpected error resetting password:', err);
+      toast({
+        title: "Error",
+        description: "Error inesperado al resetear la contraseña",
+        variant: "destructive",
+      });
+    } finally {
+      setResetting(false);
+    }
   };
 
   const handleCreateUser = async () => {
@@ -415,14 +486,24 @@ export const UserManagement: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditUser(userWithRoles)}
-                        >
-                          <Settings className="h-4 w-4 mr-1" />
-                          Gestionar
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditUser(userWithRoles)}
+                          >
+                            <Settings className="h-4 w-4 mr-1" />
+                            Gestionar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleResetPassword(userWithRoles)}
+                          >
+                            <KeyRound className="h-4 w-4 mr-1" />
+                            Resetear contraseña
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -469,6 +550,44 @@ export const UserManagement: React.FC = () => {
         onUpdateOrganizationRole={updateOrganizationRole}
         onRemoveFromOrganization={removeUserFromOrganization}
       />
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetPasswordOpen} onOpenChange={setResetPasswordOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <KeyRound className="h-5 w-5" />
+              <span>Resetear contraseña</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Vas a asignar una nueva contraseña temporal a{" "}
+              <span className="font-medium text-foreground">{resetUser?.user.email}</span>.
+              El usuario deberá cambiarla al ingresar. Comunicale la contraseña de forma
+              personal (por mensaje o en persona), ya que no se envía por email.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">Nueva contraseña temporal</Label>
+              <Input
+                id="newPassword"
+                type="text"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setResetPasswordOpen(false)} disabled={resetting}>
+                Cancelar
+              </Button>
+              <Button onClick={handleConfirmResetPassword} disabled={resetting}>
+                {resetting ? "Reseteando..." : "Resetear contraseña"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

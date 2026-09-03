@@ -20,7 +20,7 @@ La primera vez que entrás con una cuenta nueva, el sistema te pedirá **cambiar
 ### Cambiar o recuperar la contraseña
 
 - **Cambiarla vos mismo:** en la barra superior, tocá tu **usuario** (círculo con tus iniciales) → **Cambiar contraseña**. Te pedirá tu contraseña actual y una nueva.
-- **No la recordás:** en la pantalla de inicio de sesión tocá **"¿Olvidaste tu contraseña?"**, ingresá tu email y seguí el enlace que te llega para elegir una nueva.
+- **No la recordás:** el sistema no envía correos. Contactá al administrador de la plataforma, que puede **resetear tu contraseña** desde la pantalla de usuarios y te pasa una nueva de forma personal (por mensaje o en persona). La primera vez que entres con esa contraseña, el sistema te volverá a pedir que la cambies.
 
 ### Tips
 

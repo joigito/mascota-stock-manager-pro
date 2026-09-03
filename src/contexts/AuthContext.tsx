@@ -8,7 +8,6 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   forcePasswordChange: boolean;
-  isPasswordRecovery: boolean;
   clearForcePasswordChange: () => void;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -30,7 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [forcePasswordChange, setForcePasswordChange] = useState(false);
-  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const syncUserState = (session: Session | null) => {
     setSession(session);
@@ -42,9 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          setIsPasswordRecovery(true);
-        }
         syncUserState(session);
 
         // Handle new user registration from store URL
@@ -143,7 +138,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     loading,
     forcePasswordChange,
-    isPasswordRecovery,
     clearForcePasswordChange,
     signUp,
     signIn,
