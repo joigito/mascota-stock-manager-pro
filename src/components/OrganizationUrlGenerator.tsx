@@ -26,6 +26,14 @@ export const OrganizationUrlGenerator: React.FC = () => {
     loadOrganizations();
   }, []);
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadOrganizations();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
   const loadOrganizations = async () => {
     try {
       const isSuperAdminUser = await isSuperAdmin();
