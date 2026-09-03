@@ -203,8 +203,13 @@ Análisis e impresión de datos de tu negocio.
 ### Tipos de Reporte
 
 #### Reporte de Stock
-- Inventario completo con valores de costo y venta
+- Inventario completo con valores
 - Botón **Imprimir** para generar versión física
+- Podés **filtrar el listado por Categoría y por Proveedor**, además de ver el listado general (todos los productos)
+
+> **Quién ve qué en el Reporte de Stock:**
+> - **Propietario / Administrador:** ve el precio de venta, el **precio de costo**, el valor total y los **márgenes** de cada producto.
+> - **Empleado:** ve solo el **precio de venta** (y el stock). No ve costos, valores de costo ni márgenes — información reservada al dueño.
 
 #### Reporte de Ventas
 - Seleccioná el período (1, 7, 30 o 90 días)
@@ -227,7 +232,7 @@ Análisis e impresión de datos de tu negocio.
 
 ### Imprimir
 
-1. Seleccioná el período
+1. Si querés, primero **filtrá** el Reporte de Stock por Categoría y/o Proveedor
 2. Hacé clic en **Imprimir Reporte de Stock** o **Imprimir Reporte de Ventas**
 3. Se abrirá la vista de impresión del navegador
 
@@ -245,6 +250,14 @@ Análisis e impresión de datos de tu negocio.
 | **Variantes** | Avanzado; no se usan en el flujo estándar (stock simple) |
 | **Proveedores** | Opcionales; ayudan a saber de quién se compra cada producto |
 | **Cta. Cte.** | Solo los administradores pueden acceder |
+| **Costos y márgenes** | Solo el propietario/administrador los ve; el empleado no |
+
+### Acceso del Empleado vs. Propietario
+
+El sistema distingue dos perfiles:
+
+- **Propietario / Administrador:** acceso completo. Ve precios de costo, ganancias, márgenes y el saldo de cuenta corriente. Gestiona usuarios y proveedores.
+- **Empleado:** acceso de trabajo diario. Registra ventas, carga productos y consulta el stock, pero **no ve** precios de costo, ganancias ni márgenes — información de relevancia solo para el dueño. Tampoco ingresa a Cta. Cte.
 
 ### Buenas Prácticas
 
@@ -273,4 +286,4 @@ Análisis e impresión de datos de tu negocio.
 
 ---
 
-*Manual version 1.3 — Para soporte contactar al administrador de la plataforma.*
+*Manual version 1.4 — Para soporte contactar al administrador de la plataforma.*

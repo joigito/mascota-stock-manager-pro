@@ -6,9 +6,11 @@ import { useOrganization } from "@/hooks/useOrganization";
 interface PrintableStockReportProps {
   products: Product[];
   organizationName?: string;
+  canViewProfits?: boolean;
+  supplierNameById?: (supplierId: string | null | undefined) => string;
 }
 
-const PrintableStockReport = ({ products, organizationName }: PrintableStockReportProps) => {
+const PrintableStockReport = ({ products, organizationName, canViewProfits = false, supplierNameById }: PrintableStockReportProps) => {
   const { currentOrganization } = useOrganization();
   const totalInventoryValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
   const totalInventoryCost = products.reduce((sum, product) => sum + (product.stock * (product.costPrice || 0)), 0);
@@ -27,12 +29,17 @@ const PrintableStockReport = ({ products, organizationName }: PrintableStockRepo
           <TableRow>
             <TableHead>Producto</TableHead>
             <TableHead>Categoría</TableHead>
+            <TableHead>Proveedor</TableHead>
             <TableHead className="text-right">Stock Actual</TableHead>
             <TableHead className="text-right">Stock Mínimo</TableHead>
             <TableHead className="text-right">Precio Venta</TableHead>
-            <TableHead className="text-right">Precio Costo</TableHead>
-            <TableHead className="text-right">Valor Total</TableHead>
-            <TableHead className="text-right">Margen %</TableHead>
+            {canViewProfits && (
+              <>
+                <TableHead className="text-right">Precio Costo</TableHead>
+                <TableHead className="text-right">Valor Total</TableHead>
+                <TableHead className="text-right">Margen %</TableHead>
+              </>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,12 +52,17 @@ const PrintableStockReport = ({ products, organizationName }: PrintableStockRepo
               <TableRow key={product.id} className={isLowStock ? "bg-red-50" : ""}>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell className="capitalize">{product.category}</TableCell>
+                <TableCell>{supplierNameById ? (supplierNameById(product.supplier_id) || "-") : "-"}</TableCell>
                 <TableCell className="text-right">{product.stock}</TableCell>
                 <TableCell className="text-right">{product.minStock}</TableCell>
                 <TableCell className="text-right">${product.price.toLocaleString()}</TableCell>
-                <TableCell className="text-right">${(product.costPrice || 0).toLocaleString()}</TableCell>
-                <TableCell className="text-right">${totalValue.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{margin.toFixed(1)}%</TableCell>
+                {canViewProfits && (
+                  <>
+                    <TableCell className="text-right">${(product.costPrice || 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">${totalValue.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{margin.toFixed(1)}%</TableCell>
+                  </>
+                )}
               </TableRow>
             );
           })}
@@ -67,14 +79,18 @@ const PrintableStockReport = ({ products, organizationName }: PrintableStockRepo
             <p className="text-sm text-gray-600">Valor Total Inventario:</p>
             <p className="font-semibold">${totalInventoryValue.toLocaleString()}</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Costo Total Inventario:</p>
-            <p className="font-semibold">${totalInventoryCost.toLocaleString()}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-green-600">Ganancia Potencial:</p>
-            <p className="font-semibold text-green-600">${potentialProfit.toLocaleString()}</p>
-          </div>
+          {canViewProfits && (
+            <>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Costo Total Inventario:</p>
+                <p className="font-semibold">${totalInventoryCost.toLocaleString()}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-green-600">Ganancia Potencial:</p>
+                <p className="font-semibold text-green-600">${potentialProfit.toLocaleString()}</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

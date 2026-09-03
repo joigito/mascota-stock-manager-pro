@@ -7,6 +7,9 @@ import { getPeriodLabel } from "@/utils/salesCalculations";
 import { useSalesData } from "@/hooks/useSalesData";
 import { Sale } from "@/types/sales";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useSuppliers } from "@/hooks/useSuppliers";
+import { useCustomCategories } from "@/hooks/useCustomCategories";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PrintableStockReport from "@/components/reports/PrintableStockReport";
 import PrintSection from "@/components/reports/PrintSection";
 import SalesSummaryCards from "@/components/reports/SalesSummaryCards";
@@ -25,6 +28,8 @@ interface ReportsTabProps {
 
 const ReportsTab = ({ products }: ReportsTabProps) => {
   const { currentOrganization, isAdmin, isSuperAdmin } = useOrganization();
+  const { suppliers } = useSuppliers();
+  const { categories } = useCustomCategories();
   const {
     filteredSales,
     salesSummary,
@@ -39,6 +44,8 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   const [showStockPrint, setShowStockPrint] = useState(false);
   const [showSalesPrint, setShowSalesPrint] = useState(false);
   const [canViewProfits, setCanViewProfits] = useState(false);
+  const [stockCategoryFilter, setStockCategoryFilter] = useState("all");
+  const [stockSupplierFilter, setStockSupplierFilter] = useState("all");
   const [salesReportStartDate, setSalesReportStartDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() - 30);
@@ -61,6 +68,18 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   const totalInventoryValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
   const totalInventoryCost = products.reduce((sum, product) => sum + (product.stock * (product.costPrice || 0)), 0);
   const potentialProfit = totalInventoryValue - totalInventoryCost;
+
+  const filteredStockProducts = products.filter(product => {
+    if (stockCategoryFilter !== "all" && product.category !== stockCategoryFilter) return false;
+    if (stockSupplierFilter !== "all" && product.supplier_id !== stockSupplierFilter) return false;
+    return true;
+  });
+
+  const supplierNameById = (supplierId: string | null | undefined) => {
+    if (!supplierId) return "";
+    const supplier = suppliers.find(s => s.id === supplierId);
+    return supplier?.name || "";
+  };
 
   // Productos con margen bajo (menos del 20%)
   const lowMarginProducts = products.filter(product => {
@@ -288,7 +307,12 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
   };
 
   if (showStockPrint) {
-    return <PrintableStockReport products={products} organizationName={currentOrganization?.name} />;
+    return <PrintableStockReport
+      products={filteredStockProducts}
+      organizationName={currentOrganization?.name}
+      canViewProfits={canViewProfits}
+      supplierNameById={supplierNameById}
+    />;
   }
 
   if (loading) {
@@ -315,6 +339,42 @@ const ReportsTab = ({ products }: ReportsTabProps) => {
           </button>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Filtrar stock por Categoría</label>
+          <Select value={stockCategoryFilter} onValueChange={setStockCategoryFilter}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todas las categorías" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las categorías</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Filtrar stock por Proveedor</label>
+          <Select value={stockSupplierFilter} onValueChange={setStockSupplierFilter}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todos los proveedores" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los proveedores</SelectItem>
+              {suppliers.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      {!canViewProfits && (
+        <p className="text-xs text-muted-foreground">
+          Como usuario empleado, el reporte de stock muestra solo precios de venta. Los costos y márgenes están reservados para el propietario.
+        </p>
+      )}
 
       <PrintSection
         handlePrintStock={handlePrintStock}
