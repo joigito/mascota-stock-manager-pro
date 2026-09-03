@@ -54,7 +54,7 @@ const ProductSelector = ({
                     <div className="flex items-center justify-between w-full">
                       <div className="flex flex-col items-start">
                         <span>{product.name}</span>
-                        {product.baseSku && (
+                        {product.baseSku && product.hasVariants && (
                           <span className="text-xs text-muted-foreground">SKU: {product.baseSku}</span>
                         )}
                       </div>

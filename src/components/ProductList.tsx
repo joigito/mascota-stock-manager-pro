@@ -131,7 +131,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
               <div className="flex justify-between items-start">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium truncate">{product.name}</h3>
-                  {product.baseSku && (
+                  {product.baseSku && product.hasVariants && (
                     <p className="text-xs text-muted-foreground mt-1">SKU: {product.baseSku}</p>
                   )}
                   {product.description && (
@@ -254,7 +254,7 @@ const ProductList = ({ products, onUpdateProduct, onDeleteProduct, onProductChan
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="text-sm font-medium">{product.name}</div>
-                    {product.baseSku && (
+                    {product.baseSku && product.hasVariants && (
                       <div className="text-xs text-muted-foreground">SKU: {product.baseSku}</div>
                     )}
                     {product.description && (

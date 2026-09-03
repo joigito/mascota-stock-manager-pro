@@ -18,7 +18,7 @@ interface ProductSelectorWithVariantsProps {
   quantity: number;
   finalPrice: number;
   onProductSelect: (productId: string) => void;
-  onVariantSelect: (variantId: string | null, price: number) => void;
+  onVariantSelect: (variantId: string | null, price: number, variantInfo?: string, variantStock?: number) => void;
   onQuantityChange: (quantity: number) => void;
   onAddItem: () => void;
 }
@@ -102,7 +102,7 @@ const ProductSelectorWithVariants = ({
                           <Badge variant="secondary" className="text-xs">Variantes</Badge>
                         )}
                       </div>
-                      {product.baseSku && (
+                      {product.baseSku && product.hasVariants && (
                         <p className="text-xs text-muted-foreground">SKU: {product.baseSku}</p>
                       )}
                     </div>
@@ -148,7 +148,14 @@ const ProductSelectorWithVariants = ({
             productName={selectedProduct.name}
             basePrice={selectedProduct.price}
             onVariantSelect={(variant, price) => {
-              onVariantSelect(variant?.id || null, price);
+              if (variant) {
+                const parts = [];
+                if (variant.size) parts.push(variant.size);
+                if (variant.color) parts.push(variant.color);
+                onVariantSelect(variant.id, price, parts.join(', ') || 'Variante', variant.stock);
+              } else {
+                onVariantSelect(null, price, undefined, undefined);
+              }
             }}
             selectedVariantId={selectedVariantId}
           />

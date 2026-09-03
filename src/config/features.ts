@@ -1,4 +1,4 @@
-import { Package, FileText, Users, BarChart3, Layers } from 'lucide-react';
+import { FileText, Users, BarChart3, Layers } from 'lucide-react';
 
 export interface FeatureDefinition {
   key: string;
@@ -28,13 +28,6 @@ export const FEATURES: Record<string, FeatureDefinition> = {
     name: 'Variantes de Producto',
     description: 'Manejar variantes de productos con atributos personalizados (talle, color, etc.)',
     icon: Layers,
-    category: 'inventario',
-  },
-  batch_tracking: {
-    key: 'batch_tracking',
-    name: 'Tracking de Lotes',
-    description: 'Seguimiento de lotes de compra con costos y fechas de vencimiento',
-    icon: Package,
     category: 'inventario',
   },
   advanced_reports: {

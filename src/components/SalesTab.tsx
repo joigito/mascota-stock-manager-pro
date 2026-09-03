@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ShoppingCart, Package, ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
@@ -10,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Product } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useCustomers } from "@/hooks/useCustomers";
-import { useBatches } from "@/hooks/useBatches";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useCurrentAccount } from "@/hooks/useCurrentAccount";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { supabase } from "@/integrations/supabase/client";
+import { useProductVariants } from "@/hooks/useProductVariants";
 import { generateSaleReceipt } from "@/utils/saleReceiptGenerator";
 import ProductSelectorWithVariants from "./sales/ProductSelectorWithVariants";
 import SearchInput from "@/components/ui/SearchInput";
@@ -30,15 +32,17 @@ interface SalesTabProps {
 
 const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { addSale } = useSales();
   const { customers, addCustomer } = useCustomers();
-  const { updateBatchesAfterSale } = useBatches();
   const { currentOrganization } = useOrganization();
   const { isEnabled: isCurrentAccountEnabled, addTransaction, accounts: customerAccounts } = useCurrentAccount();
   const { isEnabled: variantsEnabled } = useFeatureFlag('use_variants', currentOrganization?.id);
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
+  const [selectedVariantInfo, setSelectedVariantInfo] = useState<string | undefined>();
+  const [selectedVariantStock, setSelectedVariantStock] = useState<number | undefined>();
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
   const [customerName, setCustomerName] = useState<string>("Consumidor final");
@@ -61,12 +65,16 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     const product = products.find(p => p.id === selectedProductId);
     if (!product) return;
 
-    if (product.hasVariants && variantsEnabled && selectedVariantId) {
-      toast({ title: "Info", description: "Las variantes están deshabilitadas. Editá el stock directamente en el producto.", variant: "destructive" });
+    const isVariantProduct = product.hasVariants && variantsEnabled;
+
+    if (isVariantProduct && !selectedVariantId) {
+      toast({ title: "Error", description: "Selecciona una variante del producto", variant: "destructive" });
       return;
     }
 
-    const availableStock = product.stock;
+    const availableStock = isVariantProduct
+      ? (selectedVariantStock ?? 0)
+      : product.stock;
     let currentPrice = finalPrice || product.price;
 
     if (quantity > availableStock) {
@@ -74,8 +82,8 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       return;
     }
 
-    const existingItemIndex = saleItems.findIndex(item => 
-      item.productId === selectedProductId && !item.variantId
+    const existingItemIndex = saleItems.findIndex(item =>
+      item.productId === selectedProductId && item.variantId === selectedVariantId
     );
     
     if (existingItemIndex >= 0) {
@@ -108,6 +116,8 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       const newItem: SaleItem = {
         productId: selectedProductId,
         productName: product.name,
+        variantId: selectedVariantId,
+        variantInfo: selectedVariantInfo,
         quantity,
         price: product.price,
         finalUnitPrice: currentPrice,
@@ -121,6 +131,8 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
     setSelectedProductId("");
     setSelectedVariantId(undefined);
+    setSelectedVariantInfo(undefined);
+    setSelectedVariantStock(undefined);
     setFinalPrice(0);
     setQuantity(1);
   };
@@ -162,7 +174,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     ));
   };
 
-  const updateItemQuantity = (productId: string, newQuantity: number, variantId?: string) => {
+  const updateItemQuantity = async (productId: string, newQuantity: number, variantId?: string) => {
     if (newQuantity <= 0) {
       removeItemFromSale(productId, variantId);
       return;
@@ -174,6 +186,18 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
     if (!product.hasVariants && newQuantity > product.stock) {
       toast({ title: "Stock insuficiente", description: `Solo hay ${product.stock} unidades disponibles`, variant: "destructive" });
       return;
+    }
+
+    if (product.hasVariants && variantId) {
+      const { data: variant } = await supabase
+        .from('product_variants')
+        .select('stock')
+        .eq('id', variantId)
+        .single();
+      if (variant && newQuantity > variant.stock) {
+        toast({ title: "Stock insuficiente", description: `Solo hay ${variant.stock} unidades disponibles de esta variante`, variant: "destructive" });
+        return;
+      }
     }
 
     setSaleItems(saleItems.map(item => {
@@ -227,28 +251,55 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
 
     // Validate stock for all items before processing
     for (const item of saleItems) {
-      if (item.productId) {
-        const product = products.find(p => p.id === item.productId);
-        if (product && !product.hasVariants) {
-          if (item.quantity > product.stock) {
-            toast({ 
-              title: "Stock insuficiente", 
-              description: `${product.name}: solo hay ${product.stock} unidades disponibles`, 
-              variant: "destructive" 
-            });
-            return;
-          }
+      if (!item.productId) continue;
+      const product = products.find(p => p.id === item.productId);
+      if (!product) continue;
+
+      if (!product.hasVariants) {
+        if (item.quantity > product.stock) {
+          toast({ 
+            title: "Stock insuficiente", 
+            description: `${product.name}: solo hay ${product.stock} unidades disponibles`, 
+            variant: "destructive" 
+          });
+          return;
+        }
+      } else if (item.variantId) {
+        const { data: variant } = await supabase
+          .from('product_variants')
+          .select('stock')
+          .eq('id', item.variantId)
+          .single();
+        if (variant && item.quantity > variant.stock) {
+          toast({ 
+            title: "Stock insuficiente", 
+            description: `${product.name}: solo hay ${variant.stock} unidades de esta variante`, 
+            variant: "destructive" 
+          });
+          return;
         }
       }
     }
 
     try {
       for (const item of saleItems) {
-        if (item.productId) {
-          const product = products.find(p => p.id === item.productId);
-          if (product && !product.hasVariants) {
-            await updateBatchesAfterSale(item.productId, item.quantity);
-            await onUpdateProduct(item.productId, { stock: product.stock - item.quantity });
+        if (!item.productId) continue;
+        const product = products.find(p => p.id === item.productId);
+        if (!product) continue;
+
+        if (!product.hasVariants) {
+          await onUpdateProduct(item.productId, { stock: product.stock - item.quantity });
+        } else if (item.variantId) {
+          const { data: variant } = await supabase
+            .from('product_variants')
+            .select('stock')
+            .eq('id', item.variantId)
+            .single();
+          if (variant) {
+            await supabase
+              .from('product_variants')
+              .update({ stock: variant.stock - item.quantity })
+              .eq('id', item.variantId);
           }
         }
       }
@@ -298,6 +349,7 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
       setSaleItems([]);
       setCustomerName("Consumidor final");
       setIsCreditSale(false);
+      await queryClient.invalidateQueries({ queryKey: ['product-variants'] });
     } catch (error) {
       console.error('Error completing sale:', error);
       toast({ title: "Error", description: "No se pudo completar la venta.", variant: "destructive" });
@@ -376,9 +428,17 @@ const SalesTab = ({ products, onUpdateProduct }: SalesTabProps) => {
                 selectedVariantId={selectedVariantId}
                 quantity={quantity}
                 finalPrice={finalPrice}
-                onProductSelect={setSelectedProductId}
-                onVariantSelect={(variantId, price) => {
+                onProductSelect={(productId) => {
+                  setSelectedProductId(productId);
+                  setSelectedVariantId(undefined);
+                  setSelectedVariantInfo(undefined);
+                  setSelectedVariantStock(undefined);
+                  setFinalPrice(0);
+                }}
+                onVariantSelect={(variantId, price, variantInfo, variantStock) => {
                   setSelectedVariantId(variantId || undefined);
+                  setSelectedVariantInfo(variantInfo);
+                  setSelectedVariantStock(variantStock);
                   setFinalPrice(price);
                 }}
                 onQuantityChange={setQuantity}

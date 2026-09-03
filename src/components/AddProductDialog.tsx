@@ -300,7 +300,26 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="hasVariants"
+                checked={formData.hasVariants}
+                onCheckedChange={(checked) => 
+                  setFormData(prev => ({ ...prev, hasVariants: checked }))
+                }
+              />
+              <Label htmlFor="hasVariants">Producto con variantes</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {formData.hasVariants 
+                ? "Podrás agregar colores, talles después"
+                : "Producto simple sin variantes"
+              }
+            </p>
+          </div>
+
+          {formData.hasVariants && (
             <div className="space-y-2">
               <Label htmlFor="baseSku">SKU Base (opcional)</Label>
               <Input
@@ -309,26 +328,11 @@ const AddProductDialog = ({ open, onOpenChange, onAddProduct, storeName }: AddPr
                 onChange={(e) => handleInputChange("baseSku", e.target.value)}
                 placeholder="Ej: NIKE-AIR-MAX"
               />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 pt-6">
-                <Switch
-                  id="hasVariants"
-                  checked={formData.hasVariants}
-                  onCheckedChange={(checked) => 
-                    setFormData(prev => ({ ...prev, hasVariants: checked }))
-                  }
-                />
-                <Label htmlFor="hasVariants">Producto con variantes</Label>
-              </div>
               <p className="text-xs text-muted-foreground">
-                {formData.hasVariants 
-                  ? "Podrás agregar colores, talles después"
-                  : "Producto simple sin variantes"
-                }
+                Se usará como prefijo para los SKU de cada variante
               </p>
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
