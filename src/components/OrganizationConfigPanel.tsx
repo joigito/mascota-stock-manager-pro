@@ -2,13 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Receipt, CreditCard, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Link, Building2, Receipt, CreditCard, Settings, Loader2, Check, X } from 'lucide-react';
 import { FEATURES } from '@/config/features';
 import { ElectronicInvoicingConfig } from './ElectronicInvoicingConfig';
 import { CurrentAccountConfig } from './CurrentAccountConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
+import { validateSlug, checkSlugAvailable } from '@/lib/slug';
 
 interface Organization {
   id: string;
@@ -101,6 +105,19 @@ export const OrganizationConfigPanel: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Slug Editor */}
+      {selectedOrgId && (
+        <SlugEditor
+          organizationId={selectedOrgId}
+          currentSlug={organizations.find(o => o.id === selectedOrgId)?.slug}
+          onUpdated={(newSlug) => {
+            setOrganizations(prev =>
+              prev.map(o => o.id === selectedOrgId ? { ...o, slug: newSlug } : o)
+            );
+          }}
+        />
+      )}
 
       {/* Configuration Tabs */}
       {selectedOrgId && (
@@ -248,5 +265,118 @@ const OrganizationFeatureFlags: React.FC<{ organizationId: string }> = ({ organi
         );
       })}
     </div>
+  );
+};
+
+const SlugEditor: React.FC<{
+  organizationId: string;
+  currentSlug?: string;
+  onUpdated: (newSlug: string) => void;
+}> = ({ organizationId, currentSlug, onUpdated }) => {
+  const [slug, setSlug] = useState(currentSlug || '');
+  const [checking, setChecking] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [validation, setValidation] = useState<{ valid: boolean; error?: string }>({ valid: true });
+  const [available, setAvailable] = useState<{ checked: boolean; ok: boolean; msg?: string }>({
+    checked: true,
+    ok: true,
+  });
+  const { toast } = useToast();
+
+  const slugChanged = slug.trim() !== (currentSlug || '');
+  const disabled = saving || checking || !slugChanged || !validation.valid;
+
+  const handleSlugChange = (value: string) => {
+    const clean = value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+    setSlug(clean);
+    setValidation(validateSlug(clean));
+    setAvailable({ checked: false, ok: true });
+  };
+
+  useEffect(() => {
+    if (!slugChanged || !validation.valid) {
+      setAvailable({ checked: true, ok: true });
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setChecking(true);
+      const result = await checkSlugAvailable(slug, organizationId);
+      setAvailable({ checked: true, ok: result.available, msg: result.error });
+      setChecking(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [slug, slugChanged, validation.valid, organizationId]);
+
+  const handleSave = async () => {
+    if (disabled) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ slug: slug.trim() })
+        .eq('id', organizationId);
+
+      if (error) throw error;
+      onUpdated(slug.trim());
+      toast({ title: 'URL actualizada', description: `/tienda/${slug.trim()}` });
+      sonnerToast.success('Slug guardado');
+    } catch {
+      toast({ title: 'Error', description: 'No se pudo guardar el slug', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Link className="h-5 w-5" />
+          URL de la Tienda
+        </CardTitle>
+        <CardDescription>
+          Elegí un slug corto para la URL. Ejemplo: <code className="font-mono">/tienda/{slug || 'abcd'}</code>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col sm:flex-row gap-3 items-start">
+          <div className="flex-1 w-full space-y-1">
+            <Label htmlFor="slug-input">Slug</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">/tienda/</span>
+              <Input
+                id="slug-input"
+                value={slug}
+                onChange={(e) => handleSlugChange(e.target.value)}
+                placeholder="abcd"
+                className="font-mono flex-1"
+                maxLength={20}
+              />
+            </div>
+            {slugChanged && validation.valid && !checking && !available.ok && (
+              <p className="text-xs text-destructive">
+                {available.msg || 'Ese slug ya está en uso'}
+              </p>
+            )}
+            {!validation.valid && validation.error && (
+              <p className="text-xs text-destructive">{validation.error}</p>
+            )}
+          </div>
+          <Button
+            onClick={handleSave}
+            disabled={disabled}
+            className="sm:mt-6"
+            size="sm"
+          >
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : slugChanged && validation.valid && available.ok ? (
+              <Check className="h-4 w-4" />
+            ) : null}
+            Guardar
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

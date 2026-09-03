@@ -10,6 +10,7 @@ import { Plus, Building2, Users, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { validateSlug, autoSlug, checkSlugAvailable } from '@/lib/slug';
 
 interface Organization {
   id: string;
@@ -29,6 +30,8 @@ export const OrganizationManager: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgDescription, setNewOrgDescription] = useState('');
+  const [newOrgSlug, setNewOrgSlug] = useState('');
+  const [slugEdited, setSlugEdited] = useState(false);
 
   React.useEffect(() => {
     loadAllOrganizations();
@@ -66,8 +69,29 @@ export const OrganizationManager: React.FC = () => {
       return;
     }
 
+    const slugValidation = validateSlug(newOrgSlug);
+    if (!slugValidation.valid) {
+      toast({
+        title: "Error",
+        description: slugValidation.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
+
+      const slugCheck = await checkSlugAvailable(newOrgSlug);
+      if (!slugCheck.available) {
+        toast({
+          title: "Error",
+          description: slugCheck.error || "Ese slug ya está en uso",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
       
       const { data: org, error: orgError } = await supabase
         .from('organizations')
@@ -75,7 +99,7 @@ export const OrganizationManager: React.FC = () => {
           name: newOrgName.trim(),
           description: newOrgDescription.trim() || null,
           created_by: user?.id,
-          slug: newOrgName.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+          slug: newOrgSlug.trim()
         })
         .select()
         .single();
@@ -99,6 +123,8 @@ export const OrganizationManager: React.FC = () => {
 
       setNewOrgName('');
       setNewOrgDescription('');
+      setNewOrgSlug('');
+      setSlugEdited(false);
       setIsCreateDialogOpen(false);
       loadAllOrganizations();
       reload();
@@ -173,9 +199,35 @@ export const OrganizationManager: React.FC = () => {
                 <Input
                   id="orgName"
                   value={newOrgName}
-                  onChange={(e) => setNewOrgName(e.target.value)}
+                  onChange={(e) => {
+                    setNewOrgName(e.target.value);
+                    if (!slugEdited) {
+                      setNewOrgSlug(autoSlug(e.target.value));
+                    }
+                  }}
                   placeholder="Ejemplo: Tienda Central"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="orgSlug">Slug de la URL</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">/tienda/</span>
+                  <Input
+                    id="orgSlug"
+                    value={newOrgSlug}
+                    onChange={(e) => {
+                      const clean = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+                      setNewOrgSlug(clean);
+                      setSlugEdited(true);
+                    }}
+                    placeholder="abcd"
+                    className="font-mono"
+                    maxLength={20}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Mínimo 4 caracteres. Solo minúsculas y números.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="orgDescription">Descripción (Opcional)</Label>
