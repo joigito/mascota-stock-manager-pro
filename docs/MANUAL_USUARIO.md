@@ -18,6 +18,11 @@ Para entrar: abrí la URL de tu tienda e ingresá tu email y contraseña (las cu
 - Revisá las alertas de stock bajo al inicio de cada jornada
 - Si no hay alertas, todo está en orden
 
+### Apariencia y pantalla
+
+- **Tema claro/oscuro:** en la barra superior tenés un botón para alternar entre tema claro y oscuro, según la luz del lugar donde trabajás.
+- **En celular:** se recomienda usar el equipo en **horizontal** (acostado) para ver mejor las tablas y los datos. Especialmente en listados de productos, ventas y reportes.
+
 ---
 
 ## 2. Productos
@@ -268,4 +273,4 @@ Análisis e impresión de datos de tu negocio.
 
 ---
 
-*Manual version 1.2 — Para soporte contactar al administrador de la plataforma.*
+*Manual version 1.3 — Para soporte contactar al administrador de la plataforma.*
