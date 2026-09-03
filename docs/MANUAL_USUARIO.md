@@ -1,28 +1,12 @@
 # Manual de Usuario — Gestión Comercial
 
-Guía básica de uso del sistema. Cada sección describe una pestaña, qué hace y cómo usarla.
+Guía de uso del sistema. Cada sección describe una pestaña, qué hace y cómo usarla.
 
 ---
 
-## 1. Primeros Pasos
+## 1. Inicio (Dashboard)
 
-### Inicio de Sesión
-
-1. Abrí la URL de tu tienda (ej: `netlify.app/tienda/abcd`)
-2. Ingresá tu email y contraseña
-3. Presioná **Iniciar Sesión**
-
-> **Nota:** Solo se permite iniciar sesión. Las cuentas de usuario las gestiona el administrador de la plataforma.
-
-### Selección de Tienda
-
-Si tenés acceso a más de una tienda, al ingresar elegí la tienda que querés administrar.
-
----
-
-## 2. Inicio (Dashboard)
-
-La pestaña **Inicio** muestra un resumen rápido de tu negocio.
+Para entrar: abrí la URL de tu tienda e ingresá tu email y contraseña (las cuentas las gestiona el administrador de la plataforma). Al entrar, la pestaña **Inicio** muestra un resumen rápido de tu negocio.
 
 ### Qué verás
 
@@ -36,7 +20,7 @@ La pestaña **Inicio** muestra un resumen rápido de tu negocio.
 
 ---
 
-## 3. Productos
+## 2. Productos
 
 Gestión completa del inventario de tu tienda.
 
@@ -104,18 +88,35 @@ Si algún día activás "Producto con variantes" al crear un producto:
 
 ---
 
-## 4. Ventas
+## 3. Ventas
 
 Registro de ventas de tu tienda.
+
+### Dos formas de vender
+
+Podés mezclar las dos formas en la misma venta:
+
+1. **Vender del stock:** elegís un producto cargado y se descuenta del inventario.
+2. **Vender sin stock (detalle libre):** escribís directamente lo que se vende — un servicio, algo informal, o cualquier cosa que no tengas en el inventario — con su precio y costo. No toca el stock.
+
+### Vender sin stock (detalle libre)
+
+Ideal para servicios o ventas informales. Por ejemplo: "corte de uñas", "cambio de collar" o un accesorio que no cargaste.
+
+1. En **Nueva Venta**, escribí en el campo "Agregar item libre" el detalle de lo que vendés
+2. Poné el **precio de venta** y el **costo** (opcional)
+3. Presioná **Agregar** → queda en el detalle de la venta
+4. Si además vendés productos del stock en la misma venta, los agregás igual y todo va junto al comprobante
 
 ### Registrar una Venta
 
 1. Presioná **+ Nueva Venta**
-2. Seleccioná los productos (podés buscar por nombre)
-3. Indicá la cantidad de cada uno
-4. Elegí el cliente (opcional para ventas al contado)
-5. El sistema calcula el total automáticamente
-6. Presioná **Confirmar Venta**
+2. Agregá los items:
+   - **Del stock:** buscá el producto por nombre y elegí la cantidad
+   - **Libres:** escribí el detalle, precio y costo (ver arriba)
+3. Elegí el cliente (opcional para ventas al contado)
+4. El sistema calcula el total automáticamente
+5. Presioná **Confirmar Venta**
 
 ### Tipos de Venta
 
@@ -129,12 +130,13 @@ Al concretar una venta, podés imprimir un comprobante para el cliente.
 
 ### Datos Importantes
 
-- Al registrar una venta, el stock se descuenta automáticamente
+- Al vender un producto del stock, ese stock se descuenta automáticamente
+- Los items libres (sin stock) no afectan el inventario
 - Las ventas se pueden eliminar solo desde la pestaña de Reportes (solo admin)
 
 ---
 
-## 5. Clientes
+## 4. Clientes
 
 Gestión de la base de datos de clientes.
 
@@ -156,7 +158,7 @@ Usá el campo de búsqueda para filtrar por nombre o email.
 
 ---
 
-## 6. Cuenta Corriente
+## 5. Cuenta Corriente
 
 Gestión de deudas y pagos de clientes. **Solo visible para administradores.**
 
@@ -189,7 +191,7 @@ Cada cliente tiene un link único para ver su estado de cuenta sin necesidad de 
 
 ---
 
-## 7. Reportes
+## 6. Reportes
 
 Análisis e impresión de datos de tu negocio.
 
@@ -226,14 +228,14 @@ Análisis e impresión de datos de tu negocio.
 
 ---
 
-## 8. Tips y Cosas a Tener en Cuenta
+## 7. Tips y Cosas a Tener en Cuenta
 
 ### Reglas del Sistema
 
 | Regla | Detalle |
 |-------|---------|
 | **Costo < Venta** | El precio de costo siempre debe ser menor al de venta |
-| **Stock automático** | Al registrar una venta, el stock se descuenta solo |
+| **Stock automático** | Al vender un producto del stock, se descuenta solo; los items libres no afectan stock |
 | **Historial de precios** | Todo cambio de precio queda registrado automáticamente |
 | **Variantes** | Avanzado; no se usan en el flujo estándar (stock simple) |
 | **Proveedores** | Opcionales; ayudan a saber de quién se compra cada producto |
@@ -249,8 +251,8 @@ Análisis e impresión de datos de tu negocio.
 
 ### Errores Comunes
 
-- **"No hay productos"** → Verificá que estés en la tienda correcta
-- **No puedo agregar venta** → Checkeá que haya stock disponible
+- **"No hay productos"** → Verificá que haya productos cargados en la pestaña Productos
+- **No puedo vender del stock** → Checkeá que el producto tenga stock disponible; si no es un producto del stock, usá "Agregar item libre"
 - **Cta. Cte. no aparece** → Solo los administradores la ven
 - **Link de cliente no funciona** → Verificá que la URL esté completa y correcta
 
@@ -266,4 +268,4 @@ Análisis e impresión de datos de tu negocio.
 
 ---
 
-*Manual version 1.1 — Para soporte contactar al administrador de la plataforma.*
+*Manual version 1.2 — Para soporte contactar al administrador de la plataforma.*
