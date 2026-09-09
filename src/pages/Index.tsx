@@ -71,8 +71,6 @@ const Index = () => {
   useEffect(() => {
     if (currentOrganization) {
       document.title = `${currentOrganization.name} - Stock y ventas`;
-    } else if (isSuperAdmin) {
-      document.title = 'Sistema de stock y ventas';
     } else {
       document.title = 'Sistema de Gestión Comercial';
     }
