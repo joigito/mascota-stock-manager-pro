@@ -145,7 +145,7 @@ const Index = () => {
                 <p className="text-xs sm:text-base text-muted-foreground">Plataforma de gestión comercial para múltiples tipos de negocio</p>
               </div>
             </div>
-            <div className="flex items-center flex-wrap gap-2 sm:gap-4 w-full sm:w-auto">
+            <div className="flex items-center flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
               {isSuperAdmin && <OrganizationSelector />}
               {isSuperAdmin && (
                 <Button
