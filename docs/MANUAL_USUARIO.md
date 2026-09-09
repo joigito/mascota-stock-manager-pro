@@ -6,7 +6,7 @@ Guía de uso del sistema. Cada sección describe una pestaña, qué hace y cómo
 
 ## 1. Inicio (Dashboard)
 
-Para entrar: abrí la URL de tu tienda e ingresá tu email y contraseña (las cuentas las gestiona el administrador de la plataforma). Al entrar, la pestaña **Inicio** muestra un resumen rápido de tu negocio.
+Para entrar: abrí la plataforma e ingresá tu **email** y **contraseña** (las cuentas las gestiona el administrador de la plataforma). Al entrar, la pestaña **Inicio** muestra un resumen rápido de tu negocio.
 
 ### Primer ingreso
 
@@ -19,7 +19,7 @@ La primera vez que entrás con una cuenta nueva, el sistema te pedirá **cambiar
 
 ### Cambiar o recuperar la contraseña
 
-- **Cambiarla vos mismo:** en la barra superior, tocá tu **usuario** (círculo con tus iniciales) → **Cambiar contraseña**. Te pedirá tu contraseña actual y una nueva.
+- **Cambiarla vos mismo, cuando quieras:** en la barra superior (arriba a la derecha), tocá tu **usuario** (círculo con tus iniciales) → **Cambiar contraseña**. Te pedirá tu contraseña actual y una nueva (mínimo 6 caracteres). Podés hacerlo en cualquier momento, sin avisar al administrador.
 - **No la recordás:** el sistema no envía correos. Contactá al administrador de la plataforma, que puede **resetear tu contraseña** desde la pantalla de usuarios y te pasa una nueva de forma personal (por mensaje o en persona). La primera vez que entres con esa contraseña, el sistema te volverá a pedir que la cambies.
 
 ### Tips
@@ -31,6 +31,17 @@ La primera vez que entrás con una cuenta nueva, el sistema te pedirá **cambiar
 
 - **Tema claro/oscuro:** en la barra superior tenés un botón para alternar entre tema claro y oscuro, según la luz del lugar donde trabajás.
 - **En celular:** se recomienda usar el equipo en **horizontal** (acostado) para ver mejor las tablas y los datos. Especialmente en listados de productos, ventas y reportes.
+
+### Módulos opcionales
+
+Además de las funciones básicas (productos, ventas, clientes y reportes), la plataforma tiene **módulos que se pueden activar o desactivar** según lo que tu negocio necesite. Que un módulo no se vea en tu cuenta no es un error: solo no está habilitado.
+
+- **Cuenta Corriente:** permite registrar deudas y pagos de clientes, ver el estado de cuenta de cada uno y generar un link público para que el cliente consulte su saldo.
+- **Facturación Electrónica:** permite emitir facturas electrónicas válidas para AFIP/ARCA.
+- **Variantes de Producto:** para manejar un mismo producto con talles, colores, etc., y stock distinto por variante.
+- **Reportes Avanzados:** reportes detallados de ventas, márgenes y rotación de stock.
+
+Si querés habilitar un módulo, consultá al administrador de la plataforma. También es posible que a futuro aparezcan módulos nuevos.
 
 ---
 
@@ -201,7 +212,7 @@ Cada cliente tiene un link único para ver su estado de cuenta sin necesidad de 
 2. Compartilo con el cliente
 3. El cliente puede filtrar por fecha e imprimir su estado
 
-> **URL formato:** `netlify.app/tienda/abcd/cuenta/xxxxx`
+> **URL formato:** cada cliente tiene un link único con el formato `.../tienda/<código>/cuenta/<código>`. El sistema lo genera solo; no hace falta escribir la URL a mano.
 
 ---
 
@@ -295,4 +306,4 @@ El sistema distingue dos perfiles:
 
 ---
 
-*Manual version 1.5 — Para soporte contactar al administrador de la plataforma.*
+*Manual version 1.6 — Para soporte contactar al administrador de la plataforma.*
