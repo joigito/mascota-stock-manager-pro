@@ -126,7 +126,7 @@ const Auth = () => {
               {isLoading ? "Iniciando..." : "Iniciar Sesión"}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-              ¿Olvidaste tu contraseña? Contactá al administrador para que te genere una nueva.
+              ¿Olvidaste tu contraseña? Contactá al administrador al +54 3834 78-4483 para que te genere una nueva.
             </p>
           </form>
         </CardContent>
