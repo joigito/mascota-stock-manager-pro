@@ -129,6 +129,32 @@ const Auth = () => {
               ¿Olvidaste tu contraseña? Contactá al administrador al +54 3834 78-4483 para que te genere una nueva.
             </p>
           </form>
+
+          <div className="mt-6 pt-6 border-t border-border flex flex-col items-center gap-2">
+            <p className="text-base font-bold text-foreground tracking-wide">
+              JORGE DIAZ
+            </p>
+            <p className="text-xs text-muted-foreground tracking-widest uppercase">
+              Sistemas y Automatizaciones
+            </p>
+            <a
+              href="https://wa.me/543834784483"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1"
+            >
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https%3A%2F%2Fwa.me%2F543834784483"
+                alt="WhatsApp Jorge Diaz"
+                width={120}
+                height={120}
+                className="rounded-lg border border-border"
+              />
+            </a>
+            <p className="text-[10px] text-muted-foreground">
+              Escaneame para WhatsApp
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
